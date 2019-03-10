@@ -24,7 +24,7 @@
         <div class="col-md-7"><input class="form-control" type="text" name="website" id="website" autocomplete="url" value={{user.profile.website}} ></div>
     </div>
     <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right">Gravatar</label>
-        <div class="col-sm-4"><img class="profile" src={{gravatar user}} width="100" height="100" /></div>
+        <div class="col-sm-4"><img class="profile" src={{user.gravatar}} width="100" height="100" /></div>
     </div>
     <div class="form-group">
         <div class="offset-sm-3 col-md-7 pl-2"><button class="btn btn btn-primary" type="submit"><i class="fas fa-pencil-alt fa-sm"></i>Update Profile</button></div>

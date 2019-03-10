@@ -1,12 +1,12 @@
 {{#if messages.errors}}
-  <div class="alert alert-success fade show">
+  <div class="alert alert-danger fade show">
     <button class="close" type="button" data-dismiss="alert">
       <i class="far fa-times-circle"></i>
     </button>
-    {{#each messages.errors as |error|}}
-    <div class="{{ message.type }}">
-      <strong>FLASH!</strong> {{ error }}
-  </div>
+    {{#each messages.errors}}
+      <div class="">
+        {{this.msg}}
+      </div>
     {{/each}}
   </div>
 {{else if messages.info}}
@@ -14,6 +14,11 @@
     <button class="close" type="button" data-dismiss="alert">
       <i class="far fa-times-circle"></i>
     </button>
+    {{#each messages.info}}
+      <div class="">
+        {{this.msg}}
+      </div>
+    {{/each}}
   </div>
 
 {{else if messages.success}}
@@ -21,6 +26,11 @@
     <button class="close" type="button" data-dismiss="alert">
       <i class="far fa-times-circle"></i>
     </button>
+    {{#each messages.success}}
+      <div class="">
+        {{this.msg}}
+      </div>
+    {{/each}}
   </div>
 
 {{/if}}

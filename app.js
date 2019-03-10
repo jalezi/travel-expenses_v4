@@ -19,6 +19,7 @@ const expressValidator = require('express-validator');
 const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const multer = require('multer');
+const hbsHelpers = require('./utils/hbsHelpers/hbsHelpers');
 
 const expressHbs = require('express-hbs');
 
@@ -75,6 +76,7 @@ app.engine( 'hbs', expressHbs.express4( {
 }));
 
 app.set('view engine', '.hbs');
+
 // app.set('view engine', 'pug');
 app.use(expressStatusMonitor());
 app.use(compression());

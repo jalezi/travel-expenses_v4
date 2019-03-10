@@ -13,6 +13,10 @@ expressHbs.registerHelper('flash', (message) => {
 
 })
 
+expressHbs.registerHelper('gravatar', (user) => {
+  return user.gravatar(60);
+})
+
 expressHbs.registerHelper('debug', function(data, breakpoint) {
   console.log(data);
   if (breakpoint === true) {

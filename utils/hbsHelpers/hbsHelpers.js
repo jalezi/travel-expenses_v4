@@ -44,4 +44,14 @@ expressHbs.registerHelper ("setChecked", function (value, currentValue) {
    const today = moment().format('YYYY-MM-DD');
    console.log(today);
    return today;
- })
+ });
+
+ expressHbs.registerHelper('travelsList', function(items, options) {
+  var out = "<ul>";
+
+  for(var i=0, l=items.length; i<l; i++) {
+    out = out + "<li>" + options.fn(items[i]) + "</li>";
+  }
+
+  return out + "</ul>";
+});

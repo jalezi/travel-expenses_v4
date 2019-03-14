@@ -1,11 +1,7 @@
 {{!< layout}}
 
 {{#if user}}
-  <h3>My travels
-    <a class="btn btn-success float-right mx-auto" href="/travels/add">
-      Add
-    </a>
-  </h3>
+  {{> travelsHeader}}
   <hr />
 {{else}}
   <h2>Login or Sign up

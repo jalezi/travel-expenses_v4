@@ -7,6 +7,17 @@ const Travel = require('../models/Travel');
 const ObjectId = mongoose.Types.ObjectId;
 
 // get all travels
+exports.getTravels = async function(req, res) {
+  const travels = await Travel.find({
+    user: req.user._id
+  });
+  res.render('travels/travels', {
+    title: 'Travels',
+    travels: travels
+  });
+}
+
+// get all travels
 exports.getNewTravel = async function(req, res) {
   // const travels = await Travel.find({
   //   user: req.user._id

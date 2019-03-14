@@ -40,16 +40,30 @@ expressHbs.registerHelper ("setChecked", function (value, currentValue) {
     }
  });
 
- expressHbs.registerHelper('today', () => {
-   const today = moment().format('YYYY-MM-DD');
-   console.log(today);
-   return today;
+ expressHbs.registerHelper('setValue', (value) => {
+   
+   return `value=${value}`;
+ })
+
+ expressHbs.registerHelper('formatDate', (date) => {
+   if (!date) {
+     const today = moment().format('YYYY-MM-DD');
+     // console.log('wihout date', today);
+     return today;
+   }
+   else {
+     const today = moment(date).format('YYYY-MM-DD');
+     // console.log('with date', today);
+     return today;
+   }
+
+
  });
 
  expressHbs.registerHelper('travelsList', function(items, options) {
-  var out = "<ul>";
+  let out = "<ul>";
 
-  for(var i=0, l=items.length; i<l; i++) {
+  for(let i=0, length=items.length; i<length; i++) {
     out = out + "<li>" + options.fn(items[i]) + "</li>";
   }
 

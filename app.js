@@ -159,8 +159,8 @@ app.post('/account/delete', passportConfig.isAuthenticated, userController.postD
 app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userController.getOauthUnlink);
 
 app.get('/travels', passportConfig.isAuthenticated, travelController.getTravels);
-app.get('/travels/add', passportConfig.isAuthenticated, travelController.getNewTravel);
-app.post('/travels/add', passportConfig.isAuthenticated, travelController.postNewTravel);
+app.get('/travels/new', passportConfig.isAuthenticated, travelController.getNewTravel);
+app.post('/travels/new', passportConfig.isAuthenticated, travelController.postNewTravel);
 
 /**
  * API examples routes.

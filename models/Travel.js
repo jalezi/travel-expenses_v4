@@ -32,7 +32,11 @@ const TravelSchema = new mongoose.Schema({
   expenses: [{
     type: ObjectId,
     ref: 'Expense'
-  }]
+  }],
+  total: {
+    type: Number,
+    default: 0
+  }
 });
 
 const Travel = mongoose.model('Travel', TravelSchema);

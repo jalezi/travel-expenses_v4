@@ -25,7 +25,15 @@ const userSchema = new mongoose.Schema({
     website: String,
     picture: String
   },
-  travels: Array
+  travels: Array,
+  homeCurrency: {
+    type: String,
+    default: 'USD'
+  },
+  perMileAmount: {
+    type: Number,
+    default: 0.54
+  },
 }, { timestamps: true });
 
 /**

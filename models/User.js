@@ -24,7 +24,8 @@ const userSchema = new mongoose.Schema({
     location: String,
     website: String,
     picture: String
-  }
+  },
+  travels: Array
 }, { timestamps: true });
 
 /**

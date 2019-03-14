@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const {User} = require('./models/user.model');
-const {Expense} = require('./models/expense.model');
+const User = require('../models/User');
+const Expense = require('../models/Expense');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const TravelSchema = new mongoose.Schema({

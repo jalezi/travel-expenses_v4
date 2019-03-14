@@ -37,6 +37,7 @@ const homeController = require('./controllers/home');
 const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
+const travelController = require('./controllers/travel');
 
 /**
  * API keys and Passport configuration.
@@ -70,7 +71,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.engine( 'hbs', expressHbs.express4( {
   layoutsDir: path.join(__dirname, './views/layouts'),
-  partialsDir:[path.join(__dirname, './views/partials'), path.join(__dirname, './views/account')],
+  partialsDir:[path.join(__dirname, './views/partials'), path.join(__dirname, './views/account'), path.join(__dirname, './views/travels')],
   defaultView: 'layout',
   extname: '.hbs'
 }));
@@ -156,6 +157,9 @@ app.post('/account/profile', passportConfig.isAuthenticated, userController.post
 app.post('/account/password', passportConfig.isAuthenticated, userController.postUpdatePassword);
 app.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);
 app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userController.getOauthUnlink);
+
+app.get('/travels/add', passportConfig.isAuthenticated, travelController.getNewTravel)
+app.post('/travels/add', passportConfig.isAuthenticated, travelController.postNewTravel);
 
 /**
  * API examples routes.

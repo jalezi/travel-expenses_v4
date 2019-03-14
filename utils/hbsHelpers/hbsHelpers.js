@@ -1,4 +1,5 @@
 const expressHbs = require('express-hbs');
+const moment = require('moment');
 
 expressHbs.registerHelper('flash', (message) => {
   if (message.error) {
@@ -38,3 +39,9 @@ expressHbs.registerHelper ("setChecked", function (value, currentValue) {
        return "";
     }
  });
+
+ expressHbs.registerHelper('today', () => {
+   const today = moment().format('YYYY-MM-DD');
+   console.log(today);
+   return today;
+ })

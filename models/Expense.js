@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
-const {
-  User
-} = require('./models/user.model');
-const {
-  Travel
-} = require('./models/travel.model');
+const {User} = require('../models/User');
+const {Travel} = require('../models/Travel');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const ExpenseSchema = new mongoose.Schema({

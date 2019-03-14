@@ -1,0 +1,32 @@
+{{!< layout}}
+<div class="pb-2 mt-2 mb-4 border-bottom">
+  <h3>New travel</h3>
+</div>
+
+<!-- <form class="form-login" method="POST"> -->
+<form class="" method="POST">
+  <input type="hidden" name="_csrf" value={{_csrf}} />
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="description">Description</label>
+    <div class="col-md-7"><input class="form-control" id="description" type="description" name="description" placeholder="Description" autofocus="autofocus" autocomplete="description" required="required" /></div>
+  </div>
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="dateFrom">Date from</label>
+    <div class="col-md-3"><input class="form-control" id="dateFrom" type="date" value={{today}} name="dateFrom" placeholder="" autocomplete="dateFrom" required="required" /></div>
+  </div>
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="dateTo">Date to</label>
+    <div class="col-md-3"><input class="form-control" id="dateTo" type="date" value={{today}} name="dateTo" placeholder="" autocomplete="dateTo" required="required" /></div>
+  </div>
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="homeCurrency">Home currency</label>
+    <div class="col-md-2"><input class="form-control" id="homeCurrency" type="homeCurrency" name="homeCurrency" placeholder="USD" autocomplete="homeCurrency" required="required" /></div>
+  </div>
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="perMileAmount">Per mile amount</label>
+    <div class="col-md-2"><input class="form-control" id="perMileAmount" type="perMileAmount" name="perMileAmount" placeholder="0.54" autocomplete="perMileAmount" required="required" /></div>
+  </div>
+  <div class="form-group">
+    <div class="offset-md-3 col-md-7 pl-2"><button class="col-md-3 btn btn-primary" type="submit">Add</button><a class="btn btn-link" href="/">Cancel</a></div>
+  </div>
+  <div class="form-group">
+    <div class="offset-md-3 col-md-7 pl-2">
+      <hr />
+    </div>
+  </div>
+</form>

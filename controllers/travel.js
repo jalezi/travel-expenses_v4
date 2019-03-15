@@ -32,7 +32,7 @@ exports.getNewTravel = async function(req, res) {
 // create new travel
 exports.postNewTravel = async function(req, res, next) {
 
-  req.assert('description', 'Description is empty or to long (max 120 characters)!').isLength({min: 1, max: 120});
+  req.assert('description', 'Description is empty or to long (max 120 characters)!').isLength({min: 1, max: 60});
   req.assert('homeCurrency', 'Home currency should have exactly 3 characters!').isLength({min: 3, max: 3});
   req.assert('perMileAmount', 'Per mile amount should be positive number with 2 decimals!').isNumeric().isCurrency(
     {
@@ -142,7 +142,7 @@ exports.deleteTravel = async function (req, res, next) {
 
 exports.updateTravel = async function (req, res) {
 
-  req.assert('description', 'Description is empty or to long (max 120 characters)!').isLength({min: 1, max: 120});
+  req.assert('description', 'Description is empty or to long (max 120 characters)!').isLength({min: 1, max: 60});
   req.assert('homeCurrency', 'Home currency should have exactly 3 characters!').isLength({min: 3, max: 3});
   req.assert('perMileAmount', 'Per mile amount should be positive number with 2 decimals!').isNumeric().isCurrency(
     {

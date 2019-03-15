@@ -41,8 +41,12 @@ expressHbs.registerHelper ("setChecked", function (value, currentValue) {
  });
 
  expressHbs.registerHelper('setValue', (value) => {
-   
+
    return `value=${value}`;
+ })
+
+ expressHbs.registerHelper('countList', (value) => {
+   return value + 1;
  })
 
  expressHbs.registerHelper('formatDate', (date) => {

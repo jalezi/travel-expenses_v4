@@ -161,6 +161,7 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
 app.get('/travels', passportConfig.isAuthenticated, travelController.getTravels);
 app.get('/travels/new', passportConfig.isAuthenticated, travelController.getNewTravel);
 app.post('/travels/new', passportConfig.isAuthenticated, travelController.postNewTravel);
+app.get('/travels/:id', passportConfig.isAuthenticated, travelController.getTravel);
 
 /**
  * API examples routes.

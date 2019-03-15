@@ -27,7 +27,7 @@ const TravelSchema = new mongoose.Schema({
   },
   perMileAmount: {
     type: Number,
-    default: 0
+    default: 0.00
   },
   expenses: [{
     type: ObjectId,
@@ -35,7 +35,7 @@ const TravelSchema = new mongoose.Schema({
   }],
   total: {
     type: Number,
-    default: 0
+    default: 0.00
   }
 });
 

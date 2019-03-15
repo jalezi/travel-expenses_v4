@@ -4,23 +4,25 @@
 
 <!-- {{#travelsList travels}}{{description}} {{formatDate dateFrom}} {{formatDate dateTo}}{{/travelsList}} -->
 
-<table class="table table-hover">
+<table class="table table-hover table-bordered">
   <thead>
     <tr class="text-center">
       <th scope="col">#</th>
       <th scope="col">Description</th>
       <th scope="col">From</th>
       <th scope="col">To</th>
+      <th scope="col">Total</th>
     </tr>
   </thead>
 
   <tbody>
     {{#each travels}}
     <tr>
-      <th scope="row"> </th>
-        <td>{{this.description}}</td>
+      <th scope="row" class="text-center">{{countList @index}}</th>
+        <td><a href="/travels/{{this._id}}">{{this.description}}</a></td>
         <td class="text-center">{{formatDate this.dateFrom}}</td>
         <td class="text-center">{{formatDate this.dateTo}}</td>
+        <td class="text-right">{{this.total}} {{this.homeCurrency}}</td>
       {{/each}}
     </tr>
   </tbody>

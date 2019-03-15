@@ -86,9 +86,7 @@ exports.postNewTravel = async function(req, res, next) {
 }
 
 exports.getTravel = async function (req, res, next) {
-  console.log(req.params);
-  console.log(req.params.id);
-  console.log(req.user._id);
+
   const id = req.params.id;
 
   if (!ObjectId.isValid(id)) {
@@ -109,6 +107,34 @@ exports.getTravel = async function (req, res, next) {
       title: 'Travel',
       travel: travel
     });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.deleteTravel = async function (req, res, next) {
+  const id = req.params.id;
+
+  if (!ObjectId.isValid(id)) {
+    return next(new Error('Not valid Object Id'));
+  }
+
+  try {
+    const travel = await Travel.findOneAndDelete({
+      _id: id,
+      user: req.user._id
+    });
+
+    if (!travel) {
+      return next(new Error('Travel not found'));
+    }
+
+    User.findByIdAndUpdate(req.user._id, {$pullAll : {'travels': [travel._id]}}, (err, user) => {
+      if (!err) {
+        return next(err);
+      }
+    });
+    res.redirect('/travels');
   } catch (err) {
     return next(err);
   }

@@ -1,3 +1,48 @@
 {{!< layout}}
 
-<p>{{travel}}</p>
+<div class="pb-2 mt-2 mb-4 border-bottom">
+  <h3> {{{travel.description}}} </h3>
+</div>
+
+<!-- <form class="form-login" method="POST"> -->
+<form class="" method="POST" action="/travels/{{travel._id}}">
+  <input type="hidden" name="_csrf" value={{_csrf}} />
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="description">Description</label>
+    <div class="col-md-7"><input class="form-control" id="description" type="description" value="{{travel.description}}" name="description" placeholder="Description" autofocus="autofocus" autocomplete="description" required="required" /></div>
+  </div>
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="dateFrom">Date from</label>
+    <div class="col-md-3"><input class="form-control" id="dateFrom" type="date" value={{formatDate travel.dateFrom}} name="dateFrom" placeholder="" autocomplete="dateFrom" required="required" /></div>
+  </div>
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="dateTo">Date to</label>
+    <div class="col-md-3"><input class="form-control" id="dateTo" type="date" value={{formatDate travel.dateTo}} name="dateTo" placeholder="" autocomplete="dateTo" required="required" /></div>
+  </div>
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="homeCurrency">Home currency</label>
+    <div class="col-md-2"><input class="form-control" id="homeCurrency" type="homeCurrency" value="{{travel.homeCurrency}}" name="homeCurrency" placeholder="USD" autocomplete="homeCurrency" required="required" /></div>
+  </div>
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="perMileAmount">Per mile amount</label>
+    <div class="col-md-2"><input class="form-control" id="perMileAmount" type="perMileAmount" value="{{travel.perMileAmount}}" name="perMileAmount" placeholder="0.54" autocomplete="perMileAmount" required="required" /></div>
+  </div>
+  <div class="form-group">
+    <div class="offset-md-3 col-md-7 pl-2">
+      <input type="hidden" name="_method" value="PATCH">
+      <button class="col-md-3 btn btn-primary ml-2" type="submit">Update</button>
+      <a class="col-md-3 btn btn-outline-primary ml-2" href="/travels" type="button">Cancel</a>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="offset-md-3 col-md-7 pl-2">
+      <hr />
+    </div>
+  </div>
+</form>
+
+<form method="POST" action="/travels/{{travel._id}}" enctype="application/x-www-form-urlencoded">
+  <div class="form-group">
+    <div class="offset-md-3 col-md-7 pl-2">
+      <input type="hidden" name="_method" value="DELETE">
+      <input type="hidden" name="_csrf" value={{_csrf}} />
+      <button class="col-md-3 btn btn-danger ml-2" type="submit">Delete</button>
+    </div>
+  </div>
+</form>

@@ -41,7 +41,7 @@ expressHbs.registerHelper ("setChecked", function (value, currentValue) {
  });
 
  expressHbs.registerHelper('setValue', (value) => {
-
+   console.log(value);
    return `value=${value}`;
  })
 

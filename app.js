@@ -22,6 +22,7 @@ const multer = require('multer');
 const hbsHelpers = require('./utils/hbsHelpers/hbsHelpers');
 
 const expressHbs = require('express-hbs');
+const methodOverride = require('method-override')
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
@@ -48,6 +49,8 @@ const passportConfig = require('./config/passport');
  * Create Express server.
  */
 const app = express();
+
+
 
 /**
  * Connect to MongoDB.
@@ -138,6 +141,22 @@ app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/jquery/dist
 app.use('/webfonts', express.static(path.join(__dirname, 'node_modules/@fortawesome/fontawesome-free/webfonts'), { maxAge: 31557600000 }));
 
 /**
+* Added by me
+* To overide form methodOverride
+* Must be placed after: app.use(bodyParser.urlencoded())
+*/
+
+app.use(methodOverride(function (req, res) {
+  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+    // look in urlencoded POST bodies and delete it
+    const method = req.body._method
+    delete req.body._method
+    return method
+  }
+}));
+
+
+/**
  * Primary app routes.
  */
 app.get('/', homeController.index);
@@ -162,6 +181,7 @@ app.get('/travels', passportConfig.isAuthenticated, travelController.getTravels)
 app.get('/travels/new', passportConfig.isAuthenticated, travelController.getNewTravel);
 app.post('/travels/new', passportConfig.isAuthenticated, travelController.postNewTravel);
 app.get('/travels/:id', passportConfig.isAuthenticated, travelController.getTravel);
+app.delete('/travels/:id', passportConfig.isAuthenticated, travelController.deleteTravel);
 
 /**
  * API examples routes.

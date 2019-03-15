@@ -32,7 +32,7 @@ exports.getNewTravel = async function(req, res) {
 // create new travel
 exports.postNewTravel = async function(req, res, next) {
 
-  req.assert('description', 'Description is empyt or to long (max 120 characters)!').isLength({min: 1, max: 120});
+  req.assert('description', 'Description is empty or to long (max 120 characters)!').isLength({min: 1, max: 120});
   req.assert('homeCurrency', 'Home currency should have exactly 3 characters!').isLength({min: 3, max: 3});
   req.assert('perMileAmount', 'Per mile amount should be positive number with 2 decimals!').isNumeric().isCurrency(
     {
@@ -135,6 +135,53 @@ exports.deleteTravel = async function (req, res, next) {
       }
     });
     res.redirect('/travels');
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.updateTravel = async function (req, res) {
+
+  req.assert('description', 'Description is empty or to long (max 120 characters)!').isLength({min: 1, max: 120});
+  req.assert('homeCurrency', 'Home currency should have exactly 3 characters!').isLength({min: 3, max: 3});
+  req.assert('perMileAmount', 'Per mile amount should be positive number with 2 decimals!').isNumeric().isCurrency(
+    {
+    allow_negatives: false,
+    allow_negative_sign_placeholder: true,
+    thousands_separator: ',',
+    decimal_separator: '.',
+    allow_decimal: true,
+    require_decimal: false,
+    digits_after_decimal: [2],
+    allow_space_after_digits: false
+  });
+
+
+  const dateCompare = moment(req.body.dateTo).add(1, 'days').format('YYYY-MM-DD');
+  req.assert('dateFrom', 'Date from should be before date to').isBefore(dateCompare);
+
+  const errors = req.validationErrors();
+  const id = req.params.id;
+
+  if (errors) {
+    req.flash('errors', errors);
+    return res.redirect(`/travels/${id}`);
+  }
+
+  const body = _.pick(req.body, ['description', 'dateFrom', 'dateTo','homeCurrency', 'perMileAmount']);
+
+  if (!ObjectId.isValid(id)) {
+    return next(new Error('Not valid Object Id'));
+  }
+
+  try {
+    const travel = await Travel.findOneAndUpdate({_id: id, user: req.user.id}, {$set: body}, {new: true});
+
+      if (!travel) {
+        return next(new Error('Travel not found'));
+      }
+
+      res.redirect('/travels');
   } catch (err) {
     return next(err);
   }

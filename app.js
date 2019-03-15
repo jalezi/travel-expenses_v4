@@ -182,6 +182,7 @@ app.get('/travels/new', passportConfig.isAuthenticated, travelController.getNewT
 app.post('/travels/new', passportConfig.isAuthenticated, travelController.postNewTravel);
 app.get('/travels/:id', passportConfig.isAuthenticated, travelController.getTravel);
 app.delete('/travels/:id', passportConfig.isAuthenticated, travelController.deleteTravel);
+app.patch('/travels/:id', passportConfig.isAuthenticated, travelController.updateTravel);
 
 /**
  * API examples routes.

@@ -1,5 +1,13 @@
 const expressHbs = require('express-hbs');
 const moment = require('moment');
+// const jsdom = require('jsdom');
+// const { JSDOM } = jsdom;
+// const { window } = new JSDOM();
+// const { document } = (new JSDOM('')).window;
+// global.document = document;
+//
+// const $ = require('jquery')(window);
+// const $ = require('jquery');
 
 expressHbs.registerHelper('flash', (message) => {
   if (message.error) {
@@ -73,3 +81,39 @@ expressHbs.registerHelper ("setChecked", function (value, currentValue) {
 
   return out + "</ul>";
 });
+
+expressHbs.registerHelper('checkTypeMileage', (id) => {
+
+  // $(document).ready(() => {
+  //   console.log(document.getElementById('expenseType'));
+  //   console.log(window.document.getElementById('expenseType'));
+  //   console.log($('document'));
+  //   console.log($('#expenseType'));
+    console.log(id);
+  // })
+  //
+  // console.log();
+  // console.log();
+  //
+  // $('document').ready(() => {
+  //   console.log(document.getElementById('expenseType'));
+  //   console.log(window.document.getElementById('expenseType'));
+  //   console.log($('document'));
+  //   console.log($('#expenseType'));
+  //   console.log(id);
+  // })
+
+
+
+  // document.location.refferer;
+
+  // console.log($(document));
+
+  // console.log(document.$('#expenseType'));
+  // const expenseType = $.getElementById('expenseType');
+  // console.log(expenseType);
+  // const value = expenseType.options[expenseType.selectedIndex].value;
+  // const text = expenseType.options[expenseType.selectedIndex].text;
+  // console.log(value);
+  // console.log(text);
+})

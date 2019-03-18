@@ -1,10 +1,110 @@
 {{!< layout}}
+{{debug travel.dateFrom}}
 
 <div class="pb-2 mt-2 mb-4 border-bottom">
   <h3> {{{travel.description}}}
     <button class="btn btn-primary float-right" type="button" data-toggle="collapse" data-target="#updateTravelForm" aria-expanded="false" aria-controls="updateTravelForm">
-    <i class="fas fa-pen"></i>Update
-  </button></h3>
+      <i class="fas fa-pen"></i>Update
+    </button>
+  </h3>
 </div>
 
 {{> travelUpdateForm }}
+
+<div class="pb-2 mt-2 mb-4">
+  <h6>
+    <button class="btn btn-success" type="button" data-toggle="collapse" data-target="#newExpenseForm" aria-expanded="false" aria-controls="newExpenseForm">
+      <i class="fas fa-plus"></i>New expense
+    </button>
+  </h6>
+
+</div>
+
+<div class="collapse pb-2 mt-2 mb-4 border-bottom" id="newExpenseForm">
+  <form class="form-inline" action="index.html" method="post">
+    <input type="hidden" name="_csrf" value={{_csrf}} />
+    <div class="form-group mb-2">
+      <label class="sr-only" for="expenseType">Type</label>
+      <div class="mx-1">
+        <select class="form-control" id="expenseType" name="expenseType" autofocus="autofocus" autocomplete="expenseType" required="required">
+          <option>Fligth</option>
+          <option>Hotel</option>
+          <option>Mileage</option>
+          <option>Toll</option>
+          <option>Meal</option>
+          <option>Rent a car</option>
+          <option>Gas</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group mb-2">
+      <label class="sr-only" for="expenseDescription">Description</label>
+      <div class="mx-1">
+        <input class="form-control" id="expenseDescription" type="expenseDescription" value="" name="expenseDescription" placeholder="Description" autofocus="autofocus" autocomplete="expenseDescription" required="required" />
+      </div>
+    </div>
+    <div class="form-group mb-2">
+      <label class="sr-only" for="invoiceDate">Inovice date</label>
+      <div class="mx-1">
+        <input class="form-control" id="invoiceDate" type="date" value={{formatDate travel.dateFrom}} name="invoiceDate" autocomplete="invoiceDate" required="required" />
+      </div>
+    </div>
+    <div class="form-group mb-2">
+      <label class="sr-only" for="invoiceCurrency">Invoice currency</label>
+      <div class="mx-1">
+        <select class="form-control amount-options" id="invoiceCurrency" name="invoiceCurrency" autofocus="autofocus" autocomplete="invoiceCurrency" required="required">
+          <option class="currenncy">USD</option>
+          <option class="currenncy">EUR</option>
+          <option class="currenncy">RSD</option>
+          <option class="currenncy">HRK</option>
+          <option class="currenncy">BAM</option>
+          <!-- <option> <input type="text" name="" value=""> </option> -->
+        </select>
+      </div>
+    </div>
+    <div class="form-group mb-2">
+      <label class="sr-only" for="amount">Amount/Mileage</label>
+      <div class="mx-1">
+        <input class="form-control text-right" type="text" id="amount" name="amount" placeholder="0.00" autofocus="autofocus" autocomplete="amount" required="required">
+      </div>
+    </div>
+    <div class="form-group mb-2">
+      <label class="sr-only" for="amountConverted">amountConverted</label>
+      <div class="mx-1">
+        <input class="form-control text-right" type="text" id="amountConverted" name="amountConverted" value="0.00" placeholder="0.00" autofocus="autofocus" autocomplete="amountConverted" required="required" readonly>
+      </div>
+    </div>
+    <div class="form group mb-2">
+      <button class="btn btn-success mx-1" type="button"><i class="fas fa-plus"></i>Add</button>
+      <button class="btn btn-outline-primary mx-1" type="button"><i class="fas fa-ban"></i>Cancel</button>
+    </div>
+  </form>
+</div>
+
+<script>
+
+  $().ready(function() {
+    // if ($('#newExpenseForm').is(':visible')) {
+      const expenseType = $("#expenseType")[0];
+      expenseType.addEventListener('change', function () {
+        console.log(expenseType.value);
+        if (expenseType.value === "Mileage") {
+          $("option.currenncy").detach();
+          $("<option class='distance'>mi</option>").appendTo(".amount-options");
+          $("<option class='distance'>km</option>").appendTo(".amount-options");
+        } else {
+          $("option.distance").detach();
+          $("<option class='currenncy'>USD</option>").appendTo(".amount-options");
+          $("<option class='currenncy'>EUR</option>").appendTo(".amount-options");
+          $("<option class='currenncy'>RSD</option>").appendTo(".amount-options");
+          $("<option class='currenncy'>HRK</option>").appendTo(".amount-options");
+          $("<option class='currenncy'>BAM</option>").appendTo(".amount-options");
+        }
+      })
+      // const t = expenseType[0].options[exp[0].selectedIndex].text;
+      // console.log(t);
+    // }
+
+  })
+</script>

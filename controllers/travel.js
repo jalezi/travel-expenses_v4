@@ -6,6 +6,8 @@ const User = require('../models/User');
 const Travel = require('../models/Travel');
 const ObjectId = mongoose.Types.ObjectId;
 
+const {expenseTypes} = require('../lib/globals');
+
 // get all travels
 exports.getTravels = async function(req, res) {
   const travels = await Travel.find({
@@ -13,7 +15,7 @@ exports.getTravels = async function(req, res) {
   });
   res.render('travels/travels', {
     title: 'Travels',
-    travels: travels
+    travels
   });
 }
 
@@ -105,7 +107,8 @@ exports.getTravel = async function (req, res, next) {
 
     res.render('travels/travel', {
       title: 'Travel',
-      travel: travel
+      travel,
+      expenseTypes
     });
   } catch (err) {
     return next(err);

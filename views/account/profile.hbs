@@ -18,7 +18,7 @@
     </div>
   </div>
   <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="homeCurrency">homeCurrency</label>
-    <div class="col-md-7"><input class="form-control" type="text" name="homeCurrency" id="homeCurrency" autocomplete="autocomplete" value={{user.homeCurrency}}></div>
+    <div class="col-md-7"><input class="form-control text-to-upper" type="text" name="homeCurrency" id="homeCurrency" autocomplete="autocomplete" minLength="3" maxlength="3" value={{user.homeCurrency}}></div>
   </div>
   <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="homeDistance">homeDistance</label>
     <div class="col-md-7">

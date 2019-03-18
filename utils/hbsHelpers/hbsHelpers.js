@@ -48,6 +48,14 @@ expressHbs.registerHelper ("setChecked", function (value, currentValue) {
     }
  });
 
+ expressHbs.registerHelper("setOption", (value, currentValue) => {
+   if (value == currentValue) {
+     return "selected='selected'";
+   } else {
+     return;
+   }
+ })
+
  expressHbs.registerHelper('setValue', (value) => {
    console.log(value);
    return `value=${value}`;
@@ -81,39 +89,3 @@ expressHbs.registerHelper ("setChecked", function (value, currentValue) {
 
   return out + "</ul>";
 });
-
-expressHbs.registerHelper('checkTypeMileage', (id) => {
-
-  // $(document).ready(() => {
-  //   console.log(document.getElementById('expenseType'));
-  //   console.log(window.document.getElementById('expenseType'));
-  //   console.log($('document'));
-  //   console.log($('#expenseType'));
-    console.log(id);
-  // })
-  //
-  // console.log();
-  // console.log();
-  //
-  // $('document').ready(() => {
-  //   console.log(document.getElementById('expenseType'));
-  //   console.log(window.document.getElementById('expenseType'));
-  //   console.log($('document'));
-  //   console.log($('#expenseType'));
-  //   console.log(id);
-  // })
-
-
-
-  // document.location.refferer;
-
-  // console.log($(document));
-
-  // console.log(document.$('#expenseType'));
-  // const expenseType = $.getElementById('expenseType');
-  // console.log(expenseType);
-  // const value = expenseType.options[expenseType.selectedIndex].value;
-  // const text = expenseType.options[expenseType.selectedIndex].text;
-  // console.log(value);
-  // console.log(text);
-})

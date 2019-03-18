@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'USD'
   },
+  homeDistance: {
+    type: String,
+    default: 'mi'
+  },
   perMileAmount: {
     type: Number,
     default: 0.54

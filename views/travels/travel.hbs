@@ -91,8 +91,8 @@
         console.log(expenseType.value);
         if (expenseType.value === "Mileage") {
           $("option.currenncy").detach();
-          $("<option class='distance'>mi</option>").appendTo(".amount-options");
-          $("<option class='distance'>km</option>").appendTo(".amount-options");
+          $("<option class='distance' {{{setOption user.homeDistance "mi"}}}>mi</option>").appendTo(".amount-options");
+          $("<option class='distance' {{{setOption user.homeDistance "km"}}}>km</option>").appendTo(".amount-options");
         } else {
           $("option.distance").detach();
           $("<option class='currenncy'>USD</option>").appendTo(".amount-options");

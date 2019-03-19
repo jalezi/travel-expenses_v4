@@ -15,31 +15,31 @@
       <div class="col-md-2"><input class="form-control" id="homeCurrency" type="homeCurrency" value="{{travel.homeCurrency}}" name="homeCurrency" placeholder="USD" autocomplete="homeCurrency" required="required" /></div>
     </div>
     <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="perMileAmount">Per mile amount</label>
-      <div class="col-md-2"><input class="form-control" id="perMileAmount" type="perMileAmount" value="{{travel.perMileAmount}}" name="perMileAmount" placeholder="0.54" autocomplete="perMileAmount" required="required" /></div>
+      <div class="col-md-2"><input class="form-control" id="perMileAmount" type="number" value="{{travel.perMileAmount}}" name="perMileAmount" placeholder="0.54" autocomplete="perMileAmount" required="required" /></div>
     </div>
-    <div class="form-group">
+    <div class="form-group row">
       <div class="offset-md-3 col-md-7">
         <input type="hidden" name="_method" value="PATCH">
-        <button class="col-md-4 btn btn-primary mx-2 mb-1" type="submit"><i class="fas fa-pen"></i>Update</button>
-        <button class="col-md-4 btn btn-outline-primary mx-2 mb-1" type="button" data-toggle="collapse" data-target="#updateTravelForm" aria-expanded="false" aria-controls="updateTravelForm">
+        <button class="col-md-4 btn btn-primary mb-1" type="submit"><i class="fas fa-pen"></i>Update</button>
+        <button class="col-md-4 btn btn-outline-primary mb-1" type="button" data-toggle="collapse" data-target="#updateTravelForm" aria-expanded="false" aria-controls="updateTravelForm">
           <i class="fas fa-b<n"></i>Cancel
         </button>
       </div>
     </div>
 
-    <div class="form-group">
-      <div class="offset-md-3 col-md-7 pl-2">
+    <div class="form-group row">
+      <div class="offset-md-3 col-md-7">
         <hr />
       </div>
     </div>
   </form>
 
   <form class="" method="POST" action="/travels/{{travel._id}}" enctype="application/x-www-form-urlencoded">
-    <div class="form-group">
-      <div class="offset-md-3 col-md-7 pl-2">
+    <div class="form-group row">
+      <div class="offset-md-3 col-md-7">
         <input type="hidden" name="_method" value="DELETE">
         <input type="hidden" name="_csrf" value={{_csrf}} />
-        <button class="col-md-3 btn btn-danger ml-2" type="submit"><i class="fas fa-trash-alt fa-sm"></i>Delete</button>
+        <button class="col-md-3 btn btn-danger" type="submit"><i class="fas fa-trash-alt fa-sm"></i>Delete</button>
       </div>
     </div>
   </form>

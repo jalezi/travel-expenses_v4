@@ -1,7 +1,5 @@
 {{!< layout}}
 
-{{debug expenseTypes}}
-
 <div class="pb-2 mt-2 mb-4 border-bottom">
   <h3> {{{travel.description}}}
     <button class="btn btn-primary float-right" type="button" data-toggle="collapse" data-target="#updateTravelForm" aria-expanded="false" aria-controls="updateTravelForm">
@@ -70,7 +68,7 @@
     <div class="form-group row ">
       <div class="col-md-7">
         <button class="btn btn-success mx-1 col-md-4 mb-1" type="button"><i class="fas fa-plus"></i>Add</button>
-        <button class="btn btn-outline-primary mx-1 col-md-4 mb-1" type="button"><i class="fas fa-ban"></i>Cancel</button>
+        <button class="btn btn-outline-primary mx-1 col-md-4 mb-1" type="button" data-toggle="collapse" data-target="#newExpenseForm" aria-expanded="false" aria-controls="newExpenseForm"><i class="fas fa-ban"></i>Cancel</button>
       </div>
     </div>
   </form>

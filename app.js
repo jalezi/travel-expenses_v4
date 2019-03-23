@@ -162,7 +162,7 @@ app.use(methodOverride(function (req, res) {
 */
 const Travel = require('./models/Travel')
 app.use('/travels/:id', async (req, res, next) => {
-  if (!res.locals.travel || res.locals.travel._id != req.params.id) {
+  if ((!res.locals.travel || res.locals.travel._id != req.params.id) && req.params.id != 'new') {
     try {
       const travel = await Travel.findById(req.params.id);
       res.locals.travel = travel;
@@ -170,6 +170,8 @@ app.use('/travels/:id', async (req, res, next) => {
     } catch (err) {
       next(err);
     }
+  } else {
+    next();
   }
 });
 

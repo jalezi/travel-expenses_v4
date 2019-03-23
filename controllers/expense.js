@@ -8,6 +8,7 @@ exports.postNewExpense = async function  (req, res, next) {
   // req.assert('invoiceDate', 'Invoice date should be within travel dates').isBefore(dateCompare);
 
   const errors = req.validationErrors();
+  console.log(req.body);
 
   if (errors) {
     req.flash('errors', errors);

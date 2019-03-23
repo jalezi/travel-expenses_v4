@@ -22,6 +22,7 @@ exports.getTravels = async function(req, res) {
 
 // get all travels
 exports.getNewTravel = async function(req, res) {
+  console.log('getNewTravel');
   // const travels = await Travel.find({
   //   user: req.user._id
   // });

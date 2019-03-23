@@ -1,13 +1,5 @@
 const expressHbs = require('express-hbs');
 const moment = require('moment');
-// const jsdom = require('jsdom');
-// const { JSDOM } = jsdom;
-// const { window } = new JSDOM();
-// const { document } = (new JSDOM('')).window;
-// global.document = document;
-//
-// const $ = require('jquery')(window);
-// const $ = require('jquery');
 
 expressHbs.registerHelper('flash', (message) => {
   if (message.error) {
@@ -89,3 +81,28 @@ expressHbs.registerHelper ("setChecked", function (value, currentValue) {
 
   return out + "</ul>";
 });
+
+expressHbs.registerHelper('setUnit', (homeDistance) => {
+  if (homeDistance === 'mi') {
+      return 'mile';
+    } else if (homeDistance === 'km') {
+      return 'km';
+    } else {
+      return '';
+    }
+})
+
+expressHbs.registerHelper('setUnit2', (homeDistance) => {
+  if (homeDistance != 'mi') {
+      return 'mile';
+    } else if (homeDistance != 'km') {
+      return 'km';
+    } else {
+      return '';
+    }
+})
+
+expressHbs.registerHelper('toNumber' , (valueAsString) => {
+  console.log("parseFloat with toNumber helper");
+  return parseFloat(valueAsString);
+})

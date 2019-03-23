@@ -20,7 +20,7 @@
 </div>
 
 <div class="collapse pb-2 mt-2 mb-4 border-bottom" id="newExpenseForm">
-  <form class="" action="index.html" method="post">
+  <form class="" action="/travels/{{travel._id}}/expenses/new" method="POST">
     <input type="hidden" name="_csrf" value={{_csrf}} />
     <div class="form-group row">
       <div class="col-md-3">
@@ -36,60 +36,74 @@
         <input class="form-control" id="expenseDescription" type="expenseDescription" value="" name="expenseDescription" placeholder="Description" autofocus="autofocus" autocomplete="expenseDescription" required="required" />
       </div>
       <div class="col-md-4">
-        <label class="col-form-label font-weight-bold" for="invoiceDate">Inovice date</label>
-        <input class="form-control" id="invoiceDate" type="date" value={{formatDate travel.dateFrom}} name="invoiceDate" autocomplete="invoiceDate" required="required" />
+        <label class="col-form-label font-weight-bold" for="invoiceDate" >Invoice date</label>
+        <input class="form-control" id="invoiceDate" type="date" min={{formatDate travel.dateFrom}} max={{formatDate travel.dateTo}} value={{formatDate travel.dateFrom}} name="invoiceDate" autocomplete="invoiceDate" required="required" />
       </div>
     </div>
 
-    <div class="form-group row">
-      <div class="col-md-2">
-        <label class="col-form-label font-weight-bold" for="invoiceCurrency">Currency</label>
-        <input class="form-control amount-options text-to-upper" type="text" list="currencies" id="invoiceCurrency" placeholder="USD" name="invoiceCurrency" autofocus="autofocus" autocomplete="invoiceCurrency" required="required" minLength="3" maxlength="3">
-          <datalist class="currencies" value="" id="currencies">
-            <option class="currenncy">USD</option>
-            <option class="currenncy">EUR</option>
-            <option class="currenncy">RSD</option>
-            <option class="currenncy">HRK</option>
-            <option class="currenncy">BAM</option>
-          </datalist>
-      </div>
+    {{> newExpenseFormRow2NotMileage}}
+    {{> newExpenseFormRow2Mileage}}
 
-      <div class="col-md-3">
-        <label class="col-form-label font-weight-bold" for="rate">Rate</label>
-        <input class="form-control text-right" type="number" id="rate" name="amount" placeholder="0.00" autofocus="autofocus" autocomplete="amount" required="required">
-      </div>
-
-      <div class="col-md-3">
-        <label class="col-form-label font-weight-bold" for="amount">Amount/Mileage</label>
-        <input class="form-control text-right" type="number" id="amount" name="amount" placeholder="0.00" autofocus="autofocus" autocomplete="amount" required="required">
-      </div>
-
-      <div class="col-md-4 input-group">
-        <label class="input-group col-form-label font-weight-bold" for="amountConverted">Converted amount</label>
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="currency-addon">{{user.homeCurrency}}</span>
-        </div>
-        <input class="form-control text-right input-group" type="number" id="amountConverted" name="amountConverted" value="0.00" placeholder="0.00" autofocus="autofocus" autocomplete="amountConverted" required="required" readonly>
-      </div>
-    </div>
     <div class="form-group row ">
       <div class="col-md-7">
-        <button class="btn btn-success col-md-4 mb-1" type="button"><i class="fas fa-plus"></i>Add</button>
+        <button class="btn btn-success col-md-4 mb-1" type="submit"><i class="fas fa-plus"></i>Add</button>
         <button class="btn btn-outline-primary col-md-4 mb-1" type="button" data-toggle="collapse" data-target="#newExpenseForm" aria-expanded="false" aria-controls="newExpenseForm"><i class="fas fa-ban"></i>Cancel</button>
       </div>
     </div>
   </form>
 </div>
 
-<script type="text/javascript">
-  amount.oninput = function  () {
-    amountConverted.value = amount.value * rate.value;
-    amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2)
+<script >
 
-  }
-  rate.oninput = function  () {
-    amountConverted.value = amount.value * rate.value;
-    amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2)
 
-  }
+  $(document).ready(() => {
+    invoiceUnit.onchange = () => {
+
+        document.getElementById('amountDistance2').readOnly = !document.getElementById('amountDistance2').readOnly;
+        document.getElementById('amountDistance').readOnly = !document.getElementById('amountDistance').readOnly;
+
+        
+
+        if (!document.getElementById('amountDistance2').readOnly) {
+          $('#row3Mileage').show();
+        } else {
+          $('#row3Mileage').hide();
+        }
+    }
+
+    amountDistance2.onchange = (event) => {
+      if (invoiceUnit.value === 'km') {
+        const kmToMiles = parseFloat({{constants.KILOMETERS_TO_MILES}});
+        const miles = (amountDistance2.value * kmToMiles).toFixed(2);
+        console.log(miles);
+        amountDistance.value = miles;
+        const convertedAmount = (travelPerMileAmount.value * amountDistance.value).toFixed(2);
+        amountConverted2.value = convertedAmount;
+      }
+    }
+
+      // to be moved somewhere else because of api key
+    invoiceCurrency.onfocusout = async function () {
+        if (invoiceCurrency.value.length === 3) {
+            try {
+              await $.get("http://data.fixer.io/api/latest?access_key=de6c63dc42df031c4ecd8fe60abd3e34", function(response)  {
+                const from = response.rates[invoiceCurrency.value];
+                if (from != "undefined") {
+                  const home = response.rates['{{user.homeCurrency}}'];
+                  const rateValue = (from / home);
+                  if (rateValue != "") {
+                    rate.value = rateValue;
+                    rate.value = parseFloat($('#rate').val()).toFixed(2)
+                  }
+                } else {
+                  throw new Error(`No rate for ${invoiceCurrency.value}`)
+                }
+            });
+          } catch (err) {
+            console.log("something wrong");
+            throw new Error('Something went wrong', err);
+          }
+        }
+    }
+    })
 </script>

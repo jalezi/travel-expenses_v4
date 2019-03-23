@@ -39,6 +39,7 @@ const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const travelController = require('./controllers/travel');
+const expenseController = require('./controllers/expense');
 
 /**
  * API keys and Passport configuration.
@@ -134,6 +135,7 @@ app.use((req, res, next) => {
   }
   next();
 });
+
 app.use('/', express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
 app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/popper.js/dist/umd'), { maxAge: 31557600000 }));
 app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js'), { maxAge: 31557600000 }));
@@ -154,6 +156,26 @@ app.use(methodOverride(function (req, res) {
     return method
   }
 }));
+
+/**
+* Added by me
+*/
+const Travel = require('./models/Travel')
+app.use('/travels/:id', async (req, res, next) => {
+  if (!res.locals.travel || res.locals.travel._id != req.params.id) {
+    try {
+      const travel = await Travel.findById(req.params.id);
+      res.locals.travel = travel;
+      next();
+    } catch (err) {
+      next(err);
+    }
+  }
+});
+
+/**
+* Added by me
+*/
 
 
 /**
@@ -183,6 +205,7 @@ app.post('/travels/new', passportConfig.isAuthenticated, travelController.postNe
 app.get('/travels/:id', passportConfig.isAuthenticated, travelController.getTravel);
 app.delete('/travels/:id', passportConfig.isAuthenticated, travelController.deleteTravel);
 app.patch('/travels/:id', passportConfig.isAuthenticated, travelController.updateTravel);
+app.post('/travels/:id/expenses/new', passportConfig.isAuthenticated, expenseController.postNewExpense);
 
 /**
  * API examples routes.

@@ -12,10 +12,10 @@
       <div class="col-md-4"><input class="form-control" id="dateTo" type="date" value={{formatDate travel.dateTo}} name="dateTo" placeholder="" autocomplete="dateTo" required="required" /></div>
     </div>
     <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="homeCurrency">Home currency</label>
-      <div class="col-md-2"><input class="form-control" id="homeCurrency" type="homeCurrency" value="{{travel.homeCurrency}}" name="homeCurrency" placeholder="USD" autocomplete="homeCurrency" required="required" /></div>
+      <div class="col-md-2"><input class="form-control" id="homeCurrency" type="homeCurrency" value="{{travel.homeCurrency}}" name="homeCurrency" placeholder="USD" autocomplete="homeCurrency" required="required" readonly/></div>
     </div>
     <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="perMileAmount">Per mile amount</label>
-      <div class="col-md-2"><input class="form-control" id="perMileAmount" type="number" value="{{travel.perMileAmount}}" name="perMileAmount" placeholder="0.54" autocomplete="perMileAmount" required="required" /></div>
+      <div class="col-md-2"><input class="form-control" id="perMileAmount" type="number" step="0.01" value="{{travel.perMileAmount}}" name="perMileAmount" placeholder="0.54" autocomplete="perMileAmount" required="required" /></div>
     </div>
     <div class="form-group row">
       <div class="offset-md-3 col-md-7">

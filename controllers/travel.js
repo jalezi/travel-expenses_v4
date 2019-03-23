@@ -7,6 +7,7 @@ const Travel = require('../models/Travel');
 const ObjectId = mongoose.Types.ObjectId;
 
 const {expenseTypes} = require('../lib/globals');
+const constants = require('../lib/constants');
 
 // get all travels
 exports.getTravels = async function(req, res) {
@@ -34,7 +35,7 @@ exports.getNewTravel = async function(req, res) {
 // create new travel
 exports.postNewTravel = async function(req, res, next) {
 
-  req.assert('description', 'Description is empty or to long (max 120 characters)!').isLength({min: 1, max: 60});
+  req.assert('description', 'Description is empty or to long (max 60 characters)!').isLength({min: 1, max: 60});
   req.assert('homeCurrency', 'Home currency should have exactly 3 characters!').isLength({min: 3, max: 3});
   req.assert('perMileAmount', 'Per mile amount should be positive number with 2 decimals!').isNumeric().isCurrency(
     {
@@ -88,7 +89,6 @@ exports.postNewTravel = async function(req, res, next) {
 }
 
 exports.getTravel = async function (req, res, next) {
-
   const id = req.params.id;
 
   if (!ObjectId.isValid(id)) {
@@ -105,10 +105,12 @@ exports.getTravel = async function (req, res, next) {
       return next(new Error('Travel not found'))
     }
 
+    res.locals.travel = travel;
     res.render('travels/travel', {
       title: 'Travel',
       travel,
-      expenseTypes
+      expenseTypes,
+      constants
     });
   } catch (err) {
     return next(err);

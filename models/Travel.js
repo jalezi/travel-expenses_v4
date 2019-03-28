@@ -30,7 +30,7 @@ const TravelSchema = new mongoose.Schema({
     required: true
   },
   perMileAmount: {
-    type: Number,
+    type: mongoose.Decimal128,
     default: 0.00
   },
   expenses: [{
@@ -38,7 +38,7 @@ const TravelSchema = new mongoose.Schema({
     ref: 'Expense'
   }],
   total: {
-    type: Number,
+    type: mongoose.Decimal128,
     default: 0.00
   },
   travelCurrencies: Object
@@ -48,12 +48,18 @@ const TravelSchema = new mongoose.Schema({
 
 const Travel = mongoose.model('Travel', TravelSchema);
 
-Travel.prototype.updateDateCurrenciesArray = function (userId, date, content) {
+Travel.prototype.updateDateCurrenciesArray = function (userId, date, content, content2) {
   let filter = {"_id": userId};
-  let update = {"$addToSet": {}};
+  let update = {
+    "$addToSet": {},
+    "$inc": {}
+  };
   let setter = {};
   setter['travelCurrencies.' + date] = content;
   update['$addToSet'] = setter;
+  let setter2 = {};
+  setter2['total'] = content2;
+  update['$inc'] = setter2;
 
   return this.collection.bulkWrite([
     { "updateOne": {
@@ -61,7 +67,6 @@ Travel.prototype.updateDateCurrenciesArray = function (userId, date, content) {
         "update": update
     }}
 ]);
-
 };
 
 module.exports = Travel;

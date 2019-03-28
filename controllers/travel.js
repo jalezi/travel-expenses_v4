@@ -59,7 +59,6 @@ exports.postNewTravel = async function(req, res, next) {
   const dateTo = new Date(req.body.dateTo);
   const travelCurrencies = {
     days: createCurrenciesArray(moment(req.body.dateFrom), moment(req.body.dateTo))};
-  console.log(travelCurrencies);
   const travel = new Travel({
     _user: req.user._id,
     description: req.body.description.replace(/\s+/g, " ").trim(),
@@ -107,6 +106,14 @@ exports.getTravel = async function (req, res, next) {
       _user: req.user._id
     });
 
+    expenses.forEach((expense, index, arr) => {
+      // console.log('expense',expense, '\n', 'index', index, '\n', 'arr', arr);
+      let x = expense.findRate((err, rate) => {
+        expense.rate = rate[expense.currency];
+        expense.rate = expense.rate.toFixed(2);
+      });
+    });
+
     if (!travel) {
       return next(new Error('Travel not found'))
     }
@@ -131,7 +138,7 @@ exports.getTravel = async function (req, res, next) {
 
 exports.deleteTravel = async function (req, res, next) {
   const id = req.params.id;
-  console.log(id);
+  // console.log(id);
 
   if (!ObjectId.isValid(id)) {
     return next(new Error('Not valid Object Id'));

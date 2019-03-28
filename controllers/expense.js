@@ -104,7 +104,7 @@ exports.postNewExpense = async function  (req, res, next) {
         return next(err);
       }
     });
-    await Travel.prototype.updateDateCurrenciesArray(res.locals.travel._id, invDate, cur);
+    await Travel.prototype.updateDateCurrenciesArray(res.locals.travel._id, invDate, cur, doc.amountConverted);
   } catch (err) {
     return next(err);
   }

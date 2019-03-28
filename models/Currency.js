@@ -6,7 +6,7 @@ const CurrencySchema = new mongoose.Schema({
     required: true
   },
   rate: {
-    type: Number,
+    type: mongoose.Decimal128,
     default: 1
   }
 },  {

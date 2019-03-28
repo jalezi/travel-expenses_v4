@@ -103,6 +103,14 @@ expressHbs.registerHelper('setUnit2', (homeDistance) => {
 })
 
 expressHbs.registerHelper('toNumber' , (valueAsString) => {
-  console.log("parseFloat with toNumber helper");
   return parseFloat(valueAsString);
+})
+
+expressHbs.registerHelper('getRate', (travelCurrencies, currency) => {
+  console.log(travelCurrencies, currency);
+  const item = travelCurrencies.find((item) => {
+    // console.log(cur);
+    return item.currency.name === currency;
+  });
+  return item.value;
 })

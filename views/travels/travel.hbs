@@ -53,6 +53,38 @@
   </form>
 </div>
 
+<table class="table table-hover table-bordered">
+  <thead>
+    <tr class="text-center">
+      <th scope="col">#</th>
+      <th scope="col">Type</th>
+      <th scope="col">Description</th>
+      <th scope="col">Inovice date</th>
+
+      <th scope="col">Amount</th>
+      <th scope="col">Currency/Unit</th>
+      <th scope="col">Rate</th>
+      <th scope="col">Amount '{{user.homeCurrency}}'</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {{#each expenses}}
+    <tr>
+      <th scope="row" class="text-center">{{countList @index}}</th>
+        <td class="text-center">{{this.type}}</td>
+        <td><a href="/travels/{{travel._id}}/{{this._id}}">{{this.description}}</a></td>
+        <td class="text-center">{{formatDate this.date}}</td>
+
+        <td class="text-right">{{this.amount}}</td>
+        <td class="text-right">{{this.currency}}</td>
+        <td class="text-right"></td>
+        <td class="text-right">{{this.amountConverted}}</td>
+      {{/each}}
+    </tr>
+  </tbody>
+</table>
+
 <script >
 
 
@@ -71,7 +103,7 @@
       if (invoiceUnit.value === 'km') {
         const kmToMiles = parseFloat({{constants.KILOMETERS_TO_MILES}});
         const miles = (amountDistance2.value * kmToMiles).toFixed(2);
-        console.log(miles);
+        // console.log(miles);
         amountDistance.value = miles;
         const convertedAmount = (travelPerMileAmount.value * amountDistance.value).toFixed(2);
         amountConverted2.value = convertedAmount;
@@ -96,7 +128,7 @@
                 }
             });
           } catch (err) {
-            console.log("something wrong");
+            // console.log("something wrong");
             throw new Error('Something went wrong', err);
           }
         }

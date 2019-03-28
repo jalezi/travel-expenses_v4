@@ -131,7 +131,7 @@ exports.getAccount = (req, res) => {
  * Update profile information.
  */
 exports.postUpdateProfile = (req, res, next) => {
-  console.log(req.body);
+  // console.log(req.body);
   req.assert('email', 'Please enter a valid email address.').isEmail();
   req.assert('homeCurrency', 'Home currency should have exactly 3 characters').isLength({min: 3, max: 3});
   req.assert('perMileAmount', 'Per mile amount should be number').isNumeric();

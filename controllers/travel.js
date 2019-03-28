@@ -4,15 +4,18 @@ const moment = require('moment');
 
 const User = require('../models/User');
 const Travel = require('../models/Travel');
+const Expense = require('../models/Expense');
+const Rate = require('../models/Rate');
 const ObjectId = mongoose.Types.ObjectId;
 
 const {expenseTypes} = require('../lib/globals');
 const constants = require('../lib/constants');
+const createCurrenciesArray = require('../utils/createCurrenciesArray');
 
 // get all travels
 exports.getTravels = async function(req, res) {
   const travels = await Travel.find({
-    user: req.user._id
+    _id: {$in: req.user.travels}
   });
   res.render('travels/travels', {
     title: 'Travels',
@@ -22,7 +25,7 @@ exports.getTravels = async function(req, res) {
 
 // get all travels
 exports.getNewTravel = async function(req, res) {
-  console.log('getNewTravel');
+  // console.log('getNewTravel');
   // const travels = await Travel.find({
   //   user: req.user._id
   // });
@@ -38,18 +41,9 @@ exports.postNewTravel = async function(req, res, next) {
 
   req.assert('description', 'Description is empty or to long (max 60 characters)!').isLength({min: 1, max: 60});
   req.assert('homeCurrency', 'Home currency should have exactly 3 characters!').isLength({min: 3, max: 3});
-  req.assert('perMileAmount', 'Per mile amount should be positive number with 2 decimals!').isNumeric().isCurrency(
-    {
-    allow_negatives: false,
-    allow_negative_sign_placeholder: true,
-    thousands_separator: ',',
-    decimal_separator: '.',
-    allow_decimal: true,
-    require_decimal: false,
-    digits_after_decimal: [2],
-    allow_space_after_digits: false
-  });
 
+  const decimalOptions = {decimal_digits: 2};
+  req.assert('perMileAmount', 'Per mile amount should be positive number with 2 decimals!').isDecimal(decimalOptions);
 
   const dateCompare = moment(req.body.dateTo).add(1, 'days').format('YYYY-MM-DD');
   req.assert('dateFrom', 'Date from should be before date to').isBefore(dateCompare);
@@ -61,15 +55,19 @@ exports.postNewTravel = async function(req, res, next) {
     return res.redirect('/travels/new');
   }
 
-  const dateFrom = moment(req.body.dateFrom);
-  const dateTo = moment(req.body.dateTo);
+  const dateFrom = new Date(req.body.dateFrom);
+  const dateTo = new Date(req.body.dateTo);
+  const travelCurrencies = {
+    days: createCurrenciesArray(moment(req.body.dateFrom), moment(req.body.dateTo))};
+  console.log(travelCurrencies);
   const travel = new Travel({
-    user: req.user._id,
+    _user: req.user._id,
     description: req.body.description.replace(/\s+/g, " ").trim(),
     dateFrom,
     dateTo,
     homeCurrency: req.body.homeCurrency,
-    perMileAmount: req.body.perMileAmount
+    perMileAmount: req.body.perMileAmount,
+    travelCurrencies: travelCurrencies.days
   });
 
   try {
@@ -77,15 +75,17 @@ exports.postNewTravel = async function(req, res, next) {
     await User.findByIdAndUpdate(req.user._id, {
       $addToSet: {
         'travels': doc._id
-      }
+      },
     }, (err, user) => {
       if (err) {
         return next(err);
       }
-    })
+    });
   } catch (err) {
     return next(err);
   }
+
+  req.flash('success', {msg: 'Successfully added new travel!'});
   res.redirect('/travels');
 }
 
@@ -99,17 +99,28 @@ exports.getTravel = async function (req, res, next) {
   try {
     const travel = await Travel.findOne({
       _id: id,
-      user: req.user._id
+      _user: req.user._id
+    });
+
+    const expenses = await Expense.find({
+      _id: {$in: travel.expenses},
+      _user: req.user._id
     });
 
     if (!travel) {
       return next(new Error('Travel not found'))
     }
 
+    // const rates = await Rate.find({
+    //
+    // });
+
     res.locals.travel = travel;
     res.render('travels/travel', {
       title: 'Travel',
       travel,
+      travelCurrencies: travel.travelCurrencies,
+      expenses,
       expenseTypes,
       constants
     });
@@ -120,6 +131,7 @@ exports.getTravel = async function (req, res, next) {
 
 exports.deleteTravel = async function (req, res, next) {
   const id = req.params.id;
+  console.log(id);
 
   if (!ObjectId.isValid(id)) {
     return next(new Error('Not valid Object Id'));
@@ -128,18 +140,24 @@ exports.deleteTravel = async function (req, res, next) {
   try {
     const travel = await Travel.findOneAndDelete({
       _id: id,
-      user: req.user._id
+      _user: req.user._id
     });
 
     if (!travel) {
+      req.flash('error', {msg: 'Travel not found!!'});
       return next(new Error('Travel not found'));
     }
+
+    Expense.deleteMany({travel: travel._id, _user: req.user._id}, (err) => {
+      if (err) {return next(err)}
+    });
 
     User.findByIdAndUpdate(req.user._id, {$pullAll : {'travels': [travel._id]}}, (err, user) => {
       if (!err) {
         return next(err);
       }
     });
+    req.flash('success', {msg: 'Travel successfully deleted!'});
     res.redirect('/travels');
   } catch (err) {
     return next(err);

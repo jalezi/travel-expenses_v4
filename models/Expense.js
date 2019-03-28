@@ -22,19 +22,24 @@ const ExpenseSchema = new mongoose.Schema({
     required: true
   },
   currency: {
-    type: String,
-    required: true
+    type: String
+  },
+  unit: {
+    type: String
   },
   amount: {
+    type: Number
+  },
+  amountConverted: {
     type: Number,
     default: 0
   },
-  _creator: {
+  _user: {
     type: ObjectId,
     required: true,
     ref: 'User'
   }
-});
+}, { timestamps: true });
 
 const Expense = mongoose.model('Expense', ExpenseSchema);
 

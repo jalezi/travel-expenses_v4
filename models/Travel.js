@@ -1,21 +1,14 @@
 const mongoose = require('mongoose');
+
 const User = require('../models/User');
 const Expense = require('../models/Expense');
+const Currency = require('../models/Currency');
+const CurrencySchema = Currency.schema.paths;
+
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
-const CurrencySchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  value: {
-    type: Number,
-    default: 1
-  }
-},  {useNestedStrict: true });
-
 const TravelSchema = new mongoose.Schema({
-  user: {
+  _user: {
     type: ObjectId,
     required: true,
     ref: 'User'
@@ -48,11 +41,27 @@ const TravelSchema = new mongoose.Schema({
     type: Number,
     default: 0.00
   },
-  travelCurrencies: [{
-      currency: CurrencySchema
-  }]
-});
+  travelCurrencies: Object
+}, {
+  useNestedStrict: true,
+  timestamps: true });
 
 const Travel = mongoose.model('Travel', TravelSchema);
+
+Travel.prototype.updateDateCurrenciesArray = function (userId, date, content) {
+  let filter = {"_id": userId};
+  let update = {"$addToSet": {}};
+  let setter = {};
+  setter['travelCurrencies.' + date] = content;
+  update['$addToSet'] = setter;
+
+  return this.collection.bulkWrite([
+    { "updateOne": {
+        "filter": filter,
+        "update": update
+    }}
+]);
+
+};
 
 module.exports = Travel;

@@ -1,0 +1,31 @@
+<div class="form-group row" id="row2noMileage">
+  <div class="col-md-2">
+    <label class="col-form-label font-weight-bold" id="labelCurrency" for="invoiceCurrency">Currency</label>
+    <input class="form-control amount-options text-to-upper" type="text" list="currencies" id="invoiceCurrency" placeholder="USD" name="invoiceCurrency" autofocus="autofocus" autocomplete="invoiceCurrency" required="required" minLength="3" maxlength="3">
+      <datalist class="currencies" value="" id="currencies">
+        <option class="currenncy">USD</option>
+        <option class="currenncy">EUR</option>
+        <option class="currenncy">RSD</option>
+        <option class="currenncy">HRK</option>
+        <option class="currenncy">BAM</option>
+      </datalist>
+  </div>
+
+  <div class="col-md-3">
+    <label class="col-form-label font-weight-bold" id="labelRate" for="rate">Rate</label>
+    <input class="form-control text-right" type="number" id="rate" min=0 name="rate" step="0.01" value="0.00" placeholder="0.00" autofocus="autofocus" autocomplete="rate" required="required">
+  </div>
+
+  <div class="col-md-3">
+    <label class="col-form-label font-weight-bold" id="labelAmoutDistance"for="amount">Amount</label>
+    <input class="form-control text-right" type="number" id="amount" name="amount"  min=0 value="0.00" placeholder="0.00" autofocus="autofocus" autocomplete="amount" required="required">
+  </div>
+
+  <div class="col-md-4 input-group">
+    <label class="input-group col-form-label font-weight-bold" for="amountConverted">Converted amount</label>
+    <div class="input-group-prepend">
+      <span class="input-group-text" id="currency-addon">{{user.homeCurrency}}</span>
+    </div>
+    <input class="form-control text-right input-group" type="number" id="amountConverted" name="amountConverted" value="0.00" placeholder="0.00" autofocus="autofocus" autocomplete="amountConverted" required="required" readonly>
+  </div>
+</div>

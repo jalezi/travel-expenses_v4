@@ -1,0 +1,34 @@
+<div class="form-group row" id="row2Mileage" style="display: none">
+  <div class="col-md-2">
+    <label class="col-form-label font-weight-bold" id="labelUnit" for="invoiceUnit">Unit</label>
+    <select class="form-control amount-options" id="invoiceUnit" name="invoiceUnit" autofocus="autofocus" autocomplete="invoiceUnit" required="required">
+      <option class='distance' {{{setOption user.homeDistance "mi"}}}>mi</option>
+      <option class='distance' {{{setOption user.homeDistance "km"}}}>km</option>
+      </select>
+  </div>
+
+  <div class="col-md-3">
+    <label class="col-form-label font-weight-bold" id="labelPerMileAmount" for="travelPerMileAmount">{{user.homeCurrency}}/{{setUnit user.homeDistance}}</label>
+    <input class="form-control text-right" type="number" id="travelPerMileAmount" value={{travel.perMileAmount}} name="travelPerMileAmount" step=0.01 min=0  placeholder="0.00" autofocus="autofocus" autocomplete="travelPerMileAmount" required="required" readonly>
+  </div>
+
+  <div class="col-md-3">
+    <label class="col-form-label font-weight-bold" id="labelAmoutDistance"for="amountDistance">Distance[{{setUnit user.homeDistance}}]</label>
+    <input class="form-control text-right" type="number" id="amountDistance" name="amountDistance"  min=0 value="0.00" placeholder="0.00" autofocus="autofocus" autocomplete="amountDistance" required="required">
+  </div>
+
+  <div class="col-md-4 input-group">
+    <label class="input-group col-form-label font-weight-bold" for="amountConverted2">Converted amount</label>
+    <div class="input-group-prepend">
+      <span class="input-group-text" id="currency-addon">{{user.homeCurrency}}</span>
+    </div>
+    <input class="form-control text-right input-group" type="number" id="amountConverted2" name="amountConverted2" value="0.00" placeholder="0.00" autofocus="autofocus" autocomplete="amountConverted2" required="required" readonly>
+  </div>
+</div>
+
+<div class="form-group row" id="row3Mileage" style="display: none">
+  <div class="offset-md-5 col-md-3">
+    <label class="col-form-label font-weight-bold" id="labelAmoutDistance2"for="amountDistance2">Distance[{{setUnit2 user.homeDistance}}]</label>
+    <input class="form-control text-right" type="number" id="amountDistance2" name="amountDistance2"  value=0 placeholder="0.00" autofocus="autofocus" autocomplete="amountDistance2" required="required" readonly>
+  </div>
+</div>

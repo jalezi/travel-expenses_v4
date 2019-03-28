@@ -40,8 +40,77 @@ expressHbs.registerHelper ("setChecked", function (value, currentValue) {
     }
  });
 
- expressHbs.registerHelper('today', () => {
-   const today = moment().format('YYYY-MM-DD');
-   console.log(today);
-   return today;
+ expressHbs.registerHelper("setOption", (value, currentValue) => {
+   if (value == currentValue) {
+     return "selected='selected'";
+   } else {
+     return;
+   }
  })
+
+ expressHbs.registerHelper('setValue', (value) => {
+   console.log(value);
+   return `value=${value}`;
+ })
+
+ expressHbs.registerHelper('countList', (value) => {
+   return value + 1;
+ })
+
+ expressHbs.registerHelper('formatDate', (date) => {
+   if (!date) {
+     const today = moment().format('YYYY-MM-DD');
+     // console.log('wihout date', today);
+     return today;
+   }
+   else {
+     const today = moment(date).format('YYYY-MM-DD');
+     // console.log('with date', today);
+     return today;
+   }
+
+
+ });
+
+ expressHbs.registerHelper('travelsList', function(items, options) {
+  let out = "<ul>";
+
+  for(let i=0, length=items.length; i<length; i++) {
+    out = out + "<li>" + options.fn(items[i]) + "</li>";
+  }
+
+  return out + "</ul>";
+});
+
+expressHbs.registerHelper('setUnit', (homeDistance) => {
+  if (homeDistance === 'mi') {
+      return 'mile';
+    } else if (homeDistance === 'km') {
+      return 'km';
+    } else {
+      return '';
+    }
+})
+
+expressHbs.registerHelper('setUnit2', (homeDistance) => {
+  if (homeDistance != 'mi') {
+      return 'mile';
+    } else if (homeDistance != 'km') {
+      return 'km';
+    } else {
+      return '';
+    }
+})
+
+expressHbs.registerHelper('toNumber' , (valueAsString) => {
+  return parseFloat(valueAsString);
+})
+
+expressHbs.registerHelper('getRate', (travelCurrencies, currency) => {
+  console.log(travelCurrencies, currency);
+  const item = travelCurrencies.find((item) => {
+    // console.log(cur);
+    return item.currency.name === currency;
+  });
+  return item.value;
+})

@@ -131,7 +131,10 @@ exports.getAccount = (req, res) => {
  * Update profile information.
  */
 exports.postUpdateProfile = (req, res, next) => {
+  // console.log(req.body);
   req.assert('email', 'Please enter a valid email address.').isEmail();
+  req.assert('homeCurrency', 'Home currency should have exactly 3 characters').isLength({min: 3, max: 3});
+  req.assert('perMileAmount', 'Per mile amount should be number').isNumeric();
   req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
 
   const errors = req.validationErrors();
@@ -146,6 +149,9 @@ exports.postUpdateProfile = (req, res, next) => {
     user.email = req.body.email || '';
     user.profile.name = req.body.name || '';
     user.profile.gender = req.body.gender || '';
+    user.homeCurrency = req.body.homeCurrency.toUpperCase() || '';
+    user.homeDistance = req.body.homeDistance || '';
+    user.perMileAmount = req.body.perMileAmount || '';
     user.profile.location = req.body.location || '';
     user.profile.website = req.body.website || '';
     user.save((err) => {

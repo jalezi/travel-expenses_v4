@@ -20,15 +20,19 @@ const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const multer = require('multer');
 const hbsHelpers = require('./utils/hbsHelpers/hbsHelpers');
+const getRates = require('./utils/getRates');
 
 const expressHbs = require('express-hbs');
+const methodOverride = require('method-override')
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
+
+
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
-dotenv.load({ path: '.env.example' });
+dotenv.load({ path: '.env' });
 
 /**
  * Controllers (route handlers).
@@ -38,6 +42,7 @@ const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const travelController = require('./controllers/travel');
+const expenseController = require('./controllers/expense');
 
 /**
  * API keys and Passport configuration.
@@ -48,6 +53,8 @@ const passportConfig = require('./config/passport');
  * Create Express server.
  */
 const app = express();
+
+
 
 /**
  * Connect to MongoDB.
@@ -131,11 +138,50 @@ app.use((req, res, next) => {
   }
   next();
 });
+
 app.use('/', express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
 app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/popper.js/dist/umd'), { maxAge: 31557600000 }));
 app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js'), { maxAge: 31557600000 }));
 app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/jquery/dist'), { maxAge: 31557600000 }));
 app.use('/webfonts', express.static(path.join(__dirname, 'node_modules/@fortawesome/fontawesome-free/webfonts'), { maxAge: 31557600000 }));
+
+/**
+* Added by me
+* To overide form methodOverride
+* Must be placed after: app.use(bodyParser.urlencoded())
+*/
+
+app.use(methodOverride(function (req, res) {
+  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+    // look in urlencoded POST bodies and delete it
+    const method = req.body._method
+    delete req.body._method
+    return method
+  }
+}));
+
+/**
+* Added by me
+*/
+const Travel = require('./models/Travel')
+app.use('/travels/:id', async (req, res, next) => {
+  if ((!res.locals.travel || res.locals.travel._id != req.params.id) && req.params.id != 'new') {
+    try {
+      const travel = await Travel.findById(req.params.id);
+      res.locals.travel = travel;
+      next();
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    next();
+  }
+});
+
+/**
+* Added by me
+*/
+getRates();
 
 /**
  * Primary app routes.
@@ -158,8 +204,13 @@ app.post('/account/password', passportConfig.isAuthenticated, userController.pos
 app.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);
 app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userController.getOauthUnlink);
 
-app.get('/travels/add', passportConfig.isAuthenticated, travelController.getNewTravel)
-app.post('/travels/add', passportConfig.isAuthenticated, travelController.postNewTravel);
+app.get('/travels', passportConfig.isAuthenticated, travelController.getTravels);
+app.get('/travels/new', passportConfig.isAuthenticated, travelController.getNewTravel);
+app.post('/travels/new', passportConfig.isAuthenticated, travelController.postNewTravel);
+app.get('/travels/:id', passportConfig.isAuthenticated, travelController.getTravel);
+app.delete('/travels/:id', passportConfig.isAuthenticated, travelController.deleteTravel);
+app.patch('/travels/:id', passportConfig.isAuthenticated, travelController.updateTravel);
+app.post('/travels/:id/expenses/new', passportConfig.isAuthenticated, expenseController.postNewExpense);
 
 /**
  * API examples routes.

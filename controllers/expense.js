@@ -58,20 +58,13 @@ exports.postNewExpense = async function  (req, res, next) {
 
   const invoiceCurrency = req.body.invoiceCurrency.toUpperCase();
   const rate = req.body.rate;
-  let currency = {};
+  // let currency = {};
   let invDate = moment(invoiceDate).format('YYYY-MM-DD');
-  currency[invDate] = {}
-  currency[invDate][invoiceCurrency] = Number(rate);
-  // currency[invDate] = {invoiceCurrency: Number(rate)}
-  const cur = currency[invDate];
-  // console.log('currency', currency);
-  // console.log('cur', cur);
-
-  const array = invDate;
-  // console.log(array);
-  const addToSet = {}
-  addToSet[array] = cur;
-  // console.log(addToSet);
+  // currency[invDate] = {}
+  // currency[invDate][invoiceCurrency] = Number(rate);
+  // const cur = currency[invDate];
+  let cur = {};
+  cur[invoiceCurrency] = Number(rate);
 
   if (req.body.expenseType != 'Mileage') {
     expense = new Expense ({

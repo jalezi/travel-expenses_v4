@@ -107,20 +107,19 @@ exports.getTravel = async function (req, res, next) {
     });
 
     expenses.forEach((expense, index, arr) => {
-      // console.log('expense',expense, '\n', 'index', index, '\n', 'arr', arr);
-      let x = expense.findRate((err, rate) => {
-        expense.rate = rate[expense.currency];
-        expense.rate = expense.rate.toFixed(2);
-      });
+      if (expense.type != 'Mileage') {
+        let x = expense.findRate((err, rate) => {
+          expense.rate = rate[expense.currency];
+          expense.rate = expense.rate.toFixed(2);
+        });
+      } else {
+        expense.rate = travel.perMileAmount;
+      }
     });
 
     if (!travel) {
       return next(new Error('Travel not found'))
     }
-
-    // const rates = await Rate.find({
-    //
-    // });
 
     res.locals.travel = travel;
     res.render('travels/travel', {

@@ -57,12 +57,8 @@ exports.postNewExpense = async function  (req, res, next) {
   const invoiceDate = new Date(req.body.invoiceDate);
 
   const invoiceCurrency = req.body.invoiceCurrency.toUpperCase();
-  const rate = req.body.rate;
-  // let currency = {};
   let invDate = moment(invoiceDate).format('YYYY-MM-DD');
-  // currency[invDate] = {}
-  // currency[invDate][invoiceCurrency] = Number(rate);
-  // const cur = currency[invDate];
+  const rate = req.body.rate;
   let cur = {};
   cur[invoiceCurrency] = Number(rate);
 
@@ -91,9 +87,7 @@ exports.postNewExpense = async function  (req, res, next) {
     });
   }
 
-  // console.log(res.locals.travel);
   try {
-
     const doc = await expense.save();
     const travel = await Travel.findByIdAndUpdate(res.locals.travel._id, {
       $addToSet: {
@@ -104,11 +98,15 @@ exports.postNewExpense = async function  (req, res, next) {
         return next(err);
       }
     });
-    await Travel.prototype.updateDateCurrenciesArray(res.locals.travel._id, invDate, cur, doc.amountConverted);
+    if (doc.type != 'Mileage') {
+      await Travel.prototype.updateDateCurrenciesArray(res.locals.travel._id, invDate, cur, doc.amountConverted);
+    } else {
+      console.log('try post mileage');
+    }
+
   } catch (err) {
     return next(err);
   }
-
 
   req.flash('success', {msg: 'Successfully added new expense!'});
   res.redirect(`/travels/${req.params.id}`);

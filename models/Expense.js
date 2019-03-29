@@ -45,11 +45,19 @@ const ExpenseSchema = new mongoose.Schema({
 ExpenseSchema.methods.findRate = async function(callback) {
   const invoiceDate = moment(this.date).format('YYYY-MM-DD');
   const currency = this.currency;
-  await mongoose.model('Travel').findOne({_id: this.travel}, (err, travel) => {
-    let dayCurrencies = travel.travelCurrencies[invoiceDate];
-    let rate = dayCurrencies.find(cur => cur[currency]);
-    callback(err, rate);
-  }).select({'travelCurrencies': 1, '_id': 0});
+  if (this.type != 'Mileage') {
+    await mongoose.model('Travel').findOne({_id: this.travel}, (err, travel) => {
+      let dayCurrencies = travel.travelCurrencies[invoiceDate];
+      let rate = dayCurrencies.find(cur => cur[currency]);
+      callback(err, rate);
+    }).select({'travelCurrencies': 1, '_id': 0});
+  } else {
+    await mongoose.model('Travel').findOne({_id: this.travel}, (err, travel) => {
+      let rate = travel.perMileAmount;
+      callback(err, rate);
+    }).select({'perMileAmount': 1, '_id': 0});
+  }
+
 }
 
 const Expense = mongoose.model('Expense', ExpenseSchema);

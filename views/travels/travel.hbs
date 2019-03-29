@@ -89,7 +89,7 @@
         <td class="text-center">{{formatDate this.date}}</td>
 
         <td class="text-right">{{this.amount}}</td>
-        <td class="text-right">{{this.currency}}</td>
+        <td class="text-center">{{this.currency}} {{this.unit}}</td>
         <td class="text-right">{{this.rate}}</td>
         <td class="text-right">{{this.amountConverted}}</td>
       {{/each}}
@@ -98,15 +98,28 @@
 </table>
 
 <script >
-
+function calcAmount(rate, amount, currency=true) {
+  let result = 0;
+  if (currency) {
+    result = (amount / rate).toFixed(2);
+    return result;
+  } else {
+    result = (amount * rate).toFixed(2);
+    return result;
+  }
+}
 
   $(document).ready(() => {
     invoiceUnit.onchange = () => {
         document.getElementById('amountDistance2').readOnly = !document.getElementById('amountDistance2').readOnly;
         document.getElementById('amountDistance').readOnly = !document.getElementById('amountDistance').readOnly;
         if (!document.getElementById('amountDistance2').readOnly) {
+          amountDistance2.value = amountDistance.value * {{constants.MILES_TO_KILOMETERS}};
+          amountDistance2.value = parseFloat($('#amountDistance2').val()).toFixed(2);
           $('#row3Mileage').show();
         } else {
+          amountDistance.value =amountDistance2.value * {{constants.KILOMETERS_TO_MILES}};
+          amountDistance.value = parseFloat($('#amountDistance').val()).toFixed(2)
           $('#row3Mileage').hide();
         }
     }
@@ -143,6 +156,12 @@
             // console.log("something wrong");
             throw new Error('Something went wrong', err);
           }
+        } else {
+          rate.value = 0;
+          amountConverted.value = 0.00;
+          rate.value = parseFloat($('#rate').val()).toFixed(2);
+          amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
+
         }
     }
   })

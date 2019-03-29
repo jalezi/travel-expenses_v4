@@ -90,6 +90,12 @@ exports.postNewTravel = async function(req, res, next) {
 
 exports.getTravel = async function (req, res, next) {
   const id = req.params.id;
+  // console.log('req.body', req.body);
+  // console.log('res.body', res.body);
+  // console.log('req.locals', req.locals);
+  // console.log('res.locals', res.locals);
+  // console.log('req', req);
+  // console.log('res', res);
 
   if (!ObjectId.isValid(id)) {
     return next(new Error('Not valid Object Id'));

@@ -174,10 +174,19 @@ app.use('/travels/:id', async (req, res, next) => {
     try {
       const travel = await Travel.findById(req.params.id);
       // console.log('travel', travel);
-      const rates = await Rate.findRatesOnDate(travel)
+      let rates = await Rate.findRatesOnDate(travel, (err, result) => {
+
+      });
+
+      if (rates.length === 0) {
+        rates = await Rate.findRateBeforeOrAfterDate(travel, (err, result) => {
+
+        })
+      }
       // console.log('rates', rates);
       res.locals.travel = travel;
       res.locals.rates = rates;
+      // console.log('app.use', res.locals.rates);
       next();
     } catch (err) {
       next(err);

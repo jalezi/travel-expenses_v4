@@ -76,7 +76,7 @@
       <th scope="col">Amount</th>
       <th scope="col">Cur/Unit</th>
       <th scope="col">Rate</th>
-      <th scope="col">{{user.homeCurrency}}</th>
+      <th scope="col">{{travel.homeCurrency}}</th>
     </tr>
   </thead>
 
@@ -98,16 +98,16 @@
 </table>
 
 <script >
-function calcAmount(rate, amount, currency=true) {
-  let result = 0;
-  if (currency) {
-    result = (amount / rate).toFixed(2);
-    return result;
-  } else {
-    result = (amount * rate).toFixed(2);
-    return result;
+  function calcAmount(rate, amount, currency=true) {
+    let result = 0;
+    if (currency) {
+      result = (amount / rate).toFixed(2);
+      return result;
+    } else {
+      result = (amount * rate).toFixed(2);
+      return result;
+    }
   }
-}
 
   $(document).ready(() => {
     invoiceUnit.onchange = () => {
@@ -135,33 +135,60 @@ function calcAmount(rate, amount, currency=true) {
       }
     }
 
+    invoiceCurrency.onfocusout = () => {
+      console.log(this.arguments);
+      if (rate.value != 0) {
+        amountConverted.value = (amount.value / rate.value).toFixed(2);
+      }
+
+    }
+
       // to be moved somewhere else because of api key
     invoiceCurrency.onchange = async function () {
+        invoiceCurrency.value = invoiceCurrency.value.toUpperCase();
         if (invoiceCurrency.value.length === 3) {
-            try {
-              await $.get("http://data.fixer.io/api/latest?access_key=de6c63dc42df031c4ecd8fe60abd3e34", function(response)  {
-                const from = response.rates[invoiceCurrency.value];
-                if (from != "undefined") {
-                  const home = response.rates['{{user.homeCurrency}}'];
-                  const rateValue = (from / home);
-                  if (rateValue != "") {
-                    rate.value = rateValue;
-                    rate.value = parseFloat($('#rate').val()).toFixed(2)
-                  }
-                } else {
-                  throw new Error(`No rate for ${invoiceCurrency.value}`)
-                }
+          try {
+            const date = new Date(invoiceDate.value).toISOString();
+            const rates = JSON.parse('{{{rates}}}')
+            let rts = rates.find((r) => {
+              return r.date === date;
             });
+
+            if (!rts) {
+              rts =rates[0];
+            }
+
+            const homeCur = rts.rates['{{travel.homeCurrency}}'];
+            const converted = 1 / homeCur;
+
+            const invCur = invoiceCurrency.value.toUpperCase();
+            // const toEuro = rts.rates[invoiceCurrency.value];
+
+            if (isNaN(rts.rates[invCur])) {
+              throw new Error('No such currency exist!')
+            } else {
+              rate.value = rts.rates[invCur] * converted;
+              rate.value = parseFloat($('#rate').val()).toFixed(2);
+              rate.readOnly = true;
+
+            }
+
+
           } catch (err) {
-            // console.log("something wrong");
-            throw new Error('Something went wrong', err);
+            rate.value = 0;
+            amountConverted.value = 0.00;
+            rate.value = parseFloat($('#rate').val()).toFixed(2);
+            amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
+            rate.readOnly = false;
+            invoiceCurrency.value = '';
+            throw new Error(err);
           }
         } else {
           rate.value = 0;
           amountConverted.value = 0.00;
           rate.value = parseFloat($('#rate').val()).toFixed(2);
           amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
-
+          rate.readOnly = false;
         }
     }
   })

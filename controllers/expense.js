@@ -68,7 +68,7 @@ exports.postNewExpense = async function  (req, res, next) {
       type: req.body.expenseType,
       description: req.body.expenseDescription,
       date: invoiceDate,
-      currency: req.body.invoiceCurrency,
+      currency: req.body.invoiceCurrency.toUpperCase(),
       amount: req.body.amount,
       amountConverted: req.body.amountConverted,
       _user: req.user._id
@@ -101,7 +101,9 @@ exports.postNewExpense = async function  (req, res, next) {
     if (doc.type != 'Mileage') {
       await Travel.prototype.updateDateCurrenciesArray(res.locals.travel._id, invDate, cur, doc.amountConverted);
     } else {
-      console.log('try post mileage');
+      const result = Number(travel.total) + Number(doc.amountConverted);
+      travel.total = result;
+      travel.save();
     }
 
   } catch (err) {

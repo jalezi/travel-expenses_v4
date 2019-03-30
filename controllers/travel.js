@@ -93,7 +93,7 @@ exports.getTravel = async function (req, res, next) {
   // console.log('req.body', req.body);
   // console.log('res.body', res.body);
   // console.log('req.locals', req.locals);
-  // console.log('res.locals', res.locals);
+  // console.log('res.locals', Date(res.locals.rates[0].date));
   // console.log('req', req);
   // console.log('res', res);
 
@@ -105,12 +105,12 @@ exports.getTravel = async function (req, res, next) {
     const travel = await Travel.findOne({
       _id: id,
       _user: req.user._id
-    });
-
-    const expenses = await Expense.find({
-      _id: {$in: travel.expenses},
-      _user: req.user._id
-    });
+    }).populate('expenses');
+    const expenses = travel.expenses;
+    // const expenses = await Expense.find({
+    //   _id: {$in: travel.expenses},
+    //   _user: req.user._id
+    // });
 
     expenses.forEach((expense, index, arr) => {
       if (expense.type != 'Mileage') {
@@ -134,7 +134,8 @@ exports.getTravel = async function (req, res, next) {
       travelCurrencies: travel.travelCurrencies,
       expenses,
       expenseTypes,
-      constants
+      constants,
+      rates: JSON.stringify(res.locals.rates)
     });
   } catch (err) {
     return next(err);

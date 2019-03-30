@@ -29,7 +29,7 @@ $(document).ready(() => {
       $('#row2Mileage').show();
       $('#row2noMileage').hide();
 
-      console.log(invoiceUnit.selectedIndex);
+      // console.log(invoiceUnit.selectedIndex);
       if (invoiceUnit.selectedIndex === 0) {
         $('#row3Mileage').hide();
       } else {
@@ -111,5 +111,7 @@ $(document).ready(() => {
       amountDistance2.value = parseFloat($('#amountDistance2').val()).toFixed(2);
     }
   }
+
+
 
 });

@@ -60,7 +60,20 @@ exports.postNewExpense = async function  (req, res, next) {
   let invDate = moment(invoiceDate).format('YYYY-MM-DD');
   const rate = req.body.rate;
   let cur = {};
+
   cur[invoiceCurrency] = Number(rate);
+  let curRate = {};
+  await Currency.find({date: invoiceDate, rate: cur}, async (err, item) => {
+    if (item.length === 1) {
+      curRate = item[0];
+    } else {
+      curRate = new Currency({
+        date: invoiceDate,
+        rate: cur
+      })
+      await curRate.save();
+    }
+  })
 
   if (req.body.expenseType != 'Mileage') {
     expense = new Expense ({
@@ -69,6 +82,7 @@ exports.postNewExpense = async function  (req, res, next) {
       description: req.body.expenseDescription,
       date: invoiceDate,
       currency: req.body.invoiceCurrency.toUpperCase(),
+      curRate,
       amount: req.body.amount,
       amountConverted: req.body.amountConverted,
       _user: req.user._id

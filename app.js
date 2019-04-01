@@ -172,8 +172,10 @@ app.use(methodOverride(function (req, res) {
 app.use('/travels/:id', async (req, res, next) => {
   if ((!res.locals.travel || res.locals.travel._id != req.params.id) && req.params.id != 'new') {
     try {
-      const travel = await Travel.findById(req.params.id).populate('expenses');
-      // console.log('travel', travel);
+      const travel = await Travel.findById(req.params.id).populate({
+        path: 'expenses',
+        populate: {path: 'curRate'}
+      });
       let rates = await Rate.findRatesOnDate(travel, (err, result) => {
 
       });

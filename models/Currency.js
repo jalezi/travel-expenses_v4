@@ -1,16 +1,9 @@
 const mongoose = require('mongoose');
 
 const CurrencySchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  rate: {
-    type: mongoose.Decimal128,
-    default: 1
-  }
+  date: Date,
+  rate: Object
 },  {
-  useNestedStrict: true,
   timestamps: true
  });
 

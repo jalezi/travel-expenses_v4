@@ -99,22 +99,12 @@ exports.getTravel = async function (req, res, next) {
   const travel = res.locals.travel;
   // updateCurrenciesArray(travel);
   try {
-  //   const travel = await Travel.findOne({
-  //     _id: id,
-  //     _user: req.user._id
-  //   }).populate('expenses');
     const expenses = travel.expenses;
-    // const expenses = await Expense.find({
-    //   _id: {$in: travel.expenses},
-    //   _user: req.user._id
-    // });
 
     expenses.forEach((expense, index, arr) => {
       if (expense.type != 'Mileage') {
-        let x = expense.findRate((err, rate) => {
-          expense.rate = rate[expense.currency];
-          expense.rate = expense.rate.toFixed(2);
-        });
+        const rate= Object.values(expense.curRate.rate)[0];
+        expense.rate = rate.toFixed(2);
       } else {
         expense.rate = travel.perMileAmount;
       }
@@ -124,7 +114,6 @@ exports.getTravel = async function (req, res, next) {
       return next(new Error('Travel not found'))
     }
 
-    // res.locals.travel = travel;
     res.render('travels/travel', {
       title: 'Travel',
       travel,

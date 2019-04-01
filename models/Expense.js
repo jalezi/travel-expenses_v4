@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const moment = require('moment');
 const {User} = require('../models/User');
 const {Travel} = require('../models/Travel');
+const {Currency} = require('../models/Currency');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const ExpenseSchema = new mongoose.Schema({
@@ -24,6 +25,10 @@ const ExpenseSchema = new mongoose.Schema({
   },
   currency: {
     type: String
+  },
+  curRate: {
+    type: ObjectId,
+    ref: 'Currency'
   },
   unit: {
     type: String

@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 
 const User = require('../models/User');
 const Expense = require('../models/Expense');
-const Currency = require('../models/Currency');
-const CurrencySchema = Currency.schema.paths;
+// const Currency = require('../models/Currency');
+// const CurrencySchema = Currency.schema.paths;
 
 const ObjectId = mongoose.Schema.Types.ObjectId;
 

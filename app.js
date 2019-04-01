@@ -172,7 +172,7 @@ app.use(methodOverride(function (req, res) {
 app.use('/travels/:id', async (req, res, next) => {
   if ((!res.locals.travel || res.locals.travel._id != req.params.id) && req.params.id != 'new') {
     try {
-      const travel = await Travel.findById(req.params.id);
+      const travel = await Travel.findById(req.params.id).populate('expenses');
       // console.log('travel', travel);
       let rates = await Rate.findRatesOnDate(travel, (err, result) => {
 

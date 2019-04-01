@@ -11,6 +11,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const {expenseTypes} = require('../lib/globals');
 const constants = require('../lib/constants');
 const createCurrenciesArray = require('../utils/createCurrenciesArray');
+const updateCurrenciesArray  = require('../utils/updateCurrenciesArray');
 
 // get all travels
 exports.getTravels = async function(req, res) {
@@ -90,22 +91,18 @@ exports.postNewTravel = async function(req, res, next) {
 
 exports.getTravel = async function (req, res, next) {
   const id = req.params.id;
-  // console.log('req.body', req.body);
-  // console.log('res.body', res.body);
-  // console.log('req.locals', req.locals);
-  // console.log('res.locals', Date(res.locals.rates[0].date));
-  // console.log('req', req);
-  // console.log('res', res);
 
   if (!ObjectId.isValid(id)) {
     return next(new Error('Not valid Object Id'));
   }
 
+  const travel = res.locals.travel;
+  // updateCurrenciesArray(travel);
   try {
-    const travel = await Travel.findOne({
-      _id: id,
-      _user: req.user._id
-    }).populate('expenses');
+  //   const travel = await Travel.findOne({
+  //     _id: id,
+  //     _user: req.user._id
+  //   }).populate('expenses');
     const expenses = travel.expenses;
     // const expenses = await Expense.find({
     //   _id: {$in: travel.expenses},
@@ -127,7 +124,7 @@ exports.getTravel = async function (req, res, next) {
       return next(new Error('Travel not found'))
     }
 
-    res.locals.travel = travel;
+    // res.locals.travel = travel;
     res.render('travels/travel', {
       title: 'Travel',
       travel,
@@ -177,7 +174,7 @@ exports.deleteTravel = async function (req, res, next) {
   }
 };
 
-exports.updateTravel = async function (req, res) {
+exports.updateTravel = async function (req, res, next) {
 
   req.assert('description', 'Description is empty or to long (max 120 characters)!').isLength({min: 1, max: 60});
   req.assert('homeCurrency', 'Home currency should have exactly 3 characters!').isLength({min: 3, max: 3});
@@ -212,13 +209,14 @@ exports.updateTravel = async function (req, res) {
   }
 
   try {
-    const travel = await Travel.findOneAndUpdate({_id: id, user: req.user.id}, {$set: body}, {new: true});
+    const travel = await Travel.findOneAndUpdate({_id: id, _user: req.user.id}, {$set: body}, {new: true});
 
-      if (!travel) {
-        return next(new Error('Travel not found'));
-      }
+    if (!travel) {
+      return next(new Error('Travel not found'));
+    }
 
-      res.redirect('/travels');
+    req.flash('success', {msg: 'Travel successfully updated!'});
+    res.redirect('/travels');
   } catch (err) {
     return next(err);
   }

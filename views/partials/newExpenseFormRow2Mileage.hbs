@@ -8,7 +8,7 @@
   </div>
 
   <div class="col-md-3">
-    <label class="col-form-label font-weight-bold" id="labelPerMileAmount" for="travelPerMileAmount">{{user.homeCurrency}}/{{setUnit user.homeDistance}}</label>
+    <label class="col-form-label font-weight-bold" id="labelPerMileAmount" for="travelPerMileAmount">{{travel.homeCurrency}}/{{setUnit user.homeDistance}}</label>
     <input class="form-control text-right" type="number" id="travelPerMileAmount" value={{travel.perMileAmount}} name="travelPerMileAmount" step=0.01 min=0  placeholder="0.00" autofocus="autofocus" autocomplete="travelPerMileAmount" required="required" readonly>
   </div>
 
@@ -20,7 +20,7 @@
   <div class="col-md-4 input-group">
     <label class="input-group col-form-label font-weight-bold" for="amountConverted2">Converted amount</label>
     <div class="input-group-prepend">
-      <span class="input-group-text" id="currency-addon">{{user.homeCurrency}}</span>
+      <span class="input-group-text" id="currency-addon">{{travel.homeCurrency}}</span>
     </div>
     <input class="form-control text-right input-group" type="number" id="amountConverted2" name="amountConverted2" value="0.00" placeholder="0.00" autofocus="autofocus" autocomplete="amountConverted2" required="required" readonly>
   </div>

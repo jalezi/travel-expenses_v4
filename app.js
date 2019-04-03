@@ -19,11 +19,16 @@ const expressValidator = require('express-validator');
 const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const multer = require('multer');
-const hbsHelpers = require('./utils/hbsHelpers/hbsHelpers');
-const getRates = require('./utils/getRates');
+
 
 const expressHbs = require('express-hbs');
 const methodOverride = require('method-override')
+
+const hbsHelpers = require('./utils/hbsHelpers/hbsHelpers');
+const getRates = require('./utils/getRates');
+
+const Travel = require('./models/Travel');
+const Rate = require('./models/Rate');
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
@@ -163,12 +168,31 @@ app.use(methodOverride(function (req, res) {
 /**
 * Added by me
 */
-const Travel = require('./models/Travel')
+
 app.use('/travels/:id', async (req, res, next) => {
   if ((!res.locals.travel || res.locals.travel._id != req.params.id) && req.params.id != 'new') {
     try {
-      const travel = await Travel.findById(req.params.id);
+      const travel = await Travel.findById(req.params.id).populate({
+        path: 'expenses',
+        populate: {path: 'curRate'}
+      });
+      let rates = await Rate.findRatesOnDate(travel, (err, result) => {
+        if (err) {
+          throw new Error(err);
+        }
+      });
+
+      if (rates.length === 0) {
+        rates = await Rate.findRateBeforeOrAfterDate(travel, (err, result) => {
+          if (err) {
+            throw new Error(err);
+          }
+        })
+      }
+      // console.log('rates', rates);
       res.locals.travel = travel;
+      res.locals.rates = rates;
+      // console.log('app.use', res.locals.rates);
       next();
     } catch (err) {
       next(err);

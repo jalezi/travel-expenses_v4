@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 
 const User = require('../models/User');
 const Expense = require('../models/Expense');
-const Currency = require('../models/Currency');
-const CurrencySchema = Currency.schema.paths;
+// const Currency = require('../models/Currency');
+// const CurrencySchema = Currency.schema.paths;
 
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
@@ -40,33 +40,19 @@ const TravelSchema = new mongoose.Schema({
   total: {
     type: mongoose.Decimal128,
     default: 0.00
-  },
-  travelCurrencies: Object
+  }
 }, {
   useNestedStrict: true,
   timestamps: true });
 
+TravelSchema.methods.updateTotal = function  (cb) {
+  let total = 0;
+  this.expenses.forEach((expense) => {
+    total = total + Number(expense.amountConverted);
+  });
+  return total;
+}
+
 const Travel = mongoose.model('Travel', TravelSchema);
-
-Travel.prototype.updateDateCurrenciesArray = function (userId, date, content, content2) {
-  let filter = {"_id": userId};
-  let update = {
-    "$addToSet": {},
-    "$inc": {}
-  };
-  let setter = {};
-  setter['travelCurrencies.' + date] = content;
-  update['$addToSet'] = setter;
-  let setter2 = {};
-  setter2['total'] = content2;
-  update['$inc'] = setter2;
-
-  return this.collection.bulkWrite([
-    { "updateOne": {
-        "filter": filter,
-        "update": update
-    }}
-]);
-};
 
 module.exports = Travel;

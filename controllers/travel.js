@@ -10,7 +10,8 @@ const ObjectId = mongoose.Types.ObjectId;
 
 const {expenseTypes} = require('../lib/globals');
 const constants = require('../lib/constants');
-const createCurrenciesArray = require('../utils/createCurrenciesArray');
+
+const updateExpensesToMatchTravelRangeDates  = require('../utils/updateExpensesToMatchTravelRangeDates');
 
 // get all travels
 exports.getTravels = async function(req, res) {
@@ -57,16 +58,13 @@ exports.postNewTravel = async function(req, res, next) {
 
   const dateFrom = new Date(req.body.dateFrom);
   const dateTo = new Date(req.body.dateTo);
-  const travelCurrencies = {
-    days: createCurrenciesArray(moment(req.body.dateFrom), moment(req.body.dateTo))};
   const travel = new Travel({
     _user: req.user._id,
     description: req.body.description.replace(/\s+/g, " ").trim(),
     dateFrom,
     dateTo,
     homeCurrency: req.body.homeCurrency,
-    perMileAmount: req.body.perMileAmount,
-    travelCurrencies: travelCurrencies.days
+    perMileAmount: req.body.perMileAmount
   });
 
   try {
@@ -95,41 +93,32 @@ exports.getTravel = async function (req, res, next) {
     return next(new Error('Not valid Object Id'));
   }
 
-  try {
-    const travel = await Travel.findOne({
-      _id: id,
-      _user: req.user._id
-    });
+  const travel = res.locals.travel;
 
-    const expenses = await Expense.find({
-      _id: {$in: travel.expenses},
-      _user: req.user._id
-    });
+
+  try {
+    const expenses = travel.expenses;
 
     expenses.forEach((expense, index, arr) => {
-      // console.log('expense',expense, '\n', 'index', index, '\n', 'arr', arr);
-      let x = expense.findRate((err, rate) => {
-        expense.rate = rate[expense.currency];
-        expense.rate = expense.rate.toFixed(2);
-      });
+      if (expense.type != 'Mileage') {
+        const rate= Object.values(expense.curRate.rate)[0];
+        expense.rate = rate.toFixed(2);
+      } else {
+        expense.rate = travel.perMileAmount;
+      }
     });
 
     if (!travel) {
       return next(new Error('Travel not found'))
     }
 
-    // const rates = await Rate.find({
-    //
-    // });
-
-    res.locals.travel = travel;
     res.render('travels/travel', {
       title: 'Travel',
       travel,
-      travelCurrencies: travel.travelCurrencies,
       expenses,
       expenseTypes,
-      constants
+      constants,
+      rates: JSON.stringify(res.locals.rates)
     });
   } catch (err) {
     return next(err);
@@ -171,7 +160,7 @@ exports.deleteTravel = async function (req, res, next) {
   }
 };
 
-exports.updateTravel = async function (req, res) {
+exports.updateTravel = async function (req, res, next) {
 
   req.assert('description', 'Description is empty or to long (max 120 characters)!').isLength({min: 1, max: 60});
   req.assert('homeCurrency', 'Home currency should have exactly 3 characters!').isLength({min: 3, max: 3});
@@ -206,13 +195,27 @@ exports.updateTravel = async function (req, res) {
   }
 
   try {
-    const travel = await Travel.findOneAndUpdate({_id: id, user: req.user.id}, {$set: body}, {new: true});
+    let travel = await Travel.findOneAndUpdate({_id: id, _user: req.user.id}, {$set: body}, {new: true}).populate({
+      path: 'expenses',
+      populate: {path: 'curRate'}
+    });
 
-      if (!travel) {
-        return next(new Error('Travel not found'));
-      }
+    if (!travel) {
+      return next(new Error('Travel not found'));
+    }
 
-      res.redirect('/travels');
+    await updateExpensesToMatchTravelRangeDates(travel, res.locals.rates);
+    await travel.save();
+    travel = await Travel.findOne({_id: travel._id, _user: req.user.id}).populate({
+      path: 'expenses',
+      populate: {path: 'curRate'}
+    });
+    const total = await travel.updateTotal();
+    travel.total = parseFloat(total).toFixed(2);
+    await travel.save();
+
+    req.flash('success', {msg: 'Travel successfully updated!'});
+    res.redirect('/travels');
   } catch (err) {
     return next(err);
   }

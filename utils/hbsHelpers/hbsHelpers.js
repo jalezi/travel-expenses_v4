@@ -49,7 +49,7 @@ expressHbs.registerHelper ("setChecked", function (value, currentValue) {
  })
 
  expressHbs.registerHelper('setValue', (value) => {
-   console.log(value);
+   // console.log(value);
    return `value=${value}`;
  })
 
@@ -107,7 +107,7 @@ expressHbs.registerHelper('toNumber' , (valueAsString) => {
 })
 
 expressHbs.registerHelper('getRate', (travelCurrencies, currency) => {
-  console.log(travelCurrencies, currency);
+  // console.log(travelCurrencies, currency);
   const item = travelCurrencies.find((item) => {
     // console.log(cur);
     return item.currency.name === currency;

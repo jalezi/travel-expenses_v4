@@ -7,7 +7,7 @@ const Rate = require('../models/Rate');
 const dataFixier = async () => {
   try {
     const response = await axios.get(`http://data.fixer.io/api/latest?access_key=${process.env.DATA_FIXER_IO}`);
-    console.log(response.data);
+    // console.log(response.data);
     const data = new Rate({
       success: response.data.success,
       timestamp: response.data.timestamp,
@@ -27,11 +27,11 @@ module.exports = async () => {
     const rates = await Rate.find({date: today});
 
     if (rates.length === 0) {
-      console.log('rates.length=', rates.length);
+      // console.log('rates.length=', rates.length);
       dataFixier();
     }
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     throw new Error(err);
   }
 

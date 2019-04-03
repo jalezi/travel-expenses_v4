@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const moment = require('moment');
 const {User} = require('../models/User');
 const {Travel} = require('../models/Travel');
+const {Currency} = require('../models/Currency');
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const ExpenseSchema = new mongoose.Schema({
@@ -25,6 +26,10 @@ const ExpenseSchema = new mongoose.Schema({
   currency: {
     type: String
   },
+  curRate: {
+    type: ObjectId,
+    ref: 'Currency'
+  },
   unit: {
     type: String
   },
@@ -42,15 +47,23 @@ const ExpenseSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-ExpenseSchema.methods.findRate = async function(callback) {
-  const invoiceDate = moment(this.date).format('YYYY-MM-DD');
-  const currency = this.currency;
-  await mongoose.model('Travel').findOne({_id: this.travel}, (err, travel) => {
-    let dayCurrencies = travel.travelCurrencies[invoiceDate];
-    let rate = dayCurrencies.find(cur => cur[currency]);
-    callback(err, rate);
-  }).select({'travelCurrencies': 1, '_id': 0});
-}
+// ExpenseSchema.methods.findRate = async function(callback) {
+//   const invoiceDate = moment(this.date).format('YYYY-MM-DD');
+//   const currency = this.currency;
+//   if (this.type != 'Mileage') {
+//     await mongoose.model('Travel').findOne({_id: this.travel}, (err, travel) => {
+//       let dayCurrencies = travel.travelCurrencies[invoiceDate];
+//       let rate = dayCurrencies.find(cur => cur[currency]);
+//       callback(err, rate);
+//     }).select({'travelCurrencies': 1, '_id': 0});
+//   } else {
+//     await mongoose.model('Travel').findOne({_id: this.travel}, (err, travel) => {
+//       let rate = travel.perMileAmount;
+//       callback(err, rate);
+//     }).select({'perMileAmount': 1, '_id': 0});
+//   }
+//
+// }
 
 const Expense = mongoose.model('Expense', ExpenseSchema);
 

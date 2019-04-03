@@ -63,11 +63,12 @@ exports.postNewExpense = async function  (req, res, next) {
 
   cur[invoiceCurrency] = Number(rate);
   let curRate = {};
-  await Currency.find({date: invoiceDate, rate: cur}, async (err, item) => {
+  await Currency.find({base: res.locals.travel.homeCurrency, date: invoiceDate, rate: cur}, async (err, item) => {
     if (item.length === 1) {
       curRate = item[0];
     } else {
       curRate = new Currency({
+        base: res.locals.travel.homeCurrency,
         date: invoiceDate,
         rate: cur
       })

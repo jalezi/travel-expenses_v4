@@ -1,11 +1,21 @@
 const mongoose = require('mongoose');
 
 const CurrencySchema = new mongoose.Schema({
-  date: Date,
-  rate: Object
-},  {
+  base: {
+    type: String,
+    required: true
+  },
+  date: {
+    type: Date,
+    required: true
+  },
+  rate: {
+    type: Object,
+    required: true
+  }
+}, {
   timestamps: true
- });
+});
 
 const Currency = mongoose.model('Currency', CurrencySchema);
 

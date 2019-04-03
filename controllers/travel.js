@@ -11,7 +11,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const {expenseTypes} = require('../lib/globals');
 const constants = require('../lib/constants');
 const createCurrenciesArray = require('../utils/createCurrenciesArray');
-const updateCurrenciesArray  = require('../utils/updateCurrenciesArray');
+const updateExpensesToMatchTravelRangeDates  = require('../utils/updateExpensesToMatchTravelRangeDates');
 
 // get all travels
 exports.getTravels = async function(req, res) {
@@ -97,7 +97,8 @@ exports.getTravel = async function (req, res, next) {
   }
 
   const travel = res.locals.travel;
-  // updateCurrenciesArray(travel);
+
+
   try {
     const expenses = travel.expenses;
 
@@ -198,11 +199,17 @@ exports.updateTravel = async function (req, res, next) {
   }
 
   try {
-    const travel = await Travel.findOneAndUpdate({_id: id, _user: req.user.id}, {$set: body}, {new: true});
+    const travel = await Travel.findOneAndUpdate({_id: id, _user: req.user.id}, {$set: body}, {new: true}).populate({
+      path: 'expenses',
+      populate: {path: 'curRate'}
+    });
 
     if (!travel) {
       return next(new Error('Travel not found'));
     }
+
+    console.log(travel.dateFrom.toISOString());
+    await updateExpensesToMatchTravelRangeDates(travel, res.locals.rates);
 
     req.flash('success', {msg: 'Travel successfully updated!'});
     res.redirect('/travels');

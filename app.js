@@ -177,12 +177,16 @@ app.use('/travels/:id', async (req, res, next) => {
         populate: {path: 'curRate'}
       });
       let rates = await Rate.findRatesOnDate(travel, (err, result) => {
-
+        if (err) {
+          throw new Error(err);
+        }
       });
 
       if (rates.length === 0) {
         rates = await Rate.findRateBeforeOrAfterDate(travel, (err, result) => {
-
+          if (err) {
+            throw new Error(err);
+          }
         })
       }
       // console.log('rates', rates);

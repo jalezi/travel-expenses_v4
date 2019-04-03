@@ -56,27 +56,48 @@ exports.postNewExpense = async function  (req, res, next) {
   let expense = {};
   const invoiceDate = new Date(req.body.invoiceDate);
 
+
   const invoiceCurrency = req.body.invoiceCurrency.toUpperCase();
   let invDate = moment(invoiceDate).format('YYYY-MM-DD');
-  const rate = req.body.rate;
-  let cur = {};
-
-  cur[invoiceCurrency] = Number(rate);
-  let curRate = {};
-  await Currency.find({base: res.locals.travel.homeCurrency, date: invoiceDate, rate: cur}, async (err, item) => {
-    if (item.length === 1) {
-      curRate = item[0];
-    } else {
-      curRate = new Currency({
-        base: res.locals.travel.homeCurrency,
-        date: invoiceDate,
-        rate: cur
-      })
-      await curRate.save();
-    }
-  })
+  // const rate = req.body.rate;
+  // let cur = {};
+  //
+  // cur[invoiceCurrency] = Number(rate);
+  // let curRate = {};
+  // await Currency.find({base: res.locals.travel.homeCurrency, date: invoiceDate, rate: cur}, async (err, item) => {
+  //   if (item.length === 1) {
+  //     curRate = item[0];
+  //   } else {
+  //     curRate = new Currency({
+  //       base: res.locals.travel.homeCurrency,
+  //       date: invoiceDate,
+  //       rate: cur
+  //     })
+  //     await curRate.save();
+  //   }
+  // });
 
   if (req.body.expenseType != 'Mileage') {
+    const invoiceCurrency = req.body.invoiceCurrency.toUpperCase();
+    let invDate = moment(invoiceDate).format('YYYY-MM-DD');
+    const rate = req.body.rate;
+    let cur = {};
+
+    cur[invoiceCurrency] = Number(rate);
+    let curRate = {};
+    await Currency.find({base: res.locals.travel.homeCurrency, date: invoiceDate, rate: cur}, async (err, item) => {
+      if (item.length === 1) {
+        curRate = item[0];
+      } else {
+        curRate = new Currency({
+          base: res.locals.travel.homeCurrency,
+          date: invoiceDate,
+          rate: cur
+        })
+        await curRate.save();
+      }
+    });
+
     expense = new Expense ({
       travel: req.params.id,
       type: req.body.expenseType,
@@ -114,10 +135,13 @@ exports.postNewExpense = async function  (req, res, next) {
       }
     });
     if (doc.type != 'Mileage') {
-      await Travel.prototype.updateDateCurrenciesArray(res.locals.travel._id, invDate, cur, doc.amountConverted);
-    } else {
       const result = Number(travel.total) + Number(doc.amountConverted);
-      travel.total = result;
+      travel.total = result.toFixed(2);
+      travel.save();
+    } else {
+
+      const result = Number(travel.total) + Number(doc.amountConverted);
+      travel.total = result.toFixed(2);
       travel.save();
     }
 

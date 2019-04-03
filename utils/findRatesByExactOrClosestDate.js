@@ -6,7 +6,6 @@ module.exports = async (date = new Date()) => {
       return items;
     });
     if (exactDate.length === 1) {
-      console.log('Find exact date');
       return exactDate[0];
     }
 

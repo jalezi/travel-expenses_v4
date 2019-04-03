@@ -6,10 +6,10 @@
       <div class="col-md-7"><input class="form-control" id="description" type="description" value="{{travel.description}}" name="description" placeholder="Description" autofocus="autofocus" autocomplete="description" required="required" /></div>
     </div>
     <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="dateFrom">Date from</label>
-      <div class="col-md-4"><input class="form-control" id="dateFrom" type="date" value={{formatDate travel.dateFrom}} name="dateFrom" placeholder="" autocomplete="dateFrom" required="required" /></div>
+      <div class="col-md-4"><input class="form-control" id="dateFrom" type="date" min="2015-01-01" max={{formatDate}} value={{formatDate travel.dateFrom}} name="dateFrom" placeholder="" autocomplete="dateFrom" required="required" /></div>
     </div>
     <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="dateTo">Date to</label>
-      <div class="col-md-4"><input class="form-control" id="dateTo" type="date"  value={{formatDate travel.dateTo}} name="dateTo" placeholder="" autocomplete="dateTo" required="required" /></div>
+      <div class="col-md-4"><input class="form-control" id="dateTo" type="date"  min={{formatDate travel.dateFrom}} max={{formatDate}} value={{formatDate travel.dateTo}} name="dateTo" placeholder="" autocomplete="dateTo" required="required" /></div>
     </div>
     <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="homeCurrency">Home currency</label>
       <div class="col-md-2"><input class="form-control" id="homeCurrency" type="homeCurrency" value="{{travel.homeCurrency}}" name="homeCurrency" placeholder="USD" autocomplete="homeCurrency" required="required" readonly/></div>

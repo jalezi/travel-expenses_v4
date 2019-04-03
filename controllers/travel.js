@@ -10,7 +10,7 @@ const ObjectId = mongoose.Types.ObjectId;
 
 const {expenseTypes} = require('../lib/globals');
 const constants = require('../lib/constants');
-const createCurrenciesArray = require('../utils/createCurrenciesArray');
+
 const updateExpensesToMatchTravelRangeDates  = require('../utils/updateExpensesToMatchTravelRangeDates');
 
 // get all travels
@@ -58,16 +58,13 @@ exports.postNewTravel = async function(req, res, next) {
 
   const dateFrom = new Date(req.body.dateFrom);
   const dateTo = new Date(req.body.dateTo);
-  const travelCurrencies = {
-    days: createCurrenciesArray(moment(req.body.dateFrom), moment(req.body.dateTo))};
   const travel = new Travel({
     _user: req.user._id,
     description: req.body.description.replace(/\s+/g, " ").trim(),
     dateFrom,
     dateTo,
     homeCurrency: req.body.homeCurrency,
-    perMileAmount: req.body.perMileAmount,
-    travelCurrencies: travelCurrencies.days
+    perMileAmount: req.body.perMileAmount
   });
 
   try {
@@ -118,7 +115,6 @@ exports.getTravel = async function (req, res, next) {
     res.render('travels/travel', {
       title: 'Travel',
       travel,
-      travelCurrencies: travel.travelCurrencies,
       expenses,
       expenseTypes,
       constants,
@@ -199,7 +195,7 @@ exports.updateTravel = async function (req, res, next) {
   }
 
   try {
-    const travel = await Travel.findOneAndUpdate({_id: id, _user: req.user.id}, {$set: body}, {new: true}).populate({
+    let travel = await Travel.findOneAndUpdate({_id: id, _user: req.user.id}, {$set: body}, {new: true}).populate({
       path: 'expenses',
       populate: {path: 'curRate'}
     });
@@ -208,8 +204,15 @@ exports.updateTravel = async function (req, res, next) {
       return next(new Error('Travel not found'));
     }
 
-    console.log(travel.dateFrom.toISOString());
     await updateExpensesToMatchTravelRangeDates(travel, res.locals.rates);
+    await travel.save();
+    travel = await Travel.findOne({_id: travel._id, _user: req.user.id}).populate({
+      path: 'expenses',
+      populate: {path: 'curRate'}
+    });
+    const total = await travel.updateTotal();
+    travel.total = parseFloat(total).toFixed(2);
+    await travel.save();
 
     req.flash('success', {msg: 'Travel successfully updated!'});
     res.redirect('/travels');

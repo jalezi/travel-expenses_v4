@@ -20,7 +20,7 @@ const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const multer = require('multer');
 
-
+const formidable = require('express-formidable');
 const expressHbs = require('express-hbs');
 const methodOverride = require('method-override')
 
@@ -114,6 +114,17 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
+
+/**
+ * Added by my
+ * express-formidable
+ */
+ app.use('/import', formidable({
+   encoding: 'utf-8',
+   uploadDir: '/my/dir',
+   keepExtension: true
+ }));
+
 app.use((req, res, next) => {
 
   if (req.path === '/api/upload') {
@@ -235,6 +246,8 @@ app.get('/travels/:id', passportConfig.isAuthenticated, travelController.getTrav
 app.delete('/travels/:id', passportConfig.isAuthenticated, travelController.deleteTravel);
 app.patch('/travels/:id', passportConfig.isAuthenticated, travelController.updateTravel);
 app.post('/travels/:id/expenses/new', passportConfig.isAuthenticated, expenseController.postNewExpense);
+app.get('/import', passportConfig.isAuthenticated, travelController.getImport);
+app.post('/import', passportConfig.isAuthenticated, travelController.postImport);
 
 /**
  * API examples routes.

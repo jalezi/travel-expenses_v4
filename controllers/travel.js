@@ -13,6 +13,16 @@ const constants = require('../lib/constants');
 
 const updateExpensesToMatchTravelRangeDates  = require('../utils/updateExpensesToMatchTravelRangeDates');
 
+exports.getImport = async function(req, res, next) {
+  res.render('travels/import', {
+    title: 'Import'
+  })
+}
+
+exports.postImport = async function(req, res, next) {
+
+}
+
 // get all travels
 exports.getTravels = async function(req, res) {
   const travels = await Travel.find({
@@ -23,6 +33,7 @@ exports.getTravels = async function(req, res) {
     travels
   });
 }
+
 
 // get all travels
 exports.getNewTravel = async function(req, res) {

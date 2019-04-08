@@ -48,6 +48,7 @@ const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const travelController = require('./controllers/travel');
 const expenseController = require('./controllers/expense');
+const importController = require('./controllers/import');
 
 /**
  * API keys and Passport configuration.
@@ -251,8 +252,8 @@ app.get('/travels/:id', passportConfig.isAuthenticated, travelController.getTrav
 app.delete('/travels/:id', passportConfig.isAuthenticated, travelController.deleteTravel);
 app.patch('/travels/:id', passportConfig.isAuthenticated, travelController.updateTravel);
 app.post('/travels/:id/expenses/new', passportConfig.isAuthenticated, expenseController.postNewExpense);
-app.get('/import', passportConfig.isAuthenticated, travelController.getImport);
-app.post('/import', passportConfig.isAuthenticated, travelController.postImport);
+app.get('/import', passportConfig.isAuthenticated, importController.getImport);
+app.post('/import', passportConfig.isAuthenticated, importController.postImport);
 
 /**
  * API examples routes.

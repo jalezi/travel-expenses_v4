@@ -121,12 +121,17 @@ app.use(flash());
  */
  app.use('/import', formidable({
    encoding: 'utf-8',
-   uploadDir: '/my/dir',
-   keepExtension: true
+   uploadDir: path.join(__dirname,'/uploads'),
+   keepExtensions: true
  }));
+ app.use('/import', (req, res, next) => {
+   if (Object.keys(req.body).length == 0 && req.fields) {
+     req.body = req.fields;
+   }
+   next();
+ });
 
 app.use((req, res, next) => {
-
   if (req.path === '/api/upload') {
     next();
   } else {

@@ -109,7 +109,7 @@ exports.getTravels = async function(req, res) {
     _id: {
       $in: req.user.travels
     }
-  });
+  }).sort('-dateFrom');
   res.render('travels/travels', {
     title: 'Travels',
     travels
@@ -346,8 +346,13 @@ exports.updateTravel = async function(req, res, next) {
       }
     });
     const total = await travel.updateTotal();
+    console.log(total);
     travel.total = parseFloat(total).toFixed(2);
-    await travel.save();
+    await travel.save((err, doc) => {
+      if (err) {
+        throw err:
+      }
+    });
 
     req.flash('success', {
       msg: 'Travel successfully updated!'

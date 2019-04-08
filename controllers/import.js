@@ -14,8 +14,11 @@ const {expenseTypes} = require('../lib/globals');
 const constants = require('../lib/constants');
 
 exports.getImport = async function(req, res, next) {
+  const travels = res.locals.travels;
+  
   res.render('travels/import', {
-    title: 'Import'
+    title: 'Import',
+    travels
   })
 }
 
@@ -63,36 +66,81 @@ function deleteFile(filePath, message='') {
   }
 }
 
-
-exports.postImport = async function(req, res, next) {
+async function travelImport (myFile, userId) {
   let message = '';
-  const travelHeaderArray = constants.TRAVEL_HEADER;
-  const myFilePath = req.files.myFile.path;
+  const myFilePath = myFile.path;
+  const travelHeaderArray = constants.IMPORT_TRAVEL_HEADER;
   try {
     // check if file is selected, not empty and CSV
-    await checkFile(req.files.myFile.name === '', 'No file selected!');
-    await checkFile(req.files.myFile.size === 0, 'Empty file!');
+    await checkFile(myFile.name === '', 'No file selected!');
+    await checkFile(myFile.size === 0, 'Empty file!');
     await checkFile(myFilePath.split('.').pop() != 'csv', 'Not a CSV file!');
+
     const parsedData = await readAndParseFile(myFilePath);
+    const dataArray = parsedData.data;
 
     // check if file has correct header
-    const dataArray = parsedData.data;
     const parsedHeaderArray = parsedData.meta.fields;
     await checkFile(!_.isEqual(travelHeaderArray, parsedHeaderArray), `Header should be: ${travelHeaderArray}`);
+
+    // add user._id to travel
     _.forEach(dataArray, (value, key) => {
-      dataArray[key]._user = req.user._id;
+      dataArray[key]._user = userId;
     })
+
+    // insert travels and update user with travel._id
     const travels = await Travel.insertMany(dataArray);
     const travelObjectIds = travels.map(travel => travel._id);
-    await User.findByIdAndUpdate(req.user._id, {
+    await User.findByIdAndUpdate(userId, {
       $addToSet: {'travels':{ $each: travelObjectIds} }
     });
 
-    deleteFile(myFilePath, 'File deleted after processed!');
     message = `${travelObjectIds.length} travels added successfully!`
+    return message;
+
+  } catch (err) {
+      throw err;
+  }
+}
+
+async function expensesImport(myFile, userId) {
+
+  let message = '';
+  const myFilePath = myFile.path;
+  const expenseHeaderArray = constants.IMPORT_EXPENSE_HEADER;
+  try {
+    // check if file is selected, not empty and CSV
+    await checkFile(myFile.name === '', 'No file selected!');
+    await checkFile(myFile.size === 0, 'Empty file!');
+    await checkFile(myFilePath.split('.').pop() != 'csv', 'Not a CSV file!');
+
+    const parsedData = await readAndParseFile(myFilePath);
+    const dataArray = parsedData.data;
+    console.log(dataArray);
+    return 'Expense import'
+  } catch (err) {
+      throw err;
+  }
+}
+
+
+exports.postImport = async function(req, res, next) {
+  let message = '';
+  const myFile = req.files.myFile;
+  const myFilePath = req.files.myFile.path;
+
+  try {
+    if (req.body.option === 'travels') {
+      message = await travelImport(myFile, req.user._id);
+
+    } else {
+      message = await expensesImport(myFile, req.user._id);
+
+    }
+
+    deleteFile(myFilePath, 'File deleted after processed!');
     req.flash('success', {msg: message});
     res.redirect('/travels')
-
   } catch (err) {
     deleteFile(myFilePath, 'File deleted after error!');
     req.flash('errors', {msg: err.message})

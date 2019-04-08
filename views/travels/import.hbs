@@ -7,26 +7,24 @@
       <form role="form" enctype="multipart/form-data" method="POST">
         <input type="hidden" name="_csrf" value={{_csrf}} />
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
-          <label class="form-check-label" for="exampleRadios1">
+          <input class="form-check-input" type="radio" name="option" id="travels" value="travels" checked>
+          <label class="form-check-label" for="travels">
             Travels
           </label>
         </div>
         <div class="form-check">
-          <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2">
-          <label class="form-check-label" for="exampleRadios2">
+          <input class="form-check-input" type="radio" name="option" id="expenses" value="expenses">
+          <label class="form-check-label" for="expenses">
             Expenses
           </label>
         </div>
 
         <div class="form-group d-none" id="travelSelect">
-          <label for="exampleFormControlSelect1">Example select</label>
-          <select class="form-control" id="exampleFormControlSelect1" name="exampleFormControlSelect1">
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5</option>
+          <label for="travel">Travel select</label>
+          <select class="form-control" id="travel" name="travel">
+            {{#each travels}}
+              <option value='{{this._id}}'>{{formatDate this.dateFrom}} {{this.description}}</option>
+            {{/each}}
           </select>
         </div>
 
@@ -41,14 +39,14 @@
 
 <script type="text/javascript">
   $(document).ready(() => {
-    $('#exampleRadios2').prop('disabled', true);
+    // $('#expenses').prop('disabled', true);
 
-    document.getElementById("exampleRadios1").onclick = () => {
+    document.getElementById("travels").onclick = () => {
       // $('#travelSelect').hide();
       $('#travelSelect').addClass('d-none');
     }
 
-    document.getElementById("exampleRadios2").onclick = () => {
+    document.getElementById("expenses").onclick = () => {
       // $('#travelSelect').show();
         $('#travelSelect').removeClass('d-none');
     }

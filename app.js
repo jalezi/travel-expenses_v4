@@ -178,14 +178,31 @@ app.use(methodOverride(function (req, res) {
     // look in urlencoded POST bodies and delete it
     const method = req.body._method
     delete req.body._method
-    return method
+    return method;
   }
 }));
 
 /**
 * Added by me
+* Save to res.locals.travels all user travel, sorted by dateFrom ascending
 */
+app.use('/import', async (req, res, next) => {
+  try {
+    const travels = await Travel.find({_user: req.user._id, _id:{ $in: req.user.travels}}).populate({
+        path: 'expenses',
+        populate: {
+          path: 'curRate'}
+    }).sort({dateFrom: 1});
+    res.locals.travels = travels;
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
+/**
+* Added by me
+*/
 app.use('/travels/:id', async (req, res, next) => {
   if ((!res.locals.travel || res.locals.travel._id != req.params.id) && req.params.id != 'new') {
     try {
@@ -195,7 +212,7 @@ app.use('/travels/:id', async (req, res, next) => {
       });
       let rates = await Rate.findRatesOnDate(travel, (err, result) => {
         if (err) {
-          throw new Error(err);
+          throw err;
         }
       });
 
@@ -221,6 +238,8 @@ app.use('/travels/:id', async (req, res, next) => {
 
 /**
 * Added by me
+* Create job to get rates - every day
+* Get rates from fixer.io api with base: EUR and save to database.
 */
 getRates();
 

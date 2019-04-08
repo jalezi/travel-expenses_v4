@@ -20,7 +20,8 @@ exports.getImport = async function(req, res, next) {
 }
 
 exports.postImport = async function(req, res, next) {
-
+  const myFile = req.files.myFile;
+  res.redirect('/import')
 }
 
 // get all travels

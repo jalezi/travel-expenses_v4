@@ -112,7 +112,7 @@ function createCurrency(value) {
   let curRate = {};
   currency['base'] = value.base;
   currency['date'] = new Date(value.date);
-  curRate[value.currency] = value.rate;
+  curRate[value.currency] = Number(value.rate);
   currency['rate'] = curRate;
   // console.log(currencyMongo);
   return currency;
@@ -141,11 +141,14 @@ async function expensesImport(myFile, userId, travels) {
     let travelObjectsIds = [];
     let currenciesArray = [];
     dataArray = await _.forEach(dataArray, async (value, key, object) => {
+      // console.log(key+2, value);
       let currency = {};
       if (value.type != 'Mileage') {
         currency = createCurrency(value);
         currenciesArray.push(currency);
         value._user = userId;
+        value.curRate = currency;
+        object[key].curRate = value.curRate;
         delete value.rate;
         delete value.base;
       }
@@ -155,22 +158,54 @@ async function expensesImport(myFile, userId, travels) {
         const dateRange = item.dateFrom <= date && item.dateTo >= date;
         const sameName = item.description === value.travelName;
         result = dateRange && sameName;
-
         if (!result) {
           return false;
         }
         return true;
       });
 
+
       if (!travel) {
         object.splice(key, 1);
-        console.log(key, value.type, value.travelName, value.date, value.amountConverted);
+        console.log(key+2, value.type, value.travelName, value.date, value.amountConverted);
       } else {
         object[key].travel = travel._id;
       }
     });
-    // console.log(dataArray);
+
+    // get unique imported currencies
+    currenciesArray = dataArray.reduce((result, item) => {
+      if (item.curRate && item.type != 'Mileage') {
+        result.push(item.curRate);
+      }
+      return result;
+    }, []);
     currenciesArray = [...new Set(currenciesArray)];
+    currenciesArray = await _.forEach(currenciesArray, async (cur, key, object) => {
+      let currency = await Currency.findOne({base: cur.base, date: cur.date, rate: cur.rate}, (err, doc) => {
+        if (doc) {
+          // console.log(key, doc._id);
+
+        } else {
+          // console.log(key, moment(cur.date).format('YYYY-MM-DD'), cur.rate);
+        }
+      });
+
+      if (currency) {
+        object.splice(key, 1);
+      } else {
+        try {
+          const curDoc = new Currency({
+            base: cur.base,
+            date: cur.date,
+            rate: cur.rate
+          });
+          await curDoc.save();
+        } catch (err) {
+          console.log(key, err.message);
+        }
+      }
+    })
 
 
 

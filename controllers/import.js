@@ -11,7 +11,9 @@ const Rate = require('../models/Rate');
 const Currency = require('../models/Currency');
 const ObjectId = mongoose.Types.ObjectId;
 
-const {expenseTypes} = require('../lib/globals');
+const {
+  expenseTypes
+} = require('../lib/globals');
 const constants = require('../lib/constants');
 
 exports.getImport = async function(req, res, next) {
@@ -118,7 +120,7 @@ function createCurrency(value) {
   return currency;
 }
 
-async function expensesImport(myFile, userId, travels) {
+async function expensesImportSetCurrencyArray(myFile, userId, travels) {
 
   let message = '';
   const myFilePath = myFile.path;
@@ -139,13 +141,13 @@ async function expensesImport(myFile, userId, travels) {
 
     // findRates and travel in expenses CSV
     let travelObjectsIds = [];
-    let currenciesArray = [];
-    dataArray = await _.forEach(dataArray, async (value, key, object) => {
+
+    await _.forEach(dataArray, async (value, key, object) => {
       // console.log(key+2, value);
       let currency = {};
       if (value.type != 'Mileage') {
         currency = createCurrency(value);
-        currenciesArray.push(currency);
+        // currenciesArray.push(currency);
         value._user = userId;
         value.curRate = currency;
         object[key].curRate = value.curRate;
@@ -153,72 +155,94 @@ async function expensesImport(myFile, userId, travels) {
         delete value.base;
       }
 
+      // find travel for expense
       const travel = travels.find((item) => {
         const date = new Date(value.date)
         const dateRange = item.dateFrom <= date && item.dateTo >= date;
         const sameName = item.description === value.travelName;
-        result = dateRange && sameName;
+        let result = dateRange && sameName;
         if (!result) {
           return false;
         }
         return true;
       });
 
-
+      // if no travel for expense delete expense
       if (!travel) {
         object.splice(key, 1);
-        console.log(key+2, value.type, value.travelName, value.date, value.amountConverted);
+        console.log(key + 2, value.type, value.travelName, value.date, value.amountConverted);
       } else {
         object[key].travel = travel._id;
       }
     });
 
-    // get unique imported currencies
-    currenciesArray = dataArray.reduce((result, item) => {
+    // get imported currencies
+    let currenciesArray = await dataArray.reduce((result, item) => {
       if (item.curRate && item.type != 'Mileage') {
         result.push(item.curRate);
       }
       return result;
     }, []);
-    currenciesArray = [...new Set(currenciesArray)];
-    currenciesArray = await _.forEach(currenciesArray, async (cur, key, object) => {
-      let currency = await Currency.findOne({base: cur.base, date: cur.date, rate: cur.rate}, (err, doc) => {
-        if (doc) {
-          // console.log(key, doc._id);
 
-        } else {
-          // console.log(key, moment(cur.date).format('YYYY-MM-DD'), cur.rate);
-        }
-      });
-
-      if (currency) {
-        object.splice(key, 1);
-      } else {
-        try {
-          const curDoc = new Currency({
-            base: cur.base,
-            date: cur.date,
-            rate: cur.rate
-          });
-          await curDoc.save();
-        } catch (err) {
-          console.log(key, err.message);
-        }
-      }
-    })
-
-
+    // get unique currencies
+    currenciesArray = [...new Map(currenciesArray.map(o => [JSON.stringify(o), o])).values()].sort(function(a, b) {
+      // Turn your strings into dates, and then subtract them
+      // to get a value that is either negative, positive, or zero.
+      return new Date(a.date) - new Date(b.date);
+    });
 
     const expensesCountAfter = dataArray.length;
     const invalidExpensesCount = expensesCountBefore - expensesCountAfter;
     const validExpensesCount = expensesCountBefore - invalidExpensesCount;
 
-    return `Invalid expenses: ${invalidExpensesCount}. ${validExpensesCount} imported!`
+    return {
+      currenciesArray,
+      invalidExpensesCount,
+      validExpensesCount
+    };
   } catch (err) {
     throw err;
   }
 }
 
+const getOnlyNewCurrency = (currency, value) => {
+  return new Promise((resolve, reject) => {
+    if (!currency) {
+      return resolve(value);
+
+    } else {
+      return resolve();
+    }
+  })
+};
+
+async function expensesImportSaveOrGetCurrencies(array) {
+  console.log('array', array.length);
+  let currenciesArray = [];
+  return await new Promise(async (resolve, reject) => {
+
+    for (value of array) {
+      let currency = await Currency.findOne({
+        base: value.base,
+        date: value.date,
+        rate: value.rate
+      }, (err, doc) => {
+        if (err) {
+          console.log('Error: ', err.message);
+        } else {
+
+        }
+      });
+
+      await getOnlyNewCurrency(currency, value).then((value) => {
+        if (value) {
+          currenciesArray.push(value);
+        }
+      });
+    }
+    return await resolve(currenciesArray);
+  });
+}
 
 exports.postImport = async function(req, res, next) {
   let message = '';
@@ -231,8 +255,17 @@ exports.postImport = async function(req, res, next) {
 
     } else {
 
-      message = await expensesImport(myFile, req.user._id, res.locals.travels);
+      let getCurrenciesArray = await expensesImportSetCurrencyArray(myFile, req.user._id, res.locals.travels);
+      const invalidExpensesCount = getCurrenciesArray.invalidExpensesCount;
+      const validExpensesCount = getCurrenciesArray.validExpensesCount;
+      const currenciesArray = getCurrenciesArray.currenciesArray;
+      console.log('else', currenciesArray.length);
 
+      getCurrenciesArrayMongoDocs = await expensesImportSaveOrGetCurrencies([...new Set(currenciesArray)]);
+      console.log(getCurrenciesArrayMongoDocs);
+      await Currency.insertMany(getCurrenciesArrayMongoDocs);
+      console.log('getCurrenciesArrayMongoDocs', getCurrenciesArrayMongoDocs.length);
+      message = `INVALID EXPENSES: ${invalidExpensesCount}. VALID EXPENSES: ${validExpensesCount}`;
     }
 
     deleteFile(myFilePath, 'File deleted after processed!');

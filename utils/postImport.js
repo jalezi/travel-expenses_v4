@@ -14,6 +14,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const {expenseTypes} = require('../lib/globals');
 const constants = require('../lib/constants');
 
+// read and parse file
 async function readAndParseFile(filePath, enc = 'utf8') {
   try {
     const myFile = fs.readFileSync(filePath, enc);
@@ -33,6 +34,7 @@ async function readAndParseFile(filePath, enc = 'utf8') {
   }
 }
 
+// delete uploaded file
 function deleteFile(filePath, message = '') {
   try {
     if (fs.existsSync(filePath)) {
@@ -49,13 +51,36 @@ function deleteFile(filePath, message = '') {
   }
 }
 
-async function checkFile(condition, message) {
+// return Error with message on condtion is true
+async function checkFileFor(condition, message) {
   const suffix = 'File should be a CSV with header in first line and not empty!'
   if (condition) {
     return new Error(`${message} - ${suffix}`);
   }
 }
 
+// check if file is not empty, CSV or it was not selected
+const checkFile = (myFile) => {
+  return new Promise(async (resolve, reject) => {
+    let tripleCheck = async (myFIle) => {
+      try {
+        error = await checkFileFor(myFile.name === '', 'No file selected!');
+        if (error) {return error}
+        error = await checkFileFor(myFile.size === 0, 'Empty file!');
+        if (error) {return error}
+        error = await checkFileFor(myFile.path.split('.').pop() != 'csv', 'Not a CSV file!');
+        if (error) {return error}
+        return;
+      } catch (err) {
+          resolve(err);
+        }
+    }
+    let result = await tripleCheck();
+    resolve(result);
+  });
+}
+
+// create currency Object
 function createCurrency(value) {
   let currency = {};
   let curRate = {};
@@ -63,10 +88,10 @@ function createCurrency(value) {
   currency['date'] = new Date(value.date);
   curRate[value.currency] = Number(value.rate);
   currency['rate'] = curRate;
-  // console.log(currencyMongo);
   return currency;
 }
 
+// return currency to be saved in DB
 const getOnlyNewCurrency = (currency, value) => {
   return new Promise((resolve, reject) => {
     if (!currency) {
@@ -77,14 +102,10 @@ const getOnlyNewCurrency = (currency, value) => {
   });
 };
 
-async function expensesImportSaveOrGetCurrencies(array) {
-
-  console.log('Cur array', array.length);
+//
+async function expensesImportNewCurrenciesForSave(array) {
   let currenciesArray = [];
   return await new Promise(async (resolve, reject) => {
-    // if(!array) {
-    //   reject(new Error('expensesImportSaveOrGetCurrencies'));
-    // }
     for (value of array) {
       let currency = await Currency.findOne({
         base: value.base,
@@ -110,18 +131,14 @@ async function expensesImportSaveOrGetCurrencies(array) {
 }
 
 async function expensesImportSetCurrencyArray(myFile, userId, travels) {
-
   let message = '';
   let error = null;
   const myFilePath = myFile.path;
   const expenseHeaderArray = constants.IMPORT_EXPENSE_HEADER;
   try {
-    // check if file is selected, not empty and CSV
-    error = await checkFile(myFile.name === '', 'No file selected!');
-    if (error) {throw error}
-    error = await checkFile(myFile.size === 0, 'Empty file!');
-    if (error) {throw error}
-    error = await checkFile(myFilePath.split('.').pop() != 'csv', 'Not a CSV file!');
+
+    // check if file is CSV, not empty or not even selected
+    error = await checkFile(myFile);
     if (error) {throw error}
 
     const parsedData = await readAndParseFile(myFilePath);
@@ -130,7 +147,7 @@ async function expensesImportSetCurrencyArray(myFile, userId, travels) {
 
     // check if file has correct header
     const parsedHeaderArray = parsedData.meta.fields;
-    error = await checkFile(!_.isEqual(expenseHeaderArray, parsedHeaderArray), `Header should be: ${expenseHeaderArray}`);
+    error = await checkFileFor(!_.isEqual(expenseHeaderArray, parsedHeaderArray), `Header should be: ${expenseHeaderArray}`);
     if (error) {throw error}
 
     // findRates and travel in expenses CSV
@@ -138,7 +155,6 @@ async function expensesImportSetCurrencyArray(myFile, userId, travels) {
     let noTravelKeys = [];
     await _.forEach(dataArray, async (value, key, object) => {
       // console.log(key+2, value.type, value.travelName, object.length);
-
 
       let currency = {};
       if (value.type != 'Mileage') {
@@ -154,12 +170,12 @@ async function expensesImportSetCurrencyArray(myFile, userId, travels) {
       const travel = await travels.find((item) => {
         const date = new Date(value.date);
         const dateRange = item.dateFrom <= date && item.dateTo >= date;
-        const sameName = item.description === value.travelName;
+        const sameName = item.description == value.travelName;
+
         let result = dateRange && sameName;
         if (!result) {
           return false;
         }
-
         return true;
       });
 
@@ -216,12 +232,9 @@ async function travelImport(myFile, userId) {
   const myFilePath = myFile.path;
   const travelHeaderArray = constants.IMPORT_TRAVEL_HEADER;
   try {
-    // check if file is selected, not empty and CSV
-    error = await checkFile(myFile.name === '', 'No file selected!');
-    if (error) {throw error}
-    error = await checkFile(myFile.size === 0, 'Empty file!');
-    if (error) {throw error}
-    error = await checkFile(myFilePath.split('.').pop() != 'csv', 'Not a CSV file!');
+
+    // check if file is CSV, not empty or not even selected
+    error = await checkFile(myFile);
     if (error) {throw error}
 
     const parsedData = await readAndParseFile(myFilePath);
@@ -229,7 +242,7 @@ async function travelImport(myFile, userId) {
 
     // check if file has correct header
     const parsedHeaderArray = parsedData.meta.fields;
-    error = await checkFile(!_.isEqual(travelHeaderArray, parsedHeaderArray), `Header should be: ${travelHeaderArray}`);
+    error = await checkFileFor(!_.isEqual(travelHeaderArray, parsedHeaderArray), `Header should be: ${travelHeaderArray}`);
     if (error) {throw error}
     // add user._id to travel
     await _.forEach(dataArray, (value, key) => {
@@ -258,6 +271,6 @@ async function travelImport(myFile, userId) {
 module.exports = {
   deleteFile,
   expensesImportSetCurrencyArray,
-  expensesImportSaveOrGetCurrencies,
+  expensesImportNewCurrenciesForSave,
   travelImport
 }

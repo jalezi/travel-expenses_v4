@@ -45,9 +45,9 @@ exports.postImport = async function(req, res, next) {
       let error = getCurrenciesArray.err;
       if (error) {throw error;}
 
-      getCurrenciesArrayMongoDocs = await postImport.expensesImportSaveOrGetCurrencies([...new Set(currenciesArray)]);
+      // getCurrenciesArrayMongoDocs = await postImport.expensesImportNewCurrenciesForSave([...new Set(currenciesArray)]);
+      getCurrenciesArrayMongoDocs = await postImport.expensesImportNewCurrenciesForSave(currenciesArray);
       await Currency.insertMany(getCurrenciesArrayMongoDocs);
-
     }
 
     postImport.deleteFile(myFilePath, 'File deleted after processed!');

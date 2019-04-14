@@ -13,6 +13,7 @@ const ObjectId = mongoose.Types.ObjectId;
 
 const {expenseTypes} = require('../lib/globals');
 const constants = require('../lib/constants');
+const myErrors = require('../utils/myErrors');
 
 // read and parse file
 async function readAndParseFile(filePath, enc = 'utf8') {
@@ -53,9 +54,13 @@ function deleteFile(filePath, message = '') {
 
 // return Error with message on condtion is true
 async function checkFileFor(condition, message) {
-  const suffix = 'File should be a CSV with header in first line and not empty!'
-  if (condition) {
-    return new Error(`${message} - ${suffix}`);
+  const suffix = 'File should be a CSV with header in first line and not empty!';
+  try {
+      if (condition) {
+        return new myErrors.imprortFileError(`${message} - ${suffix}`);
+    }
+  } catch (err) {
+    throw err;
   }
 }
 
@@ -123,7 +128,7 @@ async function expensesImportNewCurrenciesForSave(array) {
           currenciesArray.push(value);
         }
       }).catch((err) => {
-        throw err;
+        reject (err);
       });
     }
     return await resolve(currenciesArray);
@@ -138,8 +143,11 @@ async function expensesImportSetCurrencyArray(myFile, userId, travels) {
   try {
 
     // check if file is CSV, not empty or not even selected
-    error = await checkFile(myFile);
+    error = await checkFile(myFile).catch((err) => {
+      throw err;
+    });
     if (error) {throw error}
+
 
     const parsedData = await readAndParseFile(myFilePath);
     let dataArray = parsedData.data;
@@ -234,7 +242,9 @@ async function travelImport(myFile, userId) {
   try {
 
     // check if file is CSV, not empty or not even selected
-    error = await checkFile(myFile);
+    error = await checkFile(myFile).catch((err) => {
+      throw err;
+    });
     if (error) {throw error}
 
     const parsedData = await readAndParseFile(myFilePath);

@@ -14,6 +14,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const {expenseTypes} = require('../lib/globals');
 const constants = require('../lib/constants');
 const postImport = require('../utils/postImport');
+const myErrors = require('../utils/myErrors');
 
 exports.getImport = async function(req, res, next) {
   const travels = res.locals.travels;
@@ -46,7 +47,9 @@ exports.postImport = async function(req, res, next) {
       if (error) {throw error;}
 
       // getCurrenciesArrayMongoDocs = await postImport.expensesImportNewCurrenciesForSave([...new Set(currenciesArray)]);
-      getCurrenciesArrayMongoDocs = await postImport.expensesImportNewCurrenciesForSave(currenciesArray);
+      getCurrenciesArrayMongoDocs = await postImport.expensesImportNewCurrenciesForSave(currenciesArray).catch((err) => {
+        throw err;
+      });
       await Currency.insertMany(getCurrenciesArrayMongoDocs);
     }
 
@@ -56,14 +59,16 @@ exports.postImport = async function(req, res, next) {
     });
     res.redirect('/travels')
   } catch (err) {
-    if (message === '') {
+    if (!err instanceof myErrors.imprortFileError) {
       message = 'Something went wrong. Check console log!'
+    } else {
+      message = err.message;
     }
     postImport.deleteFile(myFilePath, 'File deleted after error!');
     req.flash('errors', {
       msg: message
     })
-    console.log(err);
-    res.redirect('/import');
+    next(err);
+    // res.redirect('/import');
   }
 }

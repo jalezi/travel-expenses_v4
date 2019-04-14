@@ -33,6 +33,16 @@ const Rate = require('./models/Rate');
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
 /**
+* Added by me
+* Catch uncaught errors
+*/
+process.on('uncaughtException', (err) => {
+    console.error('There was an uncaught error', err)
+    process.exit(1) //mandatory (as per the Node docs)
+});
+
+
+/**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
 dotenv.load({ path: '.env' });
@@ -366,7 +376,11 @@ if (process.env.NODE_ENV === 'development') {
 } else {
   app.use((err, req, res, next) => {
     console.error(err);
-    res.status(500).send('Server Error');
+    // res.status(500).send('Server Error');
+    res.status(500).render('error', {
+      layout: 'errorLayout',
+      title: 'Error'
+    })
   });
 }
 

@@ -62,12 +62,13 @@ exports.postImport = async function(req, res, next) {
     if (!err instanceof myErrors.imprortFileError) {
       message = 'Something went wrong. Check console log!'
     } else {
+      res.status(400);
       message = err.message;
     }
     postImport.deleteFile(myFilePath, 'File deleted after error!');
     req.flash('errors', {
       msg: message
-    })
+    });
     next(err);
     // res.redirect('/import');
   }

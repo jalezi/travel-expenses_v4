@@ -29,6 +29,8 @@ const getRates = require('./utils/getRates');
 
 const Travel = require('./models/Travel');
 const Rate = require('./models/Rate');
+const myErrors = require('./utils/myErrors');
+const imprortFileError = myErrors.imprortFileError;
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
@@ -372,15 +374,29 @@ app.get('/auth/pinterest/callback', passport.authorize('pinterest', { failureRed
  */
 if (process.env.NODE_ENV === 'development') {
   // only use in development
-  app.use(errorHandler());
+  app.use(errorHandler({log: (err, str, req, res) => {
+    if (err instanceof imprortFileError) {
+      console.log(str);
+    } else {
+      console.log(err);
+    }
+  }}));
+
 } else {
   app.use((err, req, res, next) => {
-    console.error(err);
     // res.status(500).send('Server Error');
-    res.status(500).render('error', {
-      layout: 'errorLayout',
-      title: 'Error'
-    })
+    if (err instanceof imprortFileError) {
+      console.log(err.stack);
+      res.status(400);
+      res.redirect(req.path);
+    } else {
+      console.log(err);
+      res.status(500).render('error', {
+        layout: 'errorLayout',
+        title: 'Error'
+      });
+    }
+
   });
 }
 

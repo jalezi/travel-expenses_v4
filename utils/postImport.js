@@ -80,8 +80,15 @@ const checkFile = (myFile) => {
           resolve(err);
         }
     }
-    let result = await tripleCheck();
-    resolve(result);
+    try {
+      let result = await tripleCheck();
+      resolve(result);
+    } catch (err) {
+      resolve(err)
+    } finally {
+
+    }
+
   });
 }
 
@@ -107,7 +114,7 @@ const getOnlyNewCurrency = (currency, value) => {
   });
 };
 
-//
+// prepare currencies
 async function expensesImportNewCurrenciesForSave(array) {
   let currenciesArray = [];
   return await new Promise(async (resolve, reject) => {
@@ -135,28 +142,51 @@ async function expensesImportNewCurrenciesForSave(array) {
   });
 }
 
-async function expensesImportSetCurrencyArray(myFile, userId, travels) {
-  let message = '';
+// read file, check file and return data or error
+async function readCheckFileAndGetData(myFile, option) {
   let error = null;
   const myFilePath = myFile.path;
-  const expenseHeaderArray = constants.IMPORT_EXPENSE_HEADER;
-  try {
+  let headerToBe;
+  switch (option) {
+    case 'travels':
+      headerToBe = constants.IMPORT_TRAVEL_HEADER;
+      break;
+    case 'expenses':
+      headerToBe = constants.IMPORT_EXPENSE_HEADER;
+    default:
 
+  }
+
+  try {
     // check if file is CSV, not empty or not even selected
     error = await checkFile(myFile).catch((err) => {
       throw err;
     });
     if (error) {throw error}
 
-
+    // no error - file is CSV & has some data
     const parsedData = await readAndParseFile(myFilePath);
     let dataArray = parsedData.data;
     const expensesCountBefore = dataArray.length;
 
-    // check if file has correct header
+    // check if data has mathcing header
     const parsedHeaderArray = parsedData.meta.fields;
-    error = await checkFileFor(!_.isEqual(expenseHeaderArray, parsedHeaderArray), `Header should be: ${expenseHeaderArray}`);
+    error = await checkFileFor(!_.isEqual(headerToBe, parsedHeaderArray), `Header should be: ${headerToBe}`).catch((err) => {
+      throw err;
+    });
     if (error) {throw error}
+    return dataArray;
+} catch (err) {
+  return err;
+}}
+
+async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
+  let message = '';
+  let error = null;
+  // const myFilePath = myFile.path;
+
+  try {
+    const expensesCountBefore = dataArray.length;
 
     // findRates and travel in expenses CSV
     let travelObjectsIds = [];
@@ -234,26 +264,13 @@ async function expensesImportSetCurrencyArray(myFile, userId, travels) {
   }
 }
 
-async function travelImport(myFile, userId) {
+async function travelImport(dataArray, userId) {
   let message = '';
-  let error = null;
-  const myFilePath = myFile.path;
-  const travelHeaderArray = constants.IMPORT_TRAVEL_HEADER;
+  // let error = null;
+  // const myFilePath = myFile.path;
+  // const travelHeaderArray = constants.IMPORT_TRAVEL_HEADER;
   try {
 
-    // check if file is CSV, not empty or not even selected
-    error = await checkFile(myFile).catch((err) => {
-      throw err;
-    });
-    if (error) {throw error}
-
-    const parsedData = await readAndParseFile(myFilePath);
-    const dataArray = parsedData.data;
-
-    // check if file has correct header
-    const parsedHeaderArray = parsedData.meta.fields;
-    error = await checkFileFor(!_.isEqual(travelHeaderArray, parsedHeaderArray), `Header should be: ${travelHeaderArray}`);
-    if (error) {throw error}
     // add user._id to travel
     await _.forEach(dataArray, (value, key) => {
       dataArray[key]._user = userId;
@@ -279,6 +296,7 @@ async function travelImport(myFile, userId) {
 }
 
 module.exports = {
+  readCheckFileAndGetData,
   deleteFile,
   expensesImportSetCurrencyArray,
   expensesImportNewCurrenciesForSave,

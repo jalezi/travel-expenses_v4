@@ -31,8 +31,16 @@ exports.postImport = async function(req, res, next) {
   const myFilePath = req.files.myFile.path;
 
   try {
+    const dataArray = await postImport.readCheckFileAndGetData(myFile, req.body.option).catch((err) => {
+      throw err;
+    });
+    if (dataArray instanceof Error) {
+      throw dataArray
+    }
+
+
     if (req.body.option === 'travels') {
-      message = await postImport.travelImport(myFile, req.user._id);
+      message = await postImport.travelImport(dataArray, req.user._id);
       if (message.error) {
         error = message.error;
         message = message.msg;
@@ -40,7 +48,8 @@ exports.postImport = async function(req, res, next) {
       }
 
     } else {
-      let getCurrenciesArray = await postImport.expensesImportSetCurrencyArray(myFile, req.user._id, res.locals.travels);
+
+      let getCurrenciesArray = await postImport.expensesImportSetCurrencyArray(dataArray, req.user._id, res.locals.travels);
       const currenciesArray = getCurrenciesArray.currenciesArray;
       message = getCurrenciesArray.message;
       let error = getCurrenciesArray.err;

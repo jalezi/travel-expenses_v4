@@ -13,6 +13,9 @@
     <button class="btn btn-primary " type="button" data-toggle="collapse" data-target="#updateTravelForm" aria-expanded="false" aria-controls="updateTravelForm">
       <i class="fas fa-pen"></i>Change travel data
     </button>
+    <button class="btn btn-danger " type="button" onclick="toPDF()">
+    <i class="far fa-file-pdf"></i>Create PDF
+    </button>
     <button class="btn btn-success float-right" type="button" data-toggle="collapse" data-target="#newExpenseForm" aria-expanded="false" aria-controls="newExpenseForm">
       <i class="fas fa-plus"></i>New expense
     </button>
@@ -98,6 +101,11 @@
 </table>
 
 <script >
+
+  function toPDF() {
+    location.href="/pdf";
+  }
+
   function calcAmount(rate, amount, currency=true) {
     let result = 0;
     if (currency) {

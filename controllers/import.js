@@ -29,6 +29,7 @@ exports.postImport = async function(req, res, next) {
   let message = '';
   const myFile = req.files.myFile;
   const myFilePath = req.files.myFile.path;
+  let combinedCurrencies = [];
 
   try {
     const dataArray = await postImport.readCheckFileAndGetData(myFile, req.body.option).catch((err) => {
@@ -55,11 +56,43 @@ exports.postImport = async function(req, res, next) {
       let error = getCurrenciesArray.err;
       if (error) {throw error;}
 
-      // getCurrenciesArrayMongoDocs = await postImport.expensesImportNewCurrenciesForSave([...new Set(currenciesArray)]);
-      getCurrenciesArrayMongoDocs = await postImport.expensesImportNewCurrenciesForSave(currenciesArray).catch((err) => {
+      const allCurrencies = await postImport.expensesImportNewCurrenciesForSave(currenciesArray).catch((err) => {
         throw err;
       });
-      await Currency.insertMany(getCurrenciesArrayMongoDocs);
+      let insertedCurrencies = await Currency.insertMany(allCurrencies.notExistingCurrenciesDB);
+      combinedCurrencies = insertedCurrencies.concat(allCurrencies.existingCurrenciesDB);
+
+      await _.forEach(dataArray, async (value, key, object) => {
+        delete value.travelName;
+        const currency = await combinedCurrencies
+        .sort((a, b) => {
+          return a.date - b.date;
+        })
+        .find((item) => {
+          let dateEqual = value.date ===  moment(item.date).format('YYYY-MM-DD');
+          let currencyMatch = item.rate.hasOwnProperty(value.currency);
+          let notMileage = value.type != 'Mileage';
+          let result = dateEqual && currencyMatch && notMileage;
+          return result;
+        });
+        
+        if (currency) {
+          console.log('YES', key, currency._id);
+          value.curRate = currency._id;
+        } else {
+          console.log('NO', key);
+        }
+      });
+    }
+
+    message = await postImport.expenseImport(dataArray).catch((err) => {
+      throw err;
+    });
+
+    if (message.error) {
+      error = message.error;
+      message = message.msg;
+      throw error;
     }
 
     postImport.deleteFile(myFilePath, 'File deleted after processed!');

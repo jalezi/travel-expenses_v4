@@ -15,7 +15,7 @@ const constants = require('../lib/constants');
 
 const updateExpensesToMatchTravelRangeDates = require('../utils/updateExpensesToMatchTravelRangeDates');
 
-const toPDF = require('../playground/toPDF');
+const toPDF = require('../utils/toPDF');
 
 /*
   toPDF

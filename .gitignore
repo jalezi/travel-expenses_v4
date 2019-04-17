@@ -8,6 +8,7 @@ lib-cov
 *.gz
 *.swp
 
+
 pids
 logs
 results
@@ -59,3 +60,4 @@ Thumbs.db
 # My
 playground/*
 utils/currency-convert.js
+/*.pdf

@@ -15,6 +15,28 @@ const constants = require('../lib/constants');
 
 const updateExpensesToMatchTravelRangeDates = require('../utils/updateExpensesToMatchTravelRangeDates');
 
+const toPDF = require('../playground/toPDF');
+
+/*
+  toPDF
+*/
+
+exports.getPDF = async function(req, res, next) {
+  var stream = toPDF(res.locals.travel, res.locals.user);
+    var filename = "WhateverFilenameYouWant.pdf";
+    // Be careful of special characters
+
+    filename = encodeURIComponent(filename);
+    // Ideally this should strip them
+
+    res.setHeader('Content-disposition', 'inline; filename="' + filename + '"');
+    res.setHeader('Content-type', 'application/pdf');
+
+    stream.pipe(res);
+}
+
+
+
 // get all travels
 exports.getTravels = async function(req, res) {
   const travels = await Travel.find({

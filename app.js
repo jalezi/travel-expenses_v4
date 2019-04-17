@@ -283,6 +283,7 @@ app.patch('/travels/:id', passportConfig.isAuthenticated, travelController.updat
 app.post('/travels/:id/expenses/new', passportConfig.isAuthenticated, expenseController.postNewExpense);
 app.get('/import', passportConfig.isAuthenticated, importController.getImport);
 app.post('/import', passportConfig.isAuthenticated, importController.postImport);
+app.get('/travels/:id/pdf', passportConfig.isAuthenticated, travelController.getPDF)
 
 /**
  * API examples routes.

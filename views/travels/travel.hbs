@@ -14,7 +14,7 @@
       <i class="fas fa-pen"></i>Change travel data
     </button>
     <button class="btn btn-danger " type="button" onclick="toPDF()">
-    <i class="far fa-file-pdf"></i>Create PDF
+      <i class="far fa-file-pdf"></i>Create PDF
     </button>
     <button class="btn btn-success float-right" type="button" data-toggle="collapse" data-target="#newExpenseForm" aria-expanded="false" aria-controls="newExpenseForm">
       <i class="fas fa-plus"></i>New expense
@@ -40,7 +40,7 @@
         <input class="form-control" id="expenseDescription" type="expenseDescription" value="" name="expenseDescription" placeholder="Description" autofocus="autofocus" autocomplete="expenseDescription" required="required" />
       </div>
       <div class="col-md-4">
-        <label class="col-form-label font-weight-bold" for="invoiceDate" >Invoice date</label>
+        <label class="col-form-label font-weight-bold" for="invoiceDate">Invoice date</label>
         <input class="form-control" id="invoiceDate" type="date" min={{formatDate travel.dateFrom}} max={{formatDate travel.dateTo}} value={{formatDate travel.dateFrom}} name="invoiceDate" autocomplete="invoiceDate" required="required" />
       </div>
     </div>
@@ -85,8 +85,8 @@
 
   <tbody>
     {{#each expenses}}
-    <tr>
-      <th scope="row" class="text-center">{{countList @index}}</th>
+      <tr>
+        <th scope="row" class="text-center">{{countList @index}}</th>
         <td class="text-center">{{this.type}}</td>
         <td><a href="/travels/{{travel._id}}/{{this._id}}">{{this.description}}</a></td>
         <td class="text-center">{{formatDate this.date}}</td>
@@ -95,18 +95,21 @@
         <td class="text-center">{{this.currency}} {{this.unit}}</td>
         <td class="text-right">{{this.rate}}</td>
         <td class="text-right">{{this.amountConverted}}</td>
-      {{/each}}
+    {{/each}}
     </tr>
   </tbody>
 </table>
 
-<script >
-
+<script type="text/javascript">
   function toPDF() {
-    location.href="/pdf";
+    let routepath = '/travels/' + '{{travel._id}}' + '/pdf';
+    window.open(routepath);
   }
+</script>
 
-  function calcAmount(rate, amount, currency=true) {
+<script>
+
+  function calcAmount(rate, amount, currency = true) {
     let result = 0;
     if (currency) {
       result = (amount / rate).toFixed(2);
@@ -119,17 +122,17 @@
 
   $(document).ready(() => {
     invoiceUnit.onchange = () => {
-        document.getElementById('amountDistance2').readOnly = !document.getElementById('amountDistance2').readOnly;
-        document.getElementById('amountDistance').readOnly = !document.getElementById('amountDistance').readOnly;
-        if (!document.getElementById('amountDistance2').readOnly) {
-          amountDistance2.value = amountDistance.value * {{constants.MILES_TO_KILOMETERS}};
-          amountDistance2.value = parseFloat($('#amountDistance2').val()).toFixed(2);
-          $('#row3Mileage').show();
-        } else {
-          amountDistance.value =amountDistance2.value * {{constants.KILOMETERS_TO_MILES}};
-          amountDistance.value = parseFloat($('#amountDistance').val()).toFixed(2)
-          $('#row3Mileage').hide();
-        }
+      document.getElementById('amountDistance2').readOnly = !document.getElementById('amountDistance2').readOnly;
+      document.getElementById('amountDistance').readOnly = !document.getElementById('amountDistance').readOnly;
+      if (!document.getElementById('amountDistance2').readOnly) {
+        amountDistance2.value = amountDistance.value * {{constants.MILES_TO_KILOMETERS}};
+        amountDistance2.value = parseFloat($('#amountDistance2').val()).toFixed(2);
+        $('#row3Mileage').show();
+      } else {
+        amountDistance.value = amountDistance2.value * {{constants.KILOMETERS_TO_MILES}};
+        amountDistance.value = parseFloat($('#amountDistance').val()).toFixed(2)
+        $('#row3Mileage').hide();
+      }
     }
 
     amountDistance2.onchange = (event) => {
@@ -148,56 +151,55 @@
       if (rate.value != 0) {
         amountConverted.value = (amount.value / rate.value).toFixed(2);
       }
-
     }
 
-      // to be moved somewhere else because of api key
-    invoiceCurrency.onchange = async function () {
-        invoiceCurrency.value = invoiceCurrency.value.toUpperCase();
-        if (invoiceCurrency.value.length === 3) {
-          try {
-            const date = new Date(invoiceDate.value).toISOString();
-            const rates = JSON.parse('{{{rates}}}')
-            let rts = rates.find((r) => {
-              return r.date === date;
-            });
+    // to be moved somewhere else because of api key
+    invoiceCurrency.onchange = async function() {
+      invoiceCurrency.value = invoiceCurrency.value.toUpperCase();
+      if (invoiceCurrency.value.length === 3) {
+        try {
+          const date = new Date(invoiceDate.value).toISOString();
+          const rates = JSON.parse('{{{rates}}}')
+          let rts = rates.find((r) => {
+            return r.date === date;
+          });
 
-            if (!rts) {
-              rts =rates[0];
-            }
-
-            const homeCur = rts.rates['{{travel.homeCurrency}}'];
-            const converted = 1 / homeCur;
-
-            const invCur = invoiceCurrency.value.toUpperCase();
-            // const toEuro = rts.rates[invoiceCurrency.value];
-
-            if (isNaN(rts.rates[invCur])) {
-              throw new Error('No such currency exist!')
-            } else {
-              rate.value = rts.rates[invCur] * converted;
-              rate.value = parseFloat($('#rate').val()).toFixed(2);
-              rate.readOnly = true;
-
-            }
-
-
-          } catch (err) {
-            rate.value = 0;
-            amountConverted.value = 0.00;
-            rate.value = parseFloat($('#rate').val()).toFixed(2);
-            amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
-            rate.readOnly = false;
-            invoiceCurrency.value = '';
-            throw new Error(err);
+          if (!rts) {
+            rts = rates[0];
           }
-        } else {
+
+          const homeCur = rts.rates['{{travel.homeCurrency}}'];
+          const converted = 1 / homeCur;
+
+          const invCur = invoiceCurrency.value.toUpperCase();
+          // const toEuro = rts.rates[invoiceCurrency.value];
+
+          if (isNaN(rts.rates[invCur])) {
+            throw new Error('No such currency exist!')
+          } else {
+            rate.value = rts.rates[invCur] * converted;
+            rate.value = parseFloat($('#rate').val()).toFixed(2);
+            rate.readOnly = true;
+
+          }
+
+
+        } catch (err) {
           rate.value = 0;
           amountConverted.value = 0.00;
           rate.value = parseFloat($('#rate').val()).toFixed(2);
           amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
           rate.readOnly = false;
+          invoiceCurrency.value = '';
+          throw new Error(err);
         }
+      } else {
+        rate.value = 0;
+        amountConverted.value = 0.00;
+        rate.value = parseFloat($('#rate').val()).toFixed(2);
+        amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
+        rate.readOnly = false;
+      }
     }
   })
 </script>

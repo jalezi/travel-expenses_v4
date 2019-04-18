@@ -47,7 +47,6 @@ exports.postImport = async function(req, res, next) {
         message = message.msg;
         throw error;
       }
-
     } else {
 
       let getCurrenciesArray = await postImport.expensesImportSetCurrencyArray(dataArray, req.user._id, res.locals.travels);
@@ -75,7 +74,7 @@ exports.postImport = async function(req, res, next) {
           let result = dateEqual && currencyMatch && notMileage;
           return result;
         });
-        
+
         if (currency) {
           console.log('YES', key, currency._id);
           value.curRate = currency._id;
@@ -83,11 +82,10 @@ exports.postImport = async function(req, res, next) {
           console.log('NO', key);
         }
       });
+      message = await postImport.expenseImport(dataArray).catch((err) => {
+        throw err;
+      });
     }
-
-    message = await postImport.expenseImport(dataArray).catch((err) => {
-      throw err;
-    });
 
     if (message.error) {
       error = message.error;

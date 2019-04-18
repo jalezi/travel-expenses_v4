@@ -320,7 +320,6 @@ const expenseImport = async function (dataArray) {
 
 async function travelImport(dataArray, userId) {
   let message = '';
-
   try {
 
     // add user._id to travel

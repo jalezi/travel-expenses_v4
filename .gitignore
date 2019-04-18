@@ -58,6 +58,5 @@ Thumbs.db
 .com.apple.timemachine.donotpresent
 
 # My
-playground/*
-utils/currency-convert.js
-/*.pdf
+/playground
+*.pdf

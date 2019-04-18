@@ -22,8 +22,8 @@ const toPDF = require('../utils/toPDF');
 */
 
 exports.getPDF = async function(req, res, next) {
-  var stream = toPDF(res.locals.travel, res.locals.user);
-    var filename = "WhateverFilenameYouWant.pdf";
+  const stream = toPDF(res.locals.travel, res.locals.user);
+    let filename = "travelReportDocument.pdf";
     // Be careful of special characters
 
     filename = encodeURIComponent(filename);
@@ -31,7 +31,7 @@ exports.getPDF = async function(req, res, next) {
 
     res.setHeader('Content-disposition', 'inline; filename="' + filename + '"');
     res.setHeader('Content-type', 'application/pdf');
-
+    // console.log('stream', stream);
     stream.pipe(res);
 }
 

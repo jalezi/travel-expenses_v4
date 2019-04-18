@@ -303,47 +303,64 @@ const expenseImport = async function (dataArray) {
   return new Promise(async function (resolve, reject) {
 
     try {
-      let expenses = await Expense.insertMany(dataArray);
+      let expenses = await Expense.insertMany(dataArray).catch((err) => {
+        throw new myErrors.saveToDbError('Something went wrong during saving expenses to DB!');
+      });
+      if (!expenses) {
+        throw new myErrors.saveToDbError('No expenses saved!');
+      }
       let travelObjectIds = expenses.map(expense => expense.travel);
       let uniqueTravelObjectIds = [...new Set(travelObjectIds)];
       const updatedTravels = await updateTravels(uniqueTravelObjectIds, expenses).catch((err) => {
-        throw err;
+        throw new myErrors.saveToDbError('Something went wrong during updating travels with expenses!');
       });
 
       let message = `${expenses.length} imported. ${updatedTravels.length} travels updated!`;
-      return resolve(message);
+      resolve(message);
     } catch (err) {
-      return resolve ({error: err, msg: 'Something went wrong during expense import!'});
+      resolve ({error: err, msg: 'Something went wrong during expense import!'});
     }
   });
 }
 
 async function travelImport(dataArray, userId) {
   let message = '';
-  try {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // add user._id to travel
+      await _.forEach(dataArray, (value, key) => {
+        dataArray[key]._user = userId;
+        console.log(key, value);
+      });
 
-    // add user._id to travel
-    await _.forEach(dataArray, (value, key) => {
-      dataArray[key]._user = userId;
-    });
+      // insert travels and update user with travel._id
+      const travels = await Travel.insertMany(dataArray).catch((err) => {
+        throw new myErrors.saveToDbError('Something went wrong during saving to DB!');
+      });
 
-    // insert travels and update user with travel._id
-    const travels = await Travel.insertMany(dataArray);
-    const travelObjectIds = travels.map(travel => travel._id);
-    await User.findByIdAndUpdate(userId, {
-      $addToSet: {
-        'travels': {
-          $each: travelObjectIds
-        }
+      if (!travels) {
+        throw new myErrors.saveToDbError('No travels saved!');
       }
-    });
 
-    message = `${travelObjectIds.length} travels added successfully!`
-    return message;
+      const travelObjectIds = travels.map(travel => travel._id);
+      await User.findByIdAndUpdate(userId, {
+        $addToSet: {
+          'travels': {
+            $each: travelObjectIds
+          }
+        }
+      }).catch((err) => {
+        throw new myErrors.saveToDbError('Something went wrong during updating user with travels!');
+      });
 
-  } catch (err) {
-    return {error: err, msg: 'Something went wrong during travel import!'};
-  }
+      message = `${travelObjectIds.length} travels added successfully!`
+      resolve (message);
+
+    } catch (err) {
+      resolve ({error: err, msg: 'Something went wrong during travel import!'});
+    }
+  })
+
 }
 
 module.exports = {

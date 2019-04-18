@@ -76,12 +76,13 @@ exports.postImport = async function(req, res, next) {
         });
 
         if (currency) {
-          console.log('YES', key, currency._id);
           value.curRate = currency._id;
-        } else {
-          console.log('NO', key);
         }
       });
+
+      if (dataArray.length === 0) {
+        throw new myErrors.imprortFileError('Nothing to import! File has wrong data!');
+      }
       message = await postImport.expenseImport(dataArray).catch((err) => {
         throw err;
       });

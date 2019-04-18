@@ -7,4 +7,14 @@ class imprortFileError extends Error {
     }
 }
 
+class saveToDbError extends Error {
+  constructor(...args) {
+        super(...args);
+        Error.captureStackTrace(this, saveToDbError);
+        this.name = 'saveToDbError';
+
+    }
+}
+
 exports.imprortFileError = imprortFileError;
+exports.saveToDbError = saveToDbError;

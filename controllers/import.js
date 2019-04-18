@@ -76,10 +76,7 @@ exports.postImport = async function(req, res, next) {
         });
 
         if (currency) {
-          console.log('YES', key, currency._id);
           value.curRate = currency._id;
-        } else {
-          console.log('NO', key);
         }
       });
       message = await postImport.expenseImport(dataArray).catch((err) => {

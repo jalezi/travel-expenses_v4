@@ -325,10 +325,18 @@ async function travelImport(dataArray, userId) {
     // add user._id to travel
     await _.forEach(dataArray, (value, key) => {
       dataArray[key]._user = userId;
+      
     });
 
     // insert travels and update user with travel._id
-    const travels = await Travel.insertMany(dataArray);
+    const travels = await Travel.insertMany(dataArray, (err) => {
+        // console.log(err);
+      });
+
+    if (!travels) {
+      throw new myErrors.imprortFileError('Something went wrong during saving to DB!');
+    }
+
     const travelObjectIds = travels.map(travel => travel._id);
     await User.findByIdAndUpdate(userId, {
       $addToSet: {
@@ -337,6 +345,8 @@ async function travelImport(dataArray, userId) {
         }
       }
     });
+
+
 
     message = `${travelObjectIds.length} travels added successfully!`
     return message;

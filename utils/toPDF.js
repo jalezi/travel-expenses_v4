@@ -120,6 +120,11 @@ function createTableData (travel) {
 }
 
 module.exports = (travel, user) => {
+
+  if (!user.profile.name) {
+    user.profile.name = 'Unknown';
+  }
+
   const dateFrom = moment(travel.dateFrom).format('ddd, MMM Do YYYY');
   const dateTo = moment(travel.dateTo).format('ddd, MMM Do YYYY');
   const tableData = createTableData(travel);

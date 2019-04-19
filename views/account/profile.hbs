@@ -1,5 +1,7 @@
 {{!< layout}}
 
+{{debug user.profile.name}}
+
 <div class="pb-2 mt-2 mb-4 border-bottom">
   <h3>Profile Information</h3>
 </div>
@@ -8,7 +10,7 @@
     <div class="col-md-7"><input class="form-control" type="email" name="email" id="email" autocomplete="email" value={{user.email}}></div>
   </div>
   <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="name">Name</label>
-    <div class="col-md-7"><input class="form-control" type="text" name="name" id="name" autocomplete="name" value={{user.profile.name}}></div>
+    <div class="col-md-7"><input class="form-control" type="text" name="name" id="name" autocomplete="name" value="{{user.profile.name}}"></div>
   </div>
   <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right">Gender</label>
     <div class="col-sm-6">

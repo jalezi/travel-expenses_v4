@@ -48,8 +48,11 @@ const TravelSchema = new mongoose.Schema({
 TravelSchema.methods.updateTotal = function  (cb) {
   let total = 0;
   this.expenses.forEach((expense) => {
+    console.log(total, Number(expense.amountConverted));
     total = total + Number(expense.amountConverted);
+
   });
+  console.log(total);
   return total;
 }
 

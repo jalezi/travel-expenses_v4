@@ -199,6 +199,9 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
     let noTravelKeys = [];
     await _.forEach(dataArray, async (value, key, object) => {
       value._user = userId;
+      value.amount = Number(value.amount).toFixed(2);
+      value.rate = Number(value.rate).toFixed(2);
+      value.amountConverted = Number(value.amountConverted).toFixed(2);
       let currency = {};
       if (value.type != 'Mileage') {
         currency = createCurrency(value);
@@ -329,8 +332,8 @@ async function travelImport(dataArray, userId) {
     try {
       // add user._id to travel
       await _.forEach(dataArray, (value, key) => {
-        dataArray[key]._user = userId;
-        console.log(key, value);
+        value._user = userId;
+        value.total = Number(0).toFixed(2);
       });
 
       // insert travels and update user with travel._id

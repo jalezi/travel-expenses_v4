@@ -269,7 +269,7 @@ exports.updateTravel = async function(req, res, next) {
     }
 
     await updateExpensesToMatchTravelRangeDates(travel, res.locals.rates);
-    await travel.save();
+    travel = await travel.save();
     travel = await Travel.findOne({
       _id: travel._id,
       _user: req.user.id
@@ -279,14 +279,10 @@ exports.updateTravel = async function(req, res, next) {
         path: 'curRate'
       }
     });
+
     const total = await travel.updateTotal();
-    console.log(total);
     travel.total = parseFloat(total).toFixed(2);
-    await travel.save((err, doc) => {
-      if (err) {
-        throw err;
-      }
-    });
+    travel = await travel.save();
 
     req.flash('success', {
       msg: 'Travel successfully updated!'

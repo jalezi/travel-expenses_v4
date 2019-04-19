@@ -209,6 +209,7 @@ app.use('/import', async (req, res, next) => {
 
 /**
 * Added by me
+* Save to res.locals.travels current travel
 */
 app.use('/travels/:id', async (req, res, next) => {
   if ((!res.locals.travel || res.locals.travel._id != req.params.id) && req.params.id != 'new') {

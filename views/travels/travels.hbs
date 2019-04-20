@@ -20,7 +20,7 @@
         <td><a href="/travels/{{this._id}}">{{this.description}}</a></td>
         <td class="text-center">{{formatDate this.dateFrom}}</td>
         <td class="text-center">{{formatDate this.dateTo}}</td>
-        <td class="text-right">{{this.total}} {{this.homeCurrency}}</td>
+        <td class="text-right">{{toCurrency this.total}} {{this.homeCurrency}}</td>
       {{/each}}
     </tr>
   </tbody>

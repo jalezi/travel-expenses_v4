@@ -90,7 +90,7 @@ expressHbs.registerHelper('setUnit', (homeDistance) => {
     } else {
       return '';
     }
-})
+});
 
 expressHbs.registerHelper('setUnit2', (homeDistance) => {
   if (homeDistance != 'mi') {
@@ -100,11 +100,11 @@ expressHbs.registerHelper('setUnit2', (homeDistance) => {
     } else {
       return '';
     }
-})
+});
 
 expressHbs.registerHelper('toNumber' , (valueAsString) => {
   return parseFloat(valueAsString);
-})
+});
 
 expressHbs.registerHelper('getRate', (travelCurrencies, currency) => {
   // console.log(travelCurrencies, currency);
@@ -113,4 +113,10 @@ expressHbs.registerHelper('getRate', (travelCurrencies, currency) => {
     return item.currency.name === currency;
   });
   return item.value;
-})
+});
+
+expressHbs.registerHelper('toCurrency', (number) => {
+  const formatter = new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  let numberString = formatter.format(number);;
+  return numberString;
+});

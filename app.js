@@ -34,6 +34,8 @@ const imprortFileError = myErrors.imprortFileError;
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
+const fullIcu = require('full-icu');
+
 /**
 * Added by me
 * Catch uncaught errors

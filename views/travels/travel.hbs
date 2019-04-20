@@ -135,6 +135,13 @@
       }
     }
 
+    updateTravelCancelButton.onclick = (event) => {
+      let df = moment(new Date("{{travel.dateFrom}}")).format('YYYY-MM-DD');
+      let dt = moment(new Date("{{travel.dateTo}}")).format('YYYY-MM-DD')
+      dateFrom.value = df;
+      dateTo.value = dt;
+    }
+
     amountDistance2.onchange = (event) => {
       if (invoiceUnit.value === 'km') {
         const kmToMiles = parseFloat({{constants.KILOMETERS_TO_MILES}});

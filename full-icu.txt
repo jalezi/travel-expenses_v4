@@ -1,0 +1,9 @@
+﻿Node will use this ICU datafile if the environment variable NODE_ICU_DATA is set to “node_modules\full-icu”
+or with node --icu-data-dir=node_modules\full-icu YOURAPP.js
+ For package.json:
+{"scripts":{"start":"node --icu-data-dir=node_modules\\full-icu YOURAPP.js"}}
+
+By the way, if you have full data, running this in node:
+> new Intl.DateTimeFormat('es',{month:'long'}).format(new Date(9E8));
+... will show “enero”. If it shows “January” you don't have full data.
+News: Please see https://github.com/icu-project/full-icu-npm/issues/6

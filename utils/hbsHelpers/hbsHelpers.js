@@ -115,7 +115,7 @@ expressHbs.registerHelper('getRate', (travelCurrencies, currency) => {
 
 expressHbs.registerHelper('toCurrency', (number) => {
   const formatter = new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  let numberString = formatter.format(number);;
+  let numberString = formatter.format(number);
   return numberString;
 });
 

@@ -2,34 +2,34 @@
 
 {{> travelsHeader}}
 
-  <div class="input-group input-group-sm md-6 w-50 mb-1" id="dateRangePicker">
-    <select class="form-control" id="dateRangePickerSelect">
-      <option selected>All</option>
-      <option>This Month</option>
-      <option>Last Month</option>
-      <option>Year</option>
-      <option>Custom</option>
-    </select>
+<div class="input-group input-group-sm md-6 w-50 mb-1" id="dateRangePicker">
+  <select class="form-control" id="dateRangePickerSelect">
+    <option selected>All</option>
+    <option>This Month</option>
+    <option>Last Month</option>
+    <option>Year</option>
+    <option>Custom</option>
+  </select>
 
-    <div class="input-group-prepend">
-      <span class="input-group-text" id="">From</span>
-    </div>
-    <input type="date" class="form-control" id="dateFrom" placeholder="" disabled/>
-
-    <div class="input-group-prepend">
-      <span class="input-group-text" id="">To</span>
-    </div>
-    <input type="date" class="form-control" id="dateTo" placeholder="" disabled />
-    <div class="input-group-append">
-      <button class="btn btn-outline-secondary" id="showCustomRange" type="button" disabled>Show</button>
-    </div>
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="">From</span>
   </div>
+  <input type="date" class="form-control" id="dateFrom" placeholder="" disabled />
 
-<table class="table table-hover table-bordered table-responsive-md">
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="">To</span>
+  </div>
+  <input type="date" class="form-control" id="dateTo" placeholder="" disabled />
+  <div class="input-group-append">
+    <button class="btn btn-outline-secondary" id="showCustomRange" type="button" disabled>Show</button>
+  </div>
+</div>
+
+<table class="table table-hover table-bordered table-responsive-md" id="travelTotalTable">
   <tbody>
     <tr class="bg-success">
       <th scope="row" class="text-right">TOTAL</th>
-      <td class="text-left col-md-9"><strong>{{toCurrency travel.total}} {{user.homeCurrency}}</strong></td>
+      <td class="text-left col-md-9" id="travelsFilteredTotal"><strong>{{toCurrency travel.total}} {{user.homeCurrency}}</strong></td>
     </tr>
 
   </tbody>
@@ -53,14 +53,14 @@
         <td><a href="/travels/{{this._id}}">{{this.description}}</a></td>
         <td class="text-center">{{formatDate this.dateFrom}}</td>
         <td class="text-center">{{formatDate this.dateTo}}</td>
-        <td class="text-right">{{toCurrency this.total}} {{this.homeCurrency}}</td>
+        <td class="text-right totalTravel">{{toCurrency this.total}} {{this.homeCurrency}}</td>
     {{/each}}
     </tr>
   </tbody>
 </table>
 
 <script type="text/javascript">
-  function showTravels (df, dt) {
+  function showTravels(df, dt) {
     $("#tableBody tr").filter(function(index, row) {
       // console.log(index);
       // console.log(row);
@@ -71,78 +71,111 @@
       const cond2 = rowDateFrom <= new Date(dt);
       const cond = cond1 && cond2;
       $(this).toggle(cond);
-      });
+    });
+  }
+
+  function calculateTotal() {
+    let sum = 0;
+    $("#tableBody .totalTravel").not(":hidden").each((index, item) => {
+      let amount = 0;
+      try {
+        amount = Number(item.innerText.split(" ")[0].replace(/,/g, ''));
+      } catch (e) {
+        console.log(e);
+      } finally {
+        sum += amount;
+      }
+
+    })
+    return sum.toFixed(2);
+  }
+
+  function displayFilteredTravelsTotal() {
+    let total = calculateTotal();
+    let el = $("#travelsFilteredTotal")[0];
+
+    let splitText = el.innerText.split(" ");
+    const formatter = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    let totalString = formatter.format(total);
+    el.innerHTML = `<strong>${totalString} ${splitText[1]}</strong>`
   }
 
   $(document).ready(() => {
 
-        showCustomRange.onclick = (event) => {
-          const df = $("#dateFrom").val();
-          const dt = $("#dateTo").val();
+    showCustomRange.onclick = (event) => {
+      const df = $("#dateFrom").val();
+      const dt = $("#dateTo").val();
+      showTravels(df, dt);
+    }
+
+    dateRangePickerSelect.onchange = (event) => {
+      let df;
+      let dt;
+      let dayArray;
+      const today = moment();
+      const year = today.format("YYYY");
+      const month = today.format("MM");
+
+      if (dateRangePickerSelect.value === "Custom") {
+        $("#dateFrom").prop('disabled', false);
+        $("#dateTo").prop('disabled', false);
+        $("#showCustomRange").prop('disabled', false);
+      } else {
+        $("#dateFrom").prop('disabled', true);
+        $("#dateTo").prop('disabled', true);
+        $("#showCustomRange").prop('disabled', true);
+      }
+
+      switch (dateRangePickerSelect.value) {
+        case "Custom":
+          dayArray = [year, month, "01"];
+          df = dayArray.join("-")
+          dt = today.format("YYYY-MM-DD");
+          // dateFrom.value = df;
+          // dateTo.value = dt;
+          break;
+        case "All":
+          df = "2018-07-01";
+          dt = "2019-06-30";
+          // dateFrom.value = df;
+          // dateTo.value = dt;
           showTravels(df, dt);
-          }
+          break;
+        case "This Month":
+          dayArray = [year, month, "01"];
+          df = dayArray.join("-")
+          dt = today.format("YYYY-MM-DD");
+          // dateFrom.value = df;
+          // dateTo.value = dt;
+          showTravels(df, dt);
+          break;
+        case "Last Month":
+          let previous = today.subtract(1, "months");
+          let prevYear = previous.format("YYYY");
+          let prevMonth = previous.format("MM");
+          let daysInMonth = previous.daysInMonth();
+          dayArray = [prevYear, prevMonth, "01"];
+          df = dayArray.join("-");
+          dayArray = [prevYear, prevMonth, daysInMonth.toString()];
+          dt = dayArray.join("-");
+          // dateFrom.value = df;
+          // dateTo.value = dt;
+          showTravels(df, dt);
+          break;
+        default:
+          df = "2018-07-01";
+          dt = "2019-06-30";
+          showTravels(df, dt);
+      }
 
-        dateRangePickerSelect.onchange = (event) => {
-          let df;
-          let dt;
-          let dayArray;
-          const today = moment();
-          const year = today.format("YYYY");
-          const month = today.format("MM");
+      dateFrom.value = df;
+      dateTo.value = dt;
+      displayFilteredTravelsTotal();
+    }
 
-          if (dateRangePickerSelect.value === "Custom") {
-            $("#dateFrom").prop('disabled', false);
-            $("#dateTo").prop('disabled', false);
-            $("#showCustomRange").prop('disabled', false);
-          } else {
-            $("#dateFrom").prop('disabled', true);
-            $("#dateTo").prop('disabled', true);
-            $("#showCustomRange").prop('disabled', true);
-          }
-
-          switch (dateRangePickerSelect.value) {
-            case "Custom":
-              dayArray = [year, month, "01"];
-              df = dayArray.join("-")
-              dt = today.format("YYYY-MM-DD");
-              // dateFrom.value = df;
-              // dateTo.value = dt;
-              break;
-            case "All":
-              df = "2018-07-01";
-              dt = "2019-06-30";
-              // dateFrom.value = df;
-              // dateTo.value = dt;
-              showTravels(df, dt);
-              break;
-            case "This Month":
-              dayArray = [year, month, "01"];
-              df = dayArray.join("-")
-              dt = today.format("YYYY-MM-DD");
-              // dateFrom.value = df;
-              // dateTo.value = dt;
-              showTravels(df, dt);
-              break;
-            case "Last Month":
-              let previous = today.subtract(1, "months");
-              let prevYear = previous.format("YYYY");
-              let prevMonth = previous.format("MM");
-              let daysInMonth = previous.daysInMonth();
-              dayArray = [prevYear, prevMonth, "01"];
-              df = dayArray.join("-");
-              dayArray = [prevYear, prevMonth, daysInMonth.toString()];
-              dt = dayArray.join("-");
-              // dateFrom.value = df;
-              // dateTo.value = dt;
-              showTravels(df, dt);
-              break;
-            default:
-              df = "2018-07-01";
-              dt = "2019-06-30";
-          }
-
-          dateFrom.value = df;
-          dateTo.value = dt;
-        }
-        });
+    displayFilteredTravelsTotal();
+  });
 </script>

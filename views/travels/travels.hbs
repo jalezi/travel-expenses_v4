@@ -3,7 +3,7 @@
 {{> travelsHeader}}
 
 <div class="input-group input-group-sm md-6 w-50 mb-1" id="dateRangePicker">
-  <select class="form-control" id="dateRangePickerSelect">
+  <select class="form-control" name="dateRangePickerSelect" id="dateRangePickerSelect">
     <option selected>All</option>
     <option>This Month</option>
     <option>Last Month</option>
@@ -11,18 +11,24 @@
     <option>Custom</option>
   </select>
 
-  <div class="input-group-prepend">
-    <span class="input-group-text" id="">From</span>
-  </div>
-  <input type="date" class="form-control" id="dateFrom" placeholder="" disabled />
+  <select class="form-control" name="choosenYear" id="choosenYear">
+    <option value="" disabled>2019</option>
+  </select>
 
   <div class="input-group-prepend">
-    <span class="input-group-text" id="">To</span>
+    <label class="input-group-text" for="dateFrom" id="">From</label>
   </div>
-  <input type="date" class="form-control" id="dateTo" placeholder="" disabled />
+  <input type="date" class="form-control" name="dateFrom" id="dateFrom" placeholder="" disabled />
+
+  <div class="input-group-prepend">
+    <label class="input-group-text" for="dateTo" id="">To</label>
+  </div>
+  <input type="date" class="form-control" name="dateTo" id="dateTo" placeholder="" disabled />
   <div class="input-group-append">
     <button class="btn btn-outline-secondary" id="showCustomRange" type="button" disabled>Show</button>
   </div>
+
+
 </div>
 
 <table class="table table-hover table-bordered table-responsive-md" id="travelTotalTable">
@@ -103,6 +109,25 @@
     el.innerHTML = `<strong>${totalString} ${splitText[1]}</strong>`
   }
 
+  function setDateRange(option) {
+    let df;
+    let dt;
+    let dayArray;
+    const today = moment();
+    const year = today.format("YYYY");
+    switch (option) {
+      case "Year":
+        dayArray = [year, "01", "01"];
+        df = dayArray.join("-");
+        dt = today.format("YYYY-MM-DD");
+        break;
+      default:
+        return new Error(`${option} is not a valid option!`);
+    }
+    console.log('return', option, df, dt);
+    return [df, dt];
+  }
+
   $(document).ready(() => {
 
     showCustomRange.onclick = (event) => {
@@ -115,19 +140,10 @@
       let df;
       let dt;
       let dayArray;
+      let dateRange = [];
       const today = moment();
       const year = today.format("YYYY");
       const month = today.format("MM");
-
-      if (dateRangePickerSelect.value === "Custom") {
-        $("#dateFrom").prop('disabled', false);
-        $("#dateTo").prop('disabled', false);
-        $("#showCustomRange").prop('disabled', false);
-      } else {
-        $("#dateFrom").prop('disabled', true);
-        $("#dateTo").prop('disabled', true);
-        $("#showCustomRange").prop('disabled', true);
-      }
 
       switch (dateRangePickerSelect.value) {
         case "Custom":
@@ -138,11 +154,11 @@
           // dateTo.value = dt;
           break;
         case "All":
-          df = "2018-07-01";
-          dt = "2019-06-30";
+          df = "2015-01-01";
+          dt = moment().format("YYYY-MM-DD");
           // dateFrom.value = df;
           // dateTo.value = dt;
-          showTravels(df, dt);
+          // showTravels(df, dt);
           break;
         case "This Month":
           dayArray = [year, month, "01"];
@@ -150,7 +166,7 @@
           dt = today.format("YYYY-MM-DD");
           // dateFrom.value = df;
           // dateTo.value = dt;
-          showTravels(df, dt);
+          // showTravels(df, dt);
           break;
         case "Last Month":
           let previous = today.subtract(1, "months");
@@ -163,16 +179,33 @@
           dt = dayArray.join("-");
           // dateFrom.value = df;
           // dateTo.value = dt;
-          showTravels(df, dt);
+          // showTravels(df, dt);
+          break;
+        case "Year":
+          dateRange = setDateRange(dateRangePickerSelect.value);
+          df = dateRange[0];
+          dt = dateRange[1]
+          // showTravels(df, dt);
           break;
         default:
-          df = "2018-07-01";
-          dt = "2019-06-30";
-          showTravels(df, dt);
+          console.log('Default');
+          df = "2000-01-01";
+          dt = "2000-01-31";
+
       }
 
       dateFrom.value = df;
       dateTo.value = dt;
+      if (dateRangePickerSelect.value === "Custom") {
+        $("#dateFrom").prop('disabled', false);
+        $("#dateTo").prop('disabled', false);
+        $("#showCustomRange").prop('disabled', false);
+      } else {
+        $("#dateFrom").prop('disabled', true);
+        $("#dateTo").prop('disabled', true);
+        $("#showCustomRange").prop('disabled', true);
+        showTravels(df, dt);
+      }
       displayFilteredTravelsTotal();
     }
 

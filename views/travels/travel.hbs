@@ -10,7 +10,7 @@
 
 <div class="pb-2 mt-2 mb-4">
   <h6>
-    <button class="btn btn-primary " type="button" data-toggle="collapse" data-target="#updateTravelForm" aria-expanded="false" aria-controls="updateTravelForm">
+    <button class="btn btn-primary " id="updateTravelChangeButton" type="button" data-toggle="collapse" data-target="#updateTravelForm" aria-expanded="false" aria-controls="updateTravelForm">
       <i class="fas fa-pen"></i>Change travel data
     </button>
     <button class="btn btn-danger " type="button" onclick="toPDF()">
@@ -120,6 +120,12 @@
     }
   }
 
+  function resetDates () {
+    let df = moment(new Date("{{travel.dateFrom}}")).format('YYYY-MM-DD');
+    let dt = moment(new Date("{{travel.dateTo}}")).format('YYYY-MM-DD');
+    return {df, dt};
+  }
+
   $(document).ready(() => {
     invoiceUnit.onchange = () => {
       document.getElementById('amountDistance2').readOnly = !document.getElementById('amountDistance2').readOnly;
@@ -133,6 +139,18 @@
         amountDistance.value = parseFloat($('#amountDistance').val()).toFixed(2)
         $('#row3Mileage').hide();
       }
+    }
+
+    updateTravelCancelButton.onclick = (event) => {
+      const {df, dt} = resetDates();
+      dateFrom.value = df;
+      dateTo.value = dt;
+    }
+
+    updateTravelChangeButton.onclick = (event) => {
+      const {df, dt} = resetDates();
+      dateFrom.value = df;
+      dateTo.value = dt;
     }
 
     amountDistance2.onchange = (event) => {

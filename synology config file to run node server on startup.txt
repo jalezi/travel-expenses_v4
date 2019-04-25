@@ -1,0 +1,26 @@
+﻿// configuration to run node server on synology on startup:
+login as admin
+
+// where configuration files are stored on synology
+cd /etc/init 
+
+/ in test.conf file (the filename is just for example)
+
+description "test application for Node.js"
+author "Jaka Daneu or whatever you want"
+
+start on syno.share.ready
+stop on runlevel [06]
+
+# run scripts as the 'http' user. The default is running as root which is not recommended
+setuid http
+
+# execute the application
+exec node /volume1/web/YOURFILE.js
+
+// start 
+sudo start test
+
+// stop
+sudo stop test
+

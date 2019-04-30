@@ -37,7 +37,8 @@
   <tbody>
     <tr class="bg-success">
       <th scope="row" class="text-right">TOTAL</th>
-      <td class="text-left col-md-9" id="travelsFilteredTotal"><strong>{{toCurrency travel.total}} {{user.homeCurrency}}</strong></td>
+      <td class="text-left" id="travelsFilteredTotal"><strong>{{toCurrency travel.total}} {{user.homeCurrency}}</strong></td>
+      <td class="" id="travelsCount"><strong>{{travels.length}} travels</strong></td>
     </tr>
 
   </tbody>
@@ -78,6 +79,10 @@
       const cond = cond1 && cond2;
       $(this).toggle(cond);
     });
+    let el = $("#travelsCount")[0];
+    let count = countRows();
+    console.log(count);
+    el.innerHTML =`<strong>${count} travels</strong>`
   }
 
   function calculateTotal() {
@@ -94,6 +99,10 @@
 
     })
     return sum.toFixed(2);
+  }
+
+  function countRows() {
+    return $("#tableBody tr").not(":hidden").length;
   }
 
   function displayFilteredTravelsTotal() {
@@ -222,6 +231,7 @@
         $("#divLabelDateFrom").show();
         $("#divLableDateTo").show();
         toggleFilterInputs(arr, false, false);
+        $("#choosenYear").prop('disabled', true).hide();
 
       } else {
 

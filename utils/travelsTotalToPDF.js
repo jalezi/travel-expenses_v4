@@ -21,6 +21,98 @@ const fonts = {
 
 const printer = new PdfPrinter(fonts);
 
+function buildTableBody(data, columns, tableHeader, total = 0) {
+
+    var body = [];
+    if (!tableHeader) {
+      tableHeader = columns;
+    }
+
+    body.push(tableHeader);
+
+    data.forEach(function(row) {
+        let dataRow = [];
+        // console.log(row);
+        columns.forEach(function(column) {
+          // console.log(column);
+            const dataRowObject = {};
+            dataRowObject.text = row[column].toString();
+            if (['amount', 'perMile', tableHeader[tableHeader.length - 1]].includes(column)) {
+              // console.log(column, 'right');
+              dataRowObject.alignment = 'right';
+            } else if (column === 'description') {
+              // console.log(column, 'left');
+              dataRowObject.alignment = 'left';
+            } else {
+              // console.log(column, 'center');
+              dataRowObject.alignment = 'center';
+            }
+            // dataRow.push(row[column].toString());
+            dataRow.push(dataRowObject);
+        })
+
+        body.push(dataRow);
+    });
+    const totalRowStyle = {
+      alignment: 'right',
+      bold: true,
+      fontSize: 12
+    }
+    const totalRow = [{
+      colSpan: 5,
+      text: `TOTAL`,
+      style: totalRowStyle
+    }, {}, {}, {}, {}, {
+      text: total.toString(),
+      style: totalRowStyle
+    }];
+    body.push(totalRow);
+
+    return body;
+}
+
+function table(data, columns, tableHeader, style = {}, sum = 0) {
+
+    return {
+
+        style: style,
+        layout: 'lightHorizontalLines',
+        alignment: 'center',
+        table: {
+            widths: ['auto', 'auto', '*', 'auto', 'auto', 'auto'],
+            heights: function(row) {
+              switch (row) {
+                case 0:
+                  return 10;
+                  break;
+                case data.length + 1:
+                  return 5
+                default:
+                  return 20
+              }
+            },
+            headerRows: 1,
+            body: buildTableBody(data, columns, tableHeader, sum)
+        }
+    };
+}
+
+function createTravelsTotalTableData(travels) {
+  const dataObjects = [];
+
+  travels.forEach((travel, key, object) => {
+    const newObject = {};
+    newObject.dateFrom = moment(travel.dateFrom).format('l');
+    newObject.dateTo = moment(travel.dateTo).format('l');
+    newObject.description = travel.description;
+    newObject.currency = travel.homeCurrency;
+    newObject.perMile = travel.perMileAmount;
+    newObject.amount = travel.total;
+    dataObjects.push(newObject);
+  });
+  return dataObjects;
+}
+
 module.exports = (travels, user, dateRange, sum) => {
 
   const titlePdf = `TOTAL`;
@@ -29,6 +121,25 @@ module.exports = (travels, user, dateRange, sum) => {
   const keywordsPdf = 'travel report expense';
   const df = dateRange.df;
   const dt = dateRange.dt;
+  const dateFrom = moment(df).format('ddd, MMM Do YYYY');
+  const dateTo = moment(dt).format('ddd, MMM Do YYYY');
+
+  const tableData = createTravelsTotalTableData(travels);
+
+  const dataProperties = ['dateFrom', 'dateTo', 'description', 'currency', 'perMile', 'amount'];
+  let homeDistance;
+  if (user.homeDistance === 'mi') {
+    homeDistance = 'MILE';
+  } else if (user.homeDistance === 'km') {
+    homeDistance = 'KM';
+  } else {
+    homeDistance = 'X';
+  }
+  const tableHeader = ['FROM', 'TO', 'DESCRIPTION', 'CUR', `PER ${homeDistance}`, 'AMOUNT'];
+  const tableStyle = {alignment: 'center', fontSize: 10, margin: [20, 0, 20, 0], width: '*'};
+
+  const travelsTable = table(tableData, dataProperties, tableHeader, tableStyle, sum);
+  console.log(travelsTable.table);
 
   const docDefinition = {
     // ...
@@ -63,10 +174,7 @@ module.exports = (travels, user, dateRange, sum) => {
   },
     content: [
       {stack: [
-          {text: 'TOTAL REPORT'},
-          {text: 'From: ' + df},
-          {text: 'To: ' + dt},
-          {text: 'Total: ' + sum}
+          {text: 'TOTAL REPORT'}
         ],
         style: 'title'
       },
@@ -83,7 +191,25 @@ module.exports = (travels, user, dateRange, sum) => {
               ['Position:', 'Whatever']
             ]
         }}
-      ]}
+      ]},
+      {stack: [
+        {text: 'TOTAL', style: 'description'},
+        {
+          layout: 'noBorders',
+          table: {
+            style: 'travelDate',
+            widths: ['*', 'auto'],
+            body: [
+              ['From:', dateFrom],
+              ['To:', dateTo]
+            ]
+
+        }}
+      ],
+      style: 'travelInfo'
+    },
+    {text: `Total expenses: ${user.homeCurrency} ${sum}`, margin: [0, 0, 0, 20], color: '#696969'},
+    travelsTable
     ],
     styles: {
     title: {
@@ -113,8 +239,8 @@ module.exports = (travels, user, dateRange, sum) => {
   };
 
   const pdfDoc = printer.createPdfKitDocument(docDefinition);
-  // console.log(docDefinition);
-  // console.log();
+  console.log(docDefinition);
+  console.log();
   const pdfDocPath = `./pdf/TOTAL_${user._id}.pdf`;
   pdfDoc.pipe(fs.createWriteStream(pdfDocPath));
   pdfDoc.end();

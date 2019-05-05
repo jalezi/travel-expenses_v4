@@ -52,7 +52,6 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
 
         body.push(dataRow);
     });
-    console.log('buildTableBody', Number(total));
     const totalRowStyle = {
       alignment: 'right',
       bold: true,
@@ -72,7 +71,7 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
 }
 
 function table(data, columns, tableHeader, style = {}, travelTotal = 0) {
-  console.log(data.length);
+
     return {
 
         style: style,
@@ -97,7 +96,7 @@ function table(data, columns, tableHeader, style = {}, travelTotal = 0) {
     };
 }
 
-function createTableData (travel) {
+function createTravelExpensesTableData (travel) {
   const expenses = travel.expenses;
   const dataObjects = [];
   expenses.forEach((expense, key, object) => {
@@ -116,7 +115,7 @@ function createTableData (travel) {
     newObject[travel.homeCurrency] = expense.amountConverted;
     dataObjects.push(newObject);
   });
-  return dataObjects
+  return dataObjects;
 }
 
 module.exports = (travel, user) => {
@@ -127,18 +126,17 @@ module.exports = (travel, user) => {
 
   const dateFrom = moment(travel.dateFrom).format('ddd, MMM Do YYYY');
   const dateTo = moment(travel.dateTo).format('ddd, MMM Do YYYY');
-  const tableData = createTableData(travel);
+
+  const tableData = createTravelExpensesTableData(travel);
   const dataProperties = ['date', 'type', 'description', 'amount', 'currency', 'rate', travel.homeCurrency];
   const tableHeader = ['DATE', 'TYPE', 'DESCRIPTION', 'AMOUNT', 'CURRENCY', 'RATE', travel.homeCurrency];
   const tableStyle = {alignment: 'center', fontSize: 10, margin: [20, 0, 20, 0], width: '*'};
-  // const tableData = [{ name: 'Bartek', age: 34 },
-  //   { name: 'John', age: 27 },
-  //   { name: 'Elizabeth', age: 30 }];
-  // const tableHeader = ['name', 'age'];
+
   const titlePdf = `${travel.description}`;
   const authorPdf = `${user.profile.name}`;
   const subjectPdf = 'Travel expenses';
   const keywordsPdf = 'travel report expense';
+
   const expensesTable = table(tableData, dataProperties, tableHeader, tableStyle, travel.total);
   const docDefinition = {
     // ...

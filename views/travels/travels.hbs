@@ -2,6 +2,10 @@
 
 {{> travelsHeader}}
 
+<button class="btn btn-danger " type="button" onclick="travelsTotalToPDF()">
+  <i class="far fa-file-pdf"></i>Create PDF
+</button>
+
 <div class="input-group input-group-sm md-6 w-50 mb-1" id="dateRangePicker">
   <select class="form-control" name="dateRangePickerSelect" id="dateRangePickerSelect">
     <option selected>All</option>
@@ -67,6 +71,15 @@
     </tr>
   </tbody>
 </table>
+
+<script type="text/javascript">
+  function travelsTotalToPDF() {
+    const dt = dateTo.value;
+    const df = dateFrom.value;
+    let routepath = `/travels/total_pdf/?df=${df}&dt=${dt}`;
+    window.open(routepath);
+  }
+</script>
 
 <script type="text/javascript">
   function showTravels(df, dt) {

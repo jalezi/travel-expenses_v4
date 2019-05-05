@@ -214,7 +214,7 @@ app.use('/import', async (req, res, next) => {
 * Save to res.locals.travels current travel
 */
 app.use('/travels/:id', async (req, res, next) => {
-  if ((!res.locals.travel || res.locals.travel._id != req.params.id) && req.params.id != 'new') {
+  if ((!res.locals.travel || res.locals.travel._id != req.params.id) && req.params.id != 'new' && req.params.id != 'total_pdf') {
     try {
       const travel = await Travel.findById(req.params.id).populate({
         path: 'expenses',
@@ -277,13 +277,15 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
 app.get('/travels', passportConfig.isAuthenticated, travelController.getTravels);
 app.get('/travels/new', passportConfig.isAuthenticated, travelController.getNewTravel);
 app.post('/travels/new', passportConfig.isAuthenticated, travelController.postNewTravel);
+app.get('/travels/total_pdf', passportConfig.isAuthenticated, travelController.getTravelsTotalPDF);
 app.get('/travels/:id', passportConfig.isAuthenticated, travelController.getTravel);
 app.delete('/travels/:id', passportConfig.isAuthenticated, travelController.deleteTravel);
 app.patch('/travels/:id', passportConfig.isAuthenticated, travelController.updateTravel);
 app.post('/travels/:id/expenses/new', passportConfig.isAuthenticated, expenseController.postNewExpense);
 app.get('/import', passportConfig.isAuthenticated, importController.getImport);
 app.post('/import', passportConfig.isAuthenticated, importController.postImport);
-app.get('/travels/:id/pdf', passportConfig.isAuthenticated, travelController.getPDF)
+app.get('/travels/:id/pdf', passportConfig.isAuthenticated, travelController.getTravelExpensesPDF);
+
 
 
 /**

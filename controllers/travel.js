@@ -15,24 +15,121 @@ const constants = require('../lib/constants');
 
 const updateExpensesToMatchTravelRangeDates = require('../utils/updateExpensesToMatchTravelRangeDates');
 
-const toPDF = require('../utils/toPDF');
+const travelExpensesToPDF = require('../utils/travelExpensesToPDF');
+const travelsTotalToPDF = require('../utils/travelsTotalToPDF');
 
 /*
-  toPDF
+* travelsTotalToPDF
+*/
+function createTravelsTotalPDF(res, travels, user, dateRange, sum) {
+  const stream = travelsTotalToPDF(travels, user, dateRange, sum);
+  let filename = "travelReportDocument.pdf";
+  // Be careful of special characters
+
+  filename = encodeURIComponent(filename);
+  // Ideally this should strip them
+
+  res.setHeader('Content-disposition', 'inline; filename="' + filename + '"');
+  res.setHeader('Content-type', 'application/pdf');
+  // console.log('stream', stream);
+  stream.pipe(res);
+}
+
+exports.getTravelsTotalPDF = async function(req, res, next) {
+  // console.log(res.locals);
+  let travels;
+  let queryDateFrom;
+  let queryDateTo;
+  let totalSum;
+  const df = req.query.df;
+  const dt = req.query.dt;
+  const dateRange = {
+    df,
+    dt
+  };
+
+  if (df === '' || dt === '') {
+    travels = await Travel.find({_user: res.locals.user._id});
+    totalSum = Travel.aggregate([
+  {
+    '$match': {
+      '_user': res.locals.user._id
+    }
+  }, {
+    '$group': {
+      '_id': null,
+      'sum': {
+        '$sum': '$total'
+      }
+    }
+  }
+], (err, result) => {
+  if (err) {
+    next(err)
+  } else {
+    let sum = Number(result[0].sum);
+    createTravelsTotalPDF(res, travels, res.locals.user, dateRange, sum);
+  }
+
+});
+
+  } else {
+    queryDateFrom = new Date(df);
+    queryDateTo = new Date(dt);
+    travels = await Travel.find({
+      _user: res.locals.user._id,
+      $and: [
+        {dateFrom: {$gte: queryDateFrom}}, {dateFrom: {$lte: queryDateTo}}
+      ]
+    });
+
+    totalSum = Travel.aggregate([
+  {
+    '$match': {
+      '_user': res.locals.user._id,
+      $and: [
+        {dateFrom: {$gte: queryDateFrom}}, {dateFrom: {$lte: queryDateTo}}
+      ]
+    }
+  }, {
+    '$group': {
+      '_id': null,
+      'sum': {
+        '$sum': '$total'
+      }
+    }
+  }
+], (err, result) => {
+  if (err) {
+    next(err)
+  } else {
+    let sum = Number(result[0].sum);
+    createTravelsTotalPDF(res, travels, res.locals.user, dateRange, sum);
+  }
+
+});
+  }
+  console.log(travels.length);
+
+
+}
+
+/*
+  travelExpensesToPDF
 */
 
-exports.getPDF = async function(req, res, next) {
-  const stream = toPDF(res.locals.travel, res.locals.user);
-    let filename = "travelReportDocument.pdf";
-    // Be careful of special characters
+exports.getTravelExpensesPDF = async function(req, res, next) {
+  const stream = travelExpensesToPDF(res.locals.travel, res.locals.user);
+  let filename = "travelReportDocument.pdf";
+  // Be careful of special characters
 
-    filename = encodeURIComponent(filename);
-    // Ideally this should strip them
+  filename = encodeURIComponent(filename);
+  // Ideally this should strip them
 
-    res.setHeader('Content-disposition', 'inline; filename="' + filename + '"');
-    res.setHeader('Content-type', 'application/pdf');
-    // console.log('stream', stream);
-    stream.pipe(res);
+  res.setHeader('Content-disposition', 'inline; filename="' + filename + '"');
+  res.setHeader('Content-type', 'application/pdf');
+  // console.log('stream', stream);
+  stream.pipe(res);
 }
 
 

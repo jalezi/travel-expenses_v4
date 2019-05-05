@@ -2,9 +2,7 @@
 
 {{> travelsHeader}}
 
-<button class="btn btn-danger " type="button" onclick="travelsTotalToPDF()">
-  <i class="far fa-file-pdf"></i>Create PDF
-</button>
+
 
 <div class="input-group input-group-sm md-6 w-50 mb-1" id="dateRangePicker">
   <select class="form-control" name="dateRangePickerSelect" id="dateRangePickerSelect">
@@ -33,7 +31,11 @@
   <div class="input-group-append " id="divShowCustomRange">
     <button class="btn btn-outline-secondary" id="showCustomRange" type="button" disabled>Show</button>
   </div>
-
+  <div class="input-group-append">
+    <button class="btn btn-danger" type="button" onclick="travelsTotalToPDF()">
+      <i class="far fa-file-pdf"></i>Create PDF
+    </button>
+  </div>
 
 </div>
 

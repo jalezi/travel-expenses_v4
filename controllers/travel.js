@@ -67,7 +67,12 @@ exports.getTravelsTotalPDF = async function(req, res, next) {
   if (err) {
     next(err)
   } else {
-    let sum = Number(result[0].sum);
+    let sum;
+    if (result.length === 0) {
+      sum = 0;
+    } else {
+      sum = Number(result[0].sum);
+    }
     createTravelsTotalPDF(res, travels, res.locals.user, dateRange, sum);
   }
 
@@ -103,7 +108,12 @@ exports.getTravelsTotalPDF = async function(req, res, next) {
   if (err) {
     next(err)
   } else {
-    let sum = Number(result[0].sum);
+    let sum;
+    if (result.length === 0) {
+      sum = 0;
+    } else {
+      sum = Number(result[0].sum);
+    }
     createTravelsTotalPDF(res, travels, res.locals.user, dateRange, sum);
   }
 

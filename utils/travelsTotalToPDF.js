@@ -79,7 +79,7 @@ function table(data, columns, tableHeader, style = {}, sum = 0) {
         layout: 'lightHorizontalLines',
         alignment: 'center',
         table: {
-            widths: ['auto', 'auto', '*', 'auto', 'auto', 'auto'],
+            widths: ['auto', 'auto', 'auto', 'auto', '*', 'auto'],
             heights: function(row) {
               switch (row) {
                 case 0:
@@ -139,20 +139,18 @@ module.exports = (travels, user, dateRange, sum) => {
   const tableStyle = {alignment: 'center', fontSize: 10, margin: [20, 0, 20, 0], width: '*'};
 
   const travelsTable = table(tableData, dataProperties, tableHeader, tableStyle, sum);
-  console.log(travelsTable.table);
 
   const docDefinition = {
     // ...
     // pageSize: 'A4',
     footer: function(currentPage, pageCount, pageSize) {
       return [
-,
+
         {canvas: [
-          {type: 'line',	x1: 30, y1: 0,	x2: 559.28, y2: 0,	lineWidth: 1, lineCap: 'square'}
+          {type: 'line',	x1: 30, y1: 15,	x2: 559.28, y2: 15,	lineWidth: 1, lineCap: 'square'}
         ]},
 
-        {text: currentPage.toString() + ' of ' + pageCount, alignment: 'center', fontSize: 10, margin: [0, 10]},
-        {canvas: [{type: 'rect', x: 170, y: 32, w: pageSize.width - 170, h: 100, fillColor: 'red'}]}
+        {text: currentPage.toString() + ' of ' + pageCount, alignment: 'center', fontSize: 10, margin: [0, 10]}
       ];
     },
     header: function(currentPage, pageCount, pageSize) {
@@ -239,8 +237,8 @@ module.exports = (travels, user, dateRange, sum) => {
   };
 
   const pdfDoc = printer.createPdfKitDocument(docDefinition);
-  console.log(docDefinition);
-  console.log();
+  // console.log(docDefinition);
+  // console.log();
   const pdfDocPath = `./pdf/TOTAL_${user._id}.pdf`;
   pdfDoc.pipe(fs.createWriteStream(pdfDocPath));
   pdfDoc.end();

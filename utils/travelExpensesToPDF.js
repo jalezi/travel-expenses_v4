@@ -143,13 +143,13 @@ module.exports = (travel, user) => {
     // pageSize: 'A4',
     footer: function(currentPage, pageCount, pageSize) {
       return [
-,
+,       {canvas: [{type: 'rect', x: 170, y: 32, w: pageSize.width - 170, h: 100, fillColor: 'red'}]},
         {canvas: [
           {type: 'line',	x1: 30, y1: 0,	x2: 559.28, y2: 0,	lineWidth: 1, lineCap: 'square'}
         ]},
 
-        {text: currentPage.toString() + ' of ' + pageCount, alignment: 'center', fontSize: 10, margin: [0, 10]},
-        {canvas: [{type: 'rect', x: 170, y: 32, w: pageSize.width - 170, h: 100, fillColor: 'red'}]}
+        {text: currentPage.toString() + ' of ' + pageCount, alignment: 'center', fontSize: 10, margin: [0, 10]}
+
       ];
     },
     header: function(currentPage, pageCount, pageSize) {

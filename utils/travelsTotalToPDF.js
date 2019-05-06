@@ -184,9 +184,9 @@ module.exports = (travels, user, dateRange, sum) => {
             style: 'personInfo',
             widths: ['auto', 'auto'],
             body: [
-              ['Team:', 'SAN ANTONIO SPURS'],
-              ['Name:', user.profile.name],
-              ['Position:', 'Whatever']
+              ['Team:', user.team],
+              ['Name:', user.fullName()],
+              ['Position:', user.jobPosition]
             ]
         }}
       ]},

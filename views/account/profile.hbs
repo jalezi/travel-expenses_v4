@@ -9,6 +9,18 @@
   <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="email">Email</label>
     <div class="col-md-7"><input class="form-control" type="email" name="email" id="email" autocomplete="email" value={{user.email}}></div>
   </div>
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="fName">First Name</label>
+    <div class="col-md-7"><input class="form-control" type="text" name="fName" id="fName" autocomplete="fName" value="{{user.profile.fName}}"></div>
+  </div>
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="lName">Last Name</label>
+    <div class="col-md-7"><input class="form-control" type="text" name="lName" id="lName" autocomplete="lName" value="{{user.profile.lName}}"></div>
+  </div>
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="team">Team</label>
+    <div class="col-md-7"><input class="form-control" type="text" name="team" id="team" autocomplete="team" value="{{user.team}}"></div>
+  </div>
+  <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="jobPosition">Positon</label>
+    <div class="col-md-7"><input class="form-control" type="text" name="jobPosition" id="jobPosition" autocomplete="jobPosition" value="{{user.jobPosition}}"></div>
+  </div>
   <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="name">Name</label>
     <div class="col-md-7"><input class="form-control" type="text" name="name" id="name" autocomplete="name" value="{{user.profile.name}}"></div>
   </div>
@@ -24,7 +36,6 @@
   </div>
   <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="homeDistance">homeDistance</label>
     <div class="col-md-7">
-      {{debug user.homeDistance}}
       <select class="form-control" type="text" name="homeDistance" id="homeDistance" autocomplete="autocomplete">
         <option value="mi" {{{setOption user.homeDistance "mi"}}} >mi</option >
         <option value="km" {{{setOption user.homeDistance "km"}}} >km</option>

@@ -23,7 +23,17 @@ const userSchema = new mongoose.Schema({
     gender: String,
     location: String,
     website: String,
-    picture: String
+    picture: String,
+    fName: String,
+    lName: String
+  },
+  team: {
+    type: String,
+    maxlength: 30
+  },
+  jobPosition: {
+    type: String,
+    maxlength: 30
   },
   travels: Array,
   homeCurrency: {
@@ -78,6 +88,15 @@ userSchema.methods.gravatar = function gravatar(size) {
   const md5 = crypto.createHash('md5').update(this.email).digest('hex');
   return `https://gravatar.com/avatar/${md5}?s=${size}&d=retro`;
 };
+
+/**
+* Helper method for getting user's full name
+*/
+
+userSchema.methods.fullName = function fullName() {
+  const result = this.profile.fName + ' ' + this.profile.lName;
+  return result;
+}
 
 const User = mongoose.model('User', userSchema);
 

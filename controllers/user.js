@@ -84,6 +84,10 @@ exports.postSignup = (req, res, next) => {
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password must be at least 4 characters long').len(4);
   req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
+  req.assert('fName', 'First name should not be empty').notEmpty();
+  req.assert('lName', 'Last name should not be empty').notEmpty();
+  req.assert('team', 'Team should not be empty').notEmpty();
+  req.assert('jobPosition', 'Position should not be empty').notEmpty();
   req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
 
   const errors = req.validationErrors();
@@ -95,7 +99,13 @@ exports.postSignup = (req, res, next) => {
 
   const user = new User({
     email: req.body.email,
-    password: req.body.password
+    password: req.body.password,
+    profile: {
+      fName: req.body.fName,
+      lName: req.body.lName
+    },
+    team: req.body.team,
+    jobPosition: req.body.jobPosition
   });
 
   User.findOne({ email: req.body.email }, (err, existingUser) => {
@@ -135,6 +145,10 @@ exports.postUpdateProfile = (req, res, next) => {
   req.assert('email', 'Please enter a valid email address.').isEmail();
   req.assert('homeCurrency', 'Home currency should have exactly 3 characters').isLength({min: 3, max: 3});
   req.assert('perMileAmount', 'Per mile amount should be number').isNumeric();
+  req.assert('fName', 'First name should not be empty').notEmpty();
+  req.assert('lName', 'Last name should not be empty').notEmpty();
+  req.assert('team', 'Team should not be empty').notEmpty();
+  req.assert('jobPosition', 'Position should not be empty').notEmpty();
   req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
 
   const errors = req.validationErrors();
@@ -148,6 +162,10 @@ exports.postUpdateProfile = (req, res, next) => {
     if (err) { return next(err); }
     user.email = req.body.email || '';
     user.profile.name = req.body.name || '';
+    user.profile.fName = req.body.fName || '';
+    user.profile.lName = req.body.lName || '';
+    user.team = req.body.team || '';
+    user.jobPosition = req.body.jobPosition || '';
     user.profile.gender = req.body.gender || '';
     user.homeCurrency = req.body.homeCurrency.toUpperCase() || '';
     user.homeDistance = req.body.homeDistance || '';

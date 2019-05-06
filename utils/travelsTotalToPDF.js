@@ -239,7 +239,7 @@ module.exports = (travels, user, dateRange, sum) => {
   const pdfDoc = printer.createPdfKitDocument(docDefinition);
   // console.log(docDefinition);
   // console.log();
-  const pdfDocPath = `./pdf/TOTAL_${user._id}.pdf`;
+  const pdfDocPath = `./pdf/TOTAL_${user._id}_${df}_${dt}.pdf`;
   pdfDoc.pipe(fs.createWriteStream(pdfDocPath));
   pdfDoc.end();
   return pdfDoc;

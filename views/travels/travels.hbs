@@ -14,9 +14,9 @@
   </select>
 
   <select class="form-control" name="choosenYear" id="choosenYear" disabled>
-    <option selected>2019</option>
-    <option>2018</option>
-    <option>2017</option>
+    {{#each years}}
+      <option>{{this}}</option>
+    {{/each}}
   </select>
 
   <div class="input-group-prepend " id="divLabelDateFrom">

@@ -179,16 +179,22 @@ exports.getTravels = async function(req, res) {
   if (err) {
     next(err);
   }
-  minDate = moment(doc[0].minDate).format('YYYY-MM-DD');
-  maxDate = moment(doc[0].maxDate).format('YYYY-MM-DD');
-  yearMin = moment(doc[0].minDate).format('YYYY');
-  yearMax = moment().format('YYYY');
-  for (i = Number(yearMax); i >= Number(yearMin); i--) {
-    years.push(i);
+
+  if (doc.length != 0) {
+    minDate = moment(doc[0].minDate).format('YYYY-MM-DD');
+    maxDate = moment(doc[0].maxDate).format('YYYY-MM-DD');
+    yearMin = moment(doc[0].minDate).format('YYYY');
+    yearMax = moment().format('YYYY');
+    for (i = Number(yearMax); i >= Number(yearMin); i--) {
+      years.push(i);
+    }
+  } else {
+    minDate = maxDate = moment().format('YYYY-MM-DD');
+    yearMin = yearMax = moment().format('YYYY');
+    years = [yearMin];
   }
 });
 
-console.log(minDate, maxDate, years);
 res.render('travels/travels', {
   title: 'Travels',
   travels,

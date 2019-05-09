@@ -21,9 +21,15 @@ const fonts = {
 
 const printer = new PdfPrinter(fonts);
 
-function buildTableBody(data, columns, tableHeader, total = 0) {
+function toCurrencyFormat (amount) {
+  const formatter = new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const result = formatter.format(amount);
+  return result;
+}
 
-    var body = [];
+function buildTableBody(data, columns, tableHeader, total = 0) {
+    const totalInCurrencyFormat = toCurrencyFormat(total)
+    let body = [];
     if (!tableHeader) {
       tableHeader = columns;
     }
@@ -32,22 +38,16 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
 
     data.forEach(function(row) {
         let dataRow = [];
-        // console.log(row);
         columns.forEach(function(column) {
-          // console.log(column);
             const dataRowObject = {};
             dataRowObject.text = row[column].toString();
             if (['amount', 'perMile', tableHeader[tableHeader.length - 1]].includes(column)) {
-              // console.log(column, 'right');
               dataRowObject.alignment = 'right';
             } else if (column === 'description') {
-              // console.log(column, 'left');
               dataRowObject.alignment = 'left';
             } else {
-              // console.log(column, 'center');
               dataRowObject.alignment = 'center';
             }
-            // dataRow.push(row[column].toString());
             dataRow.push(dataRowObject);
         })
 
@@ -63,7 +63,7 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
       text: `TOTAL`,
       style: totalRowStyle
     }, {}, {}, {}, {}, {
-      text: total.toString(),
+      text: totalInCurrencyFormat,
       style: totalRowStyle
     }];
     body.push(totalRow);
@@ -72,7 +72,6 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
 }
 
 function table(data, columns, tableHeader, style = {}, sum = 0) {
-
     return {
 
         style: style,
@@ -107,7 +106,7 @@ function createTravelsTotalTableData(travels) {
     newObject.description = travel.description;
     newObject.currency = travel.homeCurrency;
     newObject.perMile = travel.perMileAmount;
-    newObject.amount = travel.total;
+    newObject.amount = toCurrencyFormat(travel.total);
     dataObjects.push(newObject);
   });
   return dataObjects;
@@ -139,6 +138,7 @@ module.exports = (travels, user, dateRange, sum) => {
   const tableStyle = {alignment: 'center', fontSize: 10, margin: [20, 0, 20, 0], width: '*'};
 
   const travelsTable = table(tableData, dataProperties, tableHeader, tableStyle, sum);
+  sum = toCurrencyFormat(sum);
 
   const docDefinition = {
     // ...
@@ -157,7 +157,7 @@ module.exports = (travels, user, dateRange, sum) => {
       // you can apply any logic and return any valid pdfmake element
       return [
         {columns: [
-          {text: 'Created with AppName', alignment: (currentPage % 2) ? 'left' : 'right', fontSize: 10},
+          {text: 'Created with TExpenses', alignment: (currentPage % 2) ? 'left' : 'right', fontSize: 10},
           {text: moment().format('YYYY-MM-DD'), alignment: (currentPage % 2) ? 'right' : 'left', fontSize: 10}
         ]},
         {canvas: [{type: 'rect', x: 170, y: 32, w: pageSize.width - 170, h: 100, fillColor: 'red'}]}
@@ -206,7 +206,7 @@ module.exports = (travels, user, dateRange, sum) => {
       ],
       style: 'travelInfo'
     },
-    {text: `Total expenses: ${user.homeCurrency} ${sum}`, margin: [0, 0, 0, 20], color: '#696969'},
+    {text: `Total: ${user.homeCurrency} ${sum}`, margin: [0, 0, 0, 20], color: '#696969'},
     travelsTable
     ],
     styles: {
@@ -237,9 +237,8 @@ module.exports = (travels, user, dateRange, sum) => {
   };
 
   const pdfDoc = printer.createPdfKitDocument(docDefinition);
-  // console.log(docDefinition);
-  // console.log();
-  const pdfDocPath = `./pdf/TOTAL_${user._id}.pdf`;
+
+  const pdfDocPath = `./pdf/TOTAL_${user._id}_${df}_${dt}.pdf`;
   pdfDoc.pipe(fs.createWriteStream(pdfDocPath));
   pdfDoc.end();
   return pdfDoc;

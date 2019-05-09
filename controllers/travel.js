@@ -146,15 +146,56 @@ exports.getTravelExpensesPDF = async function(req, res, next) {
 
 // get all travels
 exports.getTravels = async function(req, res) {
+  let minDate;
+  let maxDate;
+  let yearMin;
+  let yearMax;
+  let years = [];
   const travels = await Travel.find({
     _id: {
       $in: req.user.travels
     }
   }).sort('-dateFrom');
-  res.render('travels/travels', {
-    title: 'Travels',
-    travels
-  });
+  /*
+  * TODO create new Promise
+  */
+  const minMaxTravelsDates = await Travel.aggregate([
+  {
+    '$match': {
+      '_user': req.user._id
+    }
+  }, {
+    '$group': {
+      '_id': req.user._id,
+      'minDate': {
+        '$min': '$dateFrom'
+      },
+      'maxDate': {
+        '$max': '$dateFrom'
+      }
+    }
+  }
+], (err, doc) => {
+  if (err) {
+    next(err);
+  }
+  minDate = moment(doc[0].minDate).format('YYYY-MM-DD');
+  maxDate = moment(doc[0].maxDate).format('YYYY-MM-DD');
+  yearMin = moment(doc[0].minDate).format('YYYY');
+  yearMax = moment().format('YYYY');
+  for (i = Number(yearMax); i >= Number(yearMin); i--) {
+    years.push(i);
+  }
+});
+
+console.log(minDate, maxDate, years);
+res.render('travels/travels', {
+  title: 'Travels',
+  travels,
+  minDate,
+  maxDate,
+  years
+});
 }
 
 

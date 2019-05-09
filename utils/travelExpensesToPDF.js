@@ -21,9 +21,15 @@ const fonts = {
 
 const printer = new PdfPrinter(fonts);
 
+function toCurrencyFormat (amount) {
+  const formatter = new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const result = formatter.format(amount);
+  return result;
+}
+
 function buildTableBody(data, columns, tableHeader, total = 0) {
 
-    var body = [];
+    let body = [];
     if (!tableHeader) {
       tableHeader = columns;
     }
@@ -37,13 +43,10 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
             const dataRowObject = {};
             dataRowObject.text = row[column].toString();
             if (['amount', 'rate', tableHeader[tableHeader.length - 1]].includes(column)) {
-              console.log(column, 'right');
               dataRowObject.alignment = 'right';
             } else if (column === 'description') {
-              console.log(column, 'left');
               dataRowObject.alignment = 'left';
             } else {
-              console.log(column, 'center');
               dataRowObject.alignment = 'center';
             }
             // dataRow.push(row[column].toString());
@@ -62,7 +65,7 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
       text: `TOTAL`,
       style: totalRowStyle
     }, {}, {}, {}, {}, {}, {
-      text: total.toString(),
+      text: toCurrencyFormat(total),
       style: totalRowStyle
     }];
     body.push(totalRow);
@@ -71,7 +74,6 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
 }
 
 function table(data, columns, tableHeader, style = {}, travelTotal = 0) {
-
     return {
 
         style: style,
@@ -104,7 +106,7 @@ function createTravelExpensesTableData (travel) {
     newObject.date = moment(expense.date).format('l');
     newObject.type = expense.type;
     newObject.description = expense.description,
-    newObject.amount = expense.amount;
+    newObject.amount = toCurrencyFormat(expense.amount);
     if (expense.type != 'Mileage') {
       newObject.currency = Object.keys(expense.curRate.rate)[0];
       newObject.rate = Object.values(expense.curRate.rate)[0];
@@ -138,6 +140,7 @@ module.exports = (travel, user) => {
   const keywordsPdf = 'travel report expense';
 
   const expensesTable = table(tableData, dataProperties, tableHeader, tableStyle, travel.total);
+  let total = toCurrencyFormat(travel.total);
   const docDefinition = {
     // ...
     // pageSize: 'A4',
@@ -155,7 +158,7 @@ module.exports = (travel, user) => {
       // you can apply any logic and return any valid pdfmake element
       return [
         {columns: [
-          {text: 'Created with AppName', alignment: (currentPage % 2) ? 'left' : 'right', fontSize: 10},
+          {text: 'Created with TExpenses', alignment: (currentPage % 2) ? 'left' : 'right', fontSize: 10},
           {text: moment().format('YYYY-MM-DD'), alignment: (currentPage % 2) ? 'right' : 'left', fontSize: 10}
         ]},
         {canvas: [{type: 'rect', x: 170, y: 32, w: pageSize.width - 170, h: 100, fillColor: 'red'}]}
@@ -204,7 +207,7 @@ module.exports = (travel, user) => {
       ],
       style: 'travelInfo'
     },
-      {text: `Total expenses: ${travel.homeCurrency} ${travel.total}`, margin: [0, 0, 0, 20], color: '#696969'},
+      {text: `Total: ${travel.homeCurrency} ${total}`, margin: [0, 0, 0, 20], color: '#696969'},
       expensesTable
     ],
     styles: {
@@ -235,8 +238,7 @@ module.exports = (travel, user) => {
   };
 
   const pdfDoc = printer.createPdfKitDocument(docDefinition);
-  // console.log(docDefinition);
-  // console.log();
+
   const pdfDocPath = `./pdf/TReport_${user._id}_${travel._id}.pdf`;
   pdfDoc.pipe(fs.createWriteStream(pdfDocPath));
   pdfDoc.end();

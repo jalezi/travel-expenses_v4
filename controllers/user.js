@@ -3,6 +3,8 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const passport = require('passport');
 const User = require('../models/User');
+const Travel = require('../models/Travel');
+const Expense = require('../models/Expense');
 const toTitleCase = require('../utils/toTitleCase');
 
 const randomBytesAsync = promisify(crypto.randomBytes);
@@ -217,6 +219,17 @@ exports.postUpdatePassword = (req, res, next) => {
  * Delete user account.
  */
 exports.postDeleteAccount = (req, res, next) => {
+  const travelsIds = req.user.travels;
+  Expense.deleteMany({travel: {$in: travelsIds}}, (err, docs) => {
+    if (err) {
+      next(err);
+    }
+  });
+  Travel.deleteMany({_user: req.user._id}, (err, docs) => {
+    if (err) {
+      next(err);
+    }
+  });
   User.deleteOne({ _id: req.user.id }, (err) => {
     if (err) { return next(err); }
     req.logout();

@@ -157,7 +157,7 @@ module.exports = (travels, user, dateRange, sum) => {
       // you can apply any logic and return any valid pdfmake element
       return [
         {columns: [
-          {text: 'Created with AppName', alignment: (currentPage % 2) ? 'left' : 'right', fontSize: 10},
+          {text: 'Created with TExpenses', alignment: (currentPage % 2) ? 'left' : 'right', fontSize: 10},
           {text: moment().format('YYYY-MM-DD'), alignment: (currentPage % 2) ? 'right' : 'left', fontSize: 10}
         ]},
         {canvas: [{type: 'rect', x: 170, y: 32, w: pageSize.width - 170, h: 100, fillColor: 'red'}]}
@@ -206,7 +206,7 @@ module.exports = (travels, user, dateRange, sum) => {
       ],
       style: 'travelInfo'
     },
-    {text: `Total expenses: ${user.homeCurrency} ${sum}`, margin: [0, 0, 0, 20], color: '#696969'},
+    {text: `Total: ${user.homeCurrency} ${sum}`, margin: [0, 0, 0, 20], color: '#696969'},
     travelsTable
     ],
     styles: {

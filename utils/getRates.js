@@ -20,6 +20,7 @@ const dataFixier = async () => {
     throw new Error(err);
   }
 }
+
 // 8640000 = 24 hours
 module.exports = async () => {
   try {
@@ -27,8 +28,10 @@ module.exports = async () => {
     const rates = await Rate.find({date: today});
 
     if (rates.length === 0) {
-      // console.log('rates.length=', rates.length);
+      console.log(`${moment(new Date())} - Rates for ${today} not yet in DB. Retrieving rates...`);
       dataFixier();
+    } else {
+      console.log(`${moment(new Date())} - Rates for ${today} already in DB`);
     }
   } catch (err) {
     // console.log(err);

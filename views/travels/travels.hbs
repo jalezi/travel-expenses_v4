@@ -22,16 +22,16 @@
   <div class="input-group-prepend " id="divLabelDateFrom">
     <label class="input-group-text" for="dateFrom" id="lableDateFrom">From</label>
   </div>
-  <input type="date" class="form-control " name="dateFrom" id="dateFrom" placeholder="" disabled />
+  <input type="date" class="form-control " name="dateFrom" id="dateFrom" placeholder="" value="{{minDate}}" disabled />
 
   <div class="input-group-prepend " id="divLableDateTo">
     <label class="input-group-text" for="dateTo" id="lableDateTo">To</label>
   </div>
-  <input type="date" class="form-control " name="dateTo" id="dateTo" placeholder="" disabled />
+  <input type="date" class="form-control " name="dateTo" id="dateTo" placeholder="" value="{{maxDate}}" disabled />
   <div class="input-group-append " id="divShowCustomRange">
     <button class="btn btn-outline-secondary" id="showCustomRange" type="button" disabled>Show</button>
   </div>
-  <div class="input-group-append">
+  <div class="input-group-append ml-2">
     <button class="btn btn-danger" type="button" onclick="travelsTotalToPDF()">
       <i class="far fa-file-pdf"></i>Create PDF
     </button>

@@ -105,7 +105,7 @@
     let team = '{{user.team}}';
     let jobPosition = '{{user.jobPosition}}'
     if (team === '' || jobPosition ==='') {
-      window.location.replace("/account");
+      window.location.replace(`/account?team=${team}&jobPosition=${jobPosition}`);
     } else {
       const dt = dateTo.value;
       const df = dateFrom.value;

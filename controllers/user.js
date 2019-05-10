@@ -133,6 +133,16 @@ exports.postSignup = (req, res, next) => {
  * Profile page.
  */
 exports.getAccount = (req, res) => {
+  if (req.query.length != 0) {
+    const team = req.query.team;
+    const jobPosition = req.query.jobPosition;
+    if (team === '') {
+      req.flash('info', {msg: 'To create PDF you need to define TEAM'});
+    }
+    if (jobPosition === '') {
+      req.flash('info', {msg: 'To create PDF you need to define POSITION'});
+    }
+  }
   res.render('account/profile', {
     title: 'Account Management'
   });

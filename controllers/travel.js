@@ -36,7 +36,7 @@ function createTravelsTotalPDF(res, travels, user, dateRange, sum) {
 }
 
 exports.getTravelsTotalPDF = async function(req, res, next) {
-  // console.log(res.locals);
+
   let travels;
   let queryDateFrom;
   let queryDateTo;
@@ -119,9 +119,6 @@ exports.getTravelsTotalPDF = async function(req, res, next) {
 
 });
   }
-  console.log(travels.length);
-
-
 }
 
 /*
@@ -129,6 +126,7 @@ exports.getTravelsTotalPDF = async function(req, res, next) {
 */
 
 exports.getTravelExpensesPDF = async function(req, res, next) {
+
   const stream = travelExpensesToPDF(res.locals.travel, res.locals.user);
   let filename = "travelReportDocument.pdf";
   // Be careful of special characters

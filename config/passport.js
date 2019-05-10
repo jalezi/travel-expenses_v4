@@ -306,6 +306,8 @@ passport.use(new GoogleStrategy({
           user.google = profile.id;
           user.tokens.push({ kind: 'google', accessToken });
           user.profile.name = user.profile.name || profile.displayName;
+          user.profile.fName = user.profile.fName || profile.name.givenName;
+          user.profile.lName = user.profile.lName || profile.name.familyName;
           user.profile.gender = user.profile.gender || profile._json.gender;
           user.profile.picture = user.profile.picture || profile._json.image.url;
           user.save((err) => {
@@ -332,6 +334,8 @@ passport.use(new GoogleStrategy({
           user.google = profile.id;
           user.tokens.push({ kind: 'google', accessToken });
           user.profile.name = profile.displayName;
+          user.profile.fName = profile.name.givenName;
+          user.profile.lName = profile.name.familyName;
           user.profile.gender = profile._json.gender;
           user.profile.picture = profile._json.image.url;
           user.save((err) => {

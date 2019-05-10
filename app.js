@@ -37,9 +37,9 @@ const upload = multer({ dest: path.join(__dirname, 'uploads') });
 const fullIcu = require('full-icu');
 
 /**
-* Added by me
-* Catch uncaught errors
-*/
+  * Added by me
+  * Catch uncaught errors
+  */
 process.on('uncaughtException', (err) => {
     console.error('There was an uncaught error', err)
     process.exit(1) //mandatory (as per the Node docs)
@@ -100,7 +100,6 @@ app.engine( 'hbs', expressHbs.express4( {
 
 app.set('view engine', '.hbs');
 
-// app.set('view engine', 'pug');
 app.use(expressStatusMonitor());
 app.use(compression());
 app.use(sass({
@@ -126,9 +125,9 @@ app.use(passport.session());
 app.use(flash());
 
 /**
- * Added by my
- * express-formidable
- */
+   * Added by my
+   * express-formidable
+   */
  app.use('/import', formidable({
    encoding: 'utf-8',
    uploadDir: path.join(__dirname,'/uploads'),
@@ -177,10 +176,10 @@ app.use('/js/lib', express.static(path.join(__dirname, 'node_modules/jquery/dist
 app.use('/webfonts', express.static(path.join(__dirname, 'node_modules/@fortawesome/fontawesome-free/webfonts'), { maxAge: 31557600000 }));
 
 /**
-* Added by me
-* To overide form methodOverride
-* Must be placed after: app.use(bodyParser.urlencoded())
-*/
+  * Added by me
+  * To overide form methodOverride
+  * Must be placed after: app.use(bodyParser.urlencoded())
+  */
 
 app.use(methodOverride(function (req, res) {
   if (req.body && typeof req.body === 'object' && '_method' in req.body) {
@@ -192,9 +191,9 @@ app.use(methodOverride(function (req, res) {
 }));
 
 /**
-* Added by me
-* Save to res.locals.travels all user travel, sorted by dateFrom ascending
-*/
+  * Added by me
+  * Save to res.locals.travels all user travel, sorted by dateFrom ascending
+  */
 app.use('/import', async (req, res, next) => {
   try {
     const travels = await Travel.find({_user: req.user._id, _id:{ $in: req.user.travels}}).populate({
@@ -210,9 +209,9 @@ app.use('/import', async (req, res, next) => {
 });
 
 /**
-* Added by me
-* Save to res.locals.travels current travel
-*/
+  * Added by me
+  * Save to res.locals.travels current travel
+  */
 app.use('/travels/:id', async (req, res, next) => {
   if ((!res.locals.travel || res.locals.travel._id != req.params.id) && req.params.id != 'new' && req.params.id != 'total_pdf') {
     try {
@@ -233,10 +232,8 @@ app.use('/travels/:id', async (req, res, next) => {
           }
         })
       }
-      // console.log('rates', rates);
       res.locals.travel = travel;
       res.locals.rates = rates;
-      // console.log('app.use', res.locals.rates);
       next();
     } catch (err) {
       next(err);
@@ -247,10 +244,10 @@ app.use('/travels/:id', async (req, res, next) => {
 });
 
 /**
-* Added by me
-* Create job to get rates - every day
-* Get rates from fixer.io api with base: EUR and save to database.
-*/
+  * Added by me
+  * Create job to get rates - every day, every 1 minute of the hour
+  * Get rates from fixer.io api with base: EUR and save to database.
+  */
 getRates();
 
 /**
@@ -314,7 +311,6 @@ if (process.env.NODE_ENV === 'development') {
 
 } else {
   app.use((err, req, res, next) => {
-    // res.status(500).send('Server Error');
     if (err instanceof imprortFileError) {
       console.log(err.stack);
       res.status(400);

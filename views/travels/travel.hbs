@@ -102,8 +102,16 @@
 
 <script type="text/javascript">
   function travelExpensesToPDF() {
-    let routepath = '/travels/' + '{{travel._id}}' + '/pdf';
-    window.open(routepath);
+    let team = '{{user.team}}';
+    let jobPosition = '{{user.jobPosition}}'
+    if (team === '' || jobPosition ==='') {
+      window.location.replace("/account");
+    } else {
+      const dt = dateTo.value;
+      const df = dateFrom.value;
+      let routepath = '/travels/' + '{{travel._id}}' + '/pdf';
+      window.open(routepath);
+    }
   }
 </script>
 

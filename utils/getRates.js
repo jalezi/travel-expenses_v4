@@ -20,7 +20,7 @@ const dataFixier = async () => {
     if (response.data.success) {
       const data = new Rate(response.data);
       await data.save().then((rates) => {
-        console.log(`Rates for ${rates.date} created at ${rates.createdAt}`);
+        console.log(`Rates for ${moment(rates.date)},\ncollected on ${new Date(rates.timestamp*1000)},\ncreated on ${moment(rates.createdAt)}`);
       });
     } else {
         console.log(`Could't get rates from data.fixer.io`);

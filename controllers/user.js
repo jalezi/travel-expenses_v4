@@ -1,4 +1,6 @@
-const { promisify } = require('util');
+const {
+  promisify
+} = require('util');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const passport = require('passport');
@@ -6,6 +8,11 @@ const User = require('../models/User');
 const Travel = require('../models/Travel');
 const Expense = require('../models/Expense');
 const toTitleCase = require('../utils/toTitleCase');
+
+const mailjet = require('node-mailjet').connect(
+  process.env.MJ_APIKEY_PUBLIC,
+  process.env.MJ_APIKEY_PRIVATE
+);
 
 const randomBytesAsync = promisify(crypto.randomBytes);
 
@@ -29,7 +36,9 @@ exports.getLogin = (req, res) => {
 exports.postLogin = (req, res, next) => {
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password cannot be blank').notEmpty();
-  req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
+  req.sanitize('email').normalizeEmail({
+    gmail_remove_dots: false
+  });
 
   const errors = req.validationErrors();
 
@@ -39,14 +48,20 @@ exports.postLogin = (req, res, next) => {
   }
 
   passport.authenticate('local', (err, user, info) => {
-    if (err) { return next(err); }
+    if (err) {
+      return next(err);
+    }
     if (!user) {
       req.flash('errors', info);
       return res.redirect('/login');
     }
     req.logIn(user, (err) => {
-      if (err) { return next(err); }
-      req.flash('success', { msg: 'Success! You are logged in.' });
+      if (err) {
+        return next(err);
+      }
+      req.flash('success', {
+        msg: 'Success! You are logged in.'
+      });
       res.redirect(req.session.returnTo || '/');
     });
   })(req, res, next);
@@ -90,7 +105,9 @@ exports.postSignup = (req, res, next) => {
   req.assert('lName', 'Last name should not be empty').notEmpty();
   req.assert('team', 'Team should not be empty').notEmpty();
   req.assert('jobPosition', 'Position should not be empty').notEmpty();
-  req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
+  req.sanitize('email').normalizeEmail({
+    gmail_remove_dots: false
+  });
 
   const errors = req.validationErrors();
 
@@ -110,14 +127,22 @@ exports.postSignup = (req, res, next) => {
     jobPosition: req.body.jobPosition
   });
 
-  User.findOne({ email: req.body.email }, (err, existingUser) => {
-    if (err) { return next(err); }
+  User.findOne({
+    email: req.body.email
+  }, (err, existingUser) => {
+    if (err) {
+      return next(err);
+    }
     if (existingUser) {
-      req.flash('errors', { msg: 'Account with that email address already exists.' });
+      req.flash('errors', {
+        msg: 'Account with that email address already exists.'
+      });
       return res.redirect('/signup');
     }
     user.save((err) => {
-      if (err) { return next(err); }
+      if (err) {
+        return next(err);
+      }
       req.logIn(user, (err) => {
         if (err) {
           return next(err);
@@ -137,10 +162,14 @@ exports.getAccount = (req, res) => {
     const team = req.query.team;
     const jobPosition = req.query.jobPosition;
     if (team === '') {
-      req.flash('info', {msg: 'To create PDF you need to define TEAM'});
+      req.flash('info', {
+        msg: 'To create PDF you need to define TEAM'
+      });
     }
     if (jobPosition === '') {
-      req.flash('info', {msg: 'To create PDF you need to define POSITION'});
+      req.flash('info', {
+        msg: 'To create PDF you need to define POSITION'
+      });
     }
   }
   res.render('account/profile', {
@@ -155,13 +184,18 @@ exports.getAccount = (req, res) => {
 exports.postUpdateProfile = (req, res, next) => {
   // console.log(req.body);
   req.assert('email', 'Please enter a valid email address.').isEmail();
-  req.assert('homeCurrency', 'Home currency should have exactly 3 characters').isLength({min: 3, max: 3});
+  req.assert('homeCurrency', 'Home currency should have exactly 3 characters').isLength({
+    min: 3,
+    max: 3
+  });
   req.assert('perMileAmount', 'Per mile amount should be number').isNumeric();
   req.assert('fName', 'First name should not be empty').notEmpty();
   req.assert('lName', 'Last name should not be empty').notEmpty();
   req.assert('team', 'Team should not be empty').notEmpty();
   req.assert('jobPosition', 'Position should not be empty').notEmpty();
-  req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
+  req.sanitize('email').normalizeEmail({
+    gmail_remove_dots: false
+  });
 
   const errors = req.validationErrors();
 
@@ -171,7 +205,9 @@ exports.postUpdateProfile = (req, res, next) => {
   }
 
   User.findById(req.user.id, (err, user) => {
-    if (err) { return next(err); }
+    if (err) {
+      return next(err);
+    }
     user.email = req.body.email || '';
     user.profile.name = req.body.name || '';
     user.profile.fName = req.body.fName || '';
@@ -187,12 +223,16 @@ exports.postUpdateProfile = (req, res, next) => {
     user.save((err) => {
       if (err) {
         if (err.code === 11000) {
-          req.flash('errors', { msg: 'The email address you have entered is already associated with an account.' });
+          req.flash('errors', {
+            msg: 'The email address you have entered is already associated with an account.'
+          });
           return res.redirect('/account');
         }
         return next(err);
       }
-      req.flash('success', { msg: 'Profile information has been updated.' });
+      req.flash('success', {
+        msg: 'Profile information has been updated.'
+      });
       res.redirect('/account');
     });
   });
@@ -214,11 +254,17 @@ exports.postUpdatePassword = (req, res, next) => {
   }
 
   User.findById(req.user.id, (err, user) => {
-    if (err) { return next(err); }
+    if (err) {
+      return next(err);
+    }
     user.password = req.body.password;
     user.save((err) => {
-      if (err) { return next(err); }
-      req.flash('success', { msg: 'Password has been changed.' });
+      if (err) {
+        return next(err);
+      }
+      req.flash('success', {
+        msg: 'Password has been changed.'
+      });
       res.redirect('/account');
     });
   });
@@ -230,20 +276,32 @@ exports.postUpdatePassword = (req, res, next) => {
  */
 exports.postDeleteAccount = (req, res, next) => {
   const travelsIds = req.user.travels;
-  Expense.deleteMany({travel: {$in: travelsIds}}, (err, docs) => {
+  Expense.deleteMany({
+    travel: {
+      $in: travelsIds
+    }
+  }, (err, docs) => {
     if (err) {
       next(err);
     }
   });
-  Travel.deleteMany({_user: req.user._id}, (err, docs) => {
+  Travel.deleteMany({
+    _user: req.user._id
+  }, (err, docs) => {
     if (err) {
       next(err);
     }
   });
-  User.deleteOne({ _id: req.user.id }, (err) => {
-    if (err) { return next(err); }
+  User.deleteOne({
+    _id: req.user.id
+  }, (err) => {
+    if (err) {
+      return next(err);
+    }
     req.logout();
-    req.flash('info', { msg: 'Your account has been deleted.' });
+    req.flash('info', {
+      msg: 'Your account has been deleted.'
+    });
     res.redirect('/');
   });
 };
@@ -253,9 +311,13 @@ exports.postDeleteAccount = (req, res, next) => {
  * Unlink OAuth provider.
  */
 exports.getOauthUnlink = (req, res, next) => {
-  const { provider } = req.params;
+  const {
+    provider
+  } = req.params;
   User.findById(req.user.id, (err, user) => {
-    if (err) { return next(err); }
+    if (err) {
+      return next(err);
+    }
     const lowerCaseProvider = provider.toLowerCase();
     const titleCaseProvider = toTitleCase(provider);
     user[lowerCaseProvider] = undefined;
@@ -265,19 +327,23 @@ exports.getOauthUnlink = (req, res, next) => {
     // As a result, we need to verify that unlinking the provider is safe by ensuring
     // that another login method exists.
     if (
-      !(user.email && user.password)
-      && tokensWithoutProviderToUnlink.length === 0
+      !(user.email && user.password) &&
+      tokensWithoutProviderToUnlink.length === 0
     ) {
       req.flash('errors', {
-        msg: `The ${titleCaseProvider} account cannot be unlinked without another form of login enabled.`
-          + ' Please link another account or add an email address and password.'
+        msg: `The ${titleCaseProvider} account cannot be unlinked without another form of login enabled.` +
+          ' Please link another account or add an email address and password.'
       });
       return res.redirect('/account');
     }
     user.tokens = tokensWithoutProviderToUnlink;
     user.save((err) => {
-      if (err) { return next(err); }
-      req.flash('info', { msg: `${titleCaseProvider} account has been unlinked.` });
+      if (err) {
+        return next(err);
+      }
+      req.flash('info', {
+        msg: `${titleCaseProvider} account has been unlinked.`
+      });
       res.redirect('/account');
     });
   });
@@ -292,12 +358,18 @@ exports.getReset = (req, res, next) => {
     return res.redirect('/');
   }
   User
-    .findOne({ passwordResetToken: req.params.token })
+    .findOne({
+      passwordResetToken: req.params.token
+    })
     .where('passwordResetExpires').gt(Date.now())
     .exec((err, user) => {
-      if (err) { return next(err); }
+      if (err) {
+        return next(err);
+      }
       if (!user) {
-        req.flash('errors', { msg: 'Password reset token is invalid or has expired.' });
+        req.flash('errors', {
+          msg: 'Password reset token is invalid or has expired.'
+        });
         return res.redirect('/forgot');
       }
       res.render('account/reset', {
@@ -310,24 +382,26 @@ exports.getReset = (req, res, next) => {
  * POST /reset/:token
  * Process the reset password request.
  */
+
 exports.postReset = (req, res, next) => {
   req.assert('password', 'Password must be at least 4 characters long.').len(4);
   req.assert('confirm', 'Passwords must match.').equals(req.body.password);
-
   const errors = req.validationErrors();
-
   if (errors) {
     req.flash('errors', errors);
     return res.redirect('back');
   }
-
   const resetPassword = () =>
     User
-      .findOne({ passwordResetToken: req.params.token })
+      .findOne({
+        passwordResetToken: req.params.token
+      })
       .where('passwordResetExpires').gt(Date.now())
       .then((user) => {
         if (!user) {
-          req.flash('errors', { msg: 'Password reset token is invalid or has expired.' });
+          req.flash('errors', {
+            msg: 'Password reset token is invalid or has expired.'
+          });
           return res.redirect('back');
         }
         user.password = req.body.password;
@@ -335,60 +409,69 @@ exports.postReset = (req, res, next) => {
         user.passwordResetExpires = undefined;
         return user.save().then(() => new Promise((resolve, reject) => {
           req.logIn(user, (err) => {
-            if (err) { return reject(err); }
+            if (err) {
+              return reject(err);
+            }
             resolve(user);
           });
-        }));
-      });
+        }))
+        .catch((err) => {
+          console.log(err);
+          return err;
+        });
+      }).catch((err) => {return err});
 
   const sendResetPasswordEmail = (user) => {
-    if (!user) { return; }
-    let transporter = nodemailer.createTransport({
-      service: 'SendGrid',
-      auth: {
-        user: process.env.SENDGRID_USER,
-        pass: process.env.SENDGRID_PASSWORD
-      }
+    console.log('sendResetPasswordEmail', user);
+    if (!user) {
+      return;
+    }
+    const sendEmail = mailjet.post('send', {
+      version: 'v3.1'
     });
-    const mailOptions = {
-      to: user.email,
-      from: 'hackathon@starter.com',
-      subject: 'Your Hackathon Starter password has been changed',
-      text: `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n`
+    const emailData = {
+      "Messages": [{
+        "From": {
+          "Email": "jaka.daneu@siol.net",
+          "Name": "Mailjet Pilot"
+        },
+        "To": [{
+          "Email": user.email,
+          "Name": user.fullName()
+        }],
+        'Subject': 'Your password for TExpenses has been changed',
+        'TextPart': `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n`
+      }]
     };
-    return transporter.sendMail(mailOptions)
-      .then(() => {
-        req.flash('success', { msg: 'Success! Your password has been changed.' });
+    return sendEmail
+      .request(emailData)
+      .then((response) => {
+        req.flash('success', {
+                    msg: 'Success! Your password has been changed.'
+                  });
       })
       .catch((err) => {
         if (err.message === 'self signed certificate in certificate chain') {
           console.log('WARNING: Self signed certificate in certificate chain. Retrying with the self signed certificate. Use a valid certificate if in production.');
-          transporter = nodemailer.createTransport({
-            service: 'SendGrid',
-            auth: {
-              user: process.env.SENDGRID_USER,
-              pass: process.env.SENDGRID_PASSWORD
-            },
-            tls: {
-              rejectUnauthorized: false
-            }
+          req.flash('success', {
+            msg: 'Success! Your password has been changed.'
           });
-          return transporter.sendMail(mailOptions)
-            .then(() => {
-              req.flash('success', { msg: 'Success! Your password has been changed.' });
-            });
         }
         console.log('ERROR: Could not send password reset confirmation email after security downgrade.\n', err);
-        req.flash('warning', { msg: 'Your password has been changed, however we were unable to send you a confirmation email. We will be looking into it shortly.' });
+        req.flash('warning', {
+          msg: 'Your password has been changed, however we were unable to send you a confirmation email. We will be looking into it shortly.'
+        });
         return err;
       });
-  };
+  }
 
-  resetPassword()
-    .then(sendResetPasswordEmail)
-    .then(() => { if (!res.finished) res.redirect('/'); })
-    .catch(err => next(err));
-};
+resetPassword()
+  .then(sendResetPasswordEmail)
+  .then(() => {
+    if (!res.finished) res.redirect('/');
+  })
+  .catch(err => next(err));
+}
 
 /**
  * GET /forgot
@@ -409,9 +492,17 @@ exports.getForgot = (req, res) => {
  */
 exports.postForgot = (req, res, next) => {
   req.assert('email', 'Please enter a valid email address.').isEmail();
-  req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
+  req.sanitize('email').normalizeEmail({
+    gmail_remove_dots: false
+  });
 
   const errors = req.validationErrors();
+
+  // GET resource
+  const userMailjet = mailjet.get('user');
+
+  // POST resource
+  const senderMailjet = mailjet.post('sender');
 
   if (errors) {
     req.flash('errors', errors);
@@ -423,61 +514,69 @@ exports.postForgot = (req, res, next) => {
 
   const setRandomToken = token =>
     User
-      .findOne({ email: req.body.email })
-      .then((user) => {
-        if (!user) {
-          req.flash('errors', { msg: 'Account with that email address does not exist.' });
-        } else {
-          user.passwordResetToken = token;
-          user.passwordResetExpires = Date.now() + 3600000; // 1 hour
-          user = user.save();
-        }
-        return user;
-      });
+    .findOne({
+      email: req.body.email
+    })
+    .then((user) => {
+      if (!user) {
+        req.flash('errors', {
+          msg: 'Account with that email address does not exist.'
+        });
+      } else {
+        user.passwordResetToken = token;
+        user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+        user = user.save();
+      }
+      return user;
+    });
 
   const sendForgotPasswordEmail = (user) => {
-    if (!user) { return; }
+    if (!user) {
+      return;
+    }
     const token = user.passwordResetToken;
-    let transporter = nodemailer.createTransport({
-      service: 'SendGrid',
-      auth: {
-        user: process.env.SENDGRID_USER,
-        pass: process.env.SENDGRID_PASSWORD
-      }
+
+    const sendEmail = mailjet.post('send', {
+      version: 'v3.1'
     });
-    const mailOptions = {
-      to: user.email,
-      from: 'jakad@me.com',
-      subject: 'Reset your password on Hackathon Starter',
-      text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
-        Please click on the following link, or paste this into your browser to complete the process:\n\n
-        http://${req.headers.host}/reset/${token}\n\n
-        If you did not request this, please ignore this email and your password will remain unchanged.\n`
-    };
-    return transporter.sendMail(mailOptions)
-      .then(() => {
-        req.flash('info', { msg: `An e-mail has been sent to ${user.email} with further instructions.` });
+
+    const emailData = {
+      "Messages": [{
+        "From": {
+          "Email": "jaka.daneu@siol.net",
+          "Name": "Mailjet Pilot"
+        },
+        "To": [{
+          "Email": user.email,
+          "Name": user.fullName()
+        }],
+        'Subject': 'Reset your password for TExpenses',
+        'TextPart': `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
+            //       Please click on the following link, or paste this into your browser to complete the process:\n\n
+            //       http://${req.headers.host}/reset/${token}\n\n
+            //       If you did not request this, please ignore this email and your password will remain unchanged.\n`
+
+      }]
+    }
+
+    return sendEmail
+      .request(emailData)
+      .then((response) => {
+        // console.log('response: ', response);
+        // console.log('body: ', response.body);
+        // console.log('messages: ', response.body.Messages);
+        // console.log('to: ', response.body.Messages[0].To);
+        req.flash('info', {
+          msg: `An e-mail has been sent to ${user.email} with further instructions.`
+        });
       })
       .catch((err) => {
         if (err.message === 'self signed certificate in certificate chain') {
-          console.log('WARNING: Self signed certificate in certificate chain. Retrying with the self signed certificate. Use a valid certificate if in production.');
-          transporter = nodemailer.createTransport({
-            service: 'SendGrid',
-            auth: {
-              user: process.env.SENDGRID_USER,
-              pass: process.env.SENDGRID_PASSWORD
-            },
-            tls: {
-              rejectUnauthorized: false
-            }
-          });
-          return transporter.sendMail(mailOptions)
-            .then(() => {
-              req.flash('info', { msg: `An e-mail has been sent to ${user.email} with further instructions.` });
-            });
-        }
-        console.log('ERROR: Could not send forgot password email after security downgrade.\n', err);
-        req.flash('errors', { msg: 'Error sending the password reset message. Please try again shortly.' });
+          console.log('WARNING: Self signed certificate in certificate chain. Retrying with the self signed certificate. Use a valid certificate if in production.')
+        };
+        req.flash('errors', {
+          msg: 'Error sending the password reset message. Please try again shortly.'
+        });
         return err;
       });
   };
@@ -485,6 +584,6 @@ exports.postForgot = (req, res, next) => {
   createRandomToken
     .then(setRandomToken)
     .then(sendForgotPasswordEmail)
-    .then(() => res.redirect('/forgot'))
+    .then(() => res.redirect('/login'))
     .catch(next);
 };

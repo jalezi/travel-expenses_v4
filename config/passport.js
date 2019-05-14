@@ -8,10 +8,24 @@ const { OAuth2Strategy } = require('passport-oauth');
 
 const User = require('../models/User');
 
+/**
+ * Determines which data of the user object should be stored in the session.
+ * The result of the serializeUser method is attached to the session as req.session.passport.user = {}.
+ * In this case req.session.passport.user = {id: user.id)
+ */
 passport.serializeUser((user, done) => {
+  console.log(user);
   done(null, user.id);
 });
 
+/**
+ * The first argument of deserializeUser corresponds to the key of the user object that was given to the done function (see 1.).
+ * So your whole object is retrieved with help of that key.
+ * That key here is the user id (key can be any key of the user object i.e. name,email etc).
+ * In deserializeUser that key is matched with the in memory array / database or any data resource.
+ *
+ * The fetched object is attached to the request object as req.user
+ */
 passport.deserializeUser((id, done) => {
   User.findById(id, (err, user) => {
     done(err, user);

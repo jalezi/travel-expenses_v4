@@ -14,7 +14,6 @@ const User = require('../models/User');
  * In this case req.session.passport.user = {id: user.id)
  */
 passport.serializeUser((user, done) => {
-  console.log(user);
   done(null, user.id);
 });
 

@@ -18,8 +18,6 @@ const updateExpensesToMatchTravelRangeDates = require('../utils/updateExpensesTo
 const travelExpensesToPDF = require('../utils/travelExpensesToPDF');
 const travelsTotalToPDF = require('../utils/travelsTotalToPDF');
 
-
-
 /*
  * GET /travels/total_pdf
  */
@@ -40,7 +38,7 @@ exports.getTravelsTotalPDF = async function(req, res, next) {
   const dt = req.query.dt;
   const dateRange = {df, dt};
 
-  // TODO if statement is safety in case date range is not passed as url query
+  // if statement is safety in case date range is not passed as url query
   if (df === '' || dt === '') {
     travels = await Travel.find({_user: res.locals.user._id});
     totalSum = Travel.aggregate([
@@ -237,7 +235,6 @@ exports.deleteTravel = async function(req, res, next) {
 
 /*
  * PATCH /travels/new
- * TODO fix total calculation
  */
 exports.updateTravel = async function(req, res, next) {
   const currencyOptions = {
@@ -270,40 +267,27 @@ exports.updateTravel = async function(req, res, next) {
   if (!ObjectId.isValid(id)) {return next(new Error('Not valid Object Id'));}
 
   try {
-    let travel = await Travel.findOneAndUpdate({
-      _id: id,
-      _user: req.user.id
-    }, {
-      $set: body
-    }, {
-      new: true
-    }).populate({
-      path: 'expenses',
-      populate: {
-        path: 'curRate'
-      }
-    });
+    let travel = await Travel.findOneAndUpdate(
+      {_id: id, _user: req.user.id},
+      {$set: body}, {new: true})
+      .populate({path: 'expenses', populate: {path: 'curRate'}});
 
     if (!travel) {return next(new Error('Travel not found'));}
-
-    await updateExpensesToMatchTravelRangeDates(travel, res.locals.rates);
-    travel = await travel.save();
-    travel = await Travel.findOne({
-      _id: travel._id,
-      _user: req.user.id
-    }).populate({
-      path: 'expenses',
-      populate: {
-        path: 'curRate'
-      }
+    updateExpensesToMatchTravelRangeDates(travel, res.locals.rates).then(() => {
+      travel.save()
+        .then((doc) => {
+          Travel.findOne({_id: doc._id, _user: req.user.id})
+          .populate({path: 'expenses', populate: {path: 'curRate'}})
+          .then((doc) => {
+            doc.updateTotal()
+              .then((doc) => {
+                req.flash('success', {msg: 'Travel successfully updated!'});
+                res.redirect('/travels');
+              });
+          });
+      });
     });
 
-    const total = await travel.updateTotal();
-    travel.total = parseFloat(total).toFixed(2);
-    travel = await travel.save();
-
-    req.flash('success', {msg: 'Travel successfully updated!'});
-    res.redirect('/travels');
   } catch (err) {
     return next(err);
   }

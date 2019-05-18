@@ -1,3 +1,16 @@
+/*
+ * Expense Schema
+ * travel: link to travel => travel._id from travels collection
+ * type: possible expense type => ./lib/globals.expenseTypes
+ * descprition: expense description
+ * date: expense date
+ * curency: TODO implement validation => length=3 & make upper case
+ * curRate: link to currency => currency._id from currencies collection
+ * unit: only if expense type is Mileage based on user's unit(user.homeDistance) => userSchema in ./models/User.js
+ * amount: amount spent in local currency or distance in unit
+ * amountConverted: converted amount based on user's currency(homeCurrency) or user's per distance conversion(user.perMileAmount) => userSchema in ./models/User.js
+ * _user: link to user => user._id from users collection
+ */
 const mongoose = require('mongoose');
 const moment = require('moment');
 const {User} = require('../models/User');
@@ -46,24 +59,6 @@ const ExpenseSchema = new mongoose.Schema({
     ref: 'User'
   }
 }, { timestamps: true });
-
-// ExpenseSchema.methods.findRate = async function(callback) {
-//   const invoiceDate = moment(this.date).format('YYYY-MM-DD');
-//   const currency = this.currency;
-//   if (this.type != 'Mileage') {
-//     await mongoose.model('Travel').findOne({_id: this.travel}, (err, travel) => {
-//       let dayCurrencies = travel.travelCurrencies[invoiceDate];
-//       let rate = dayCurrencies.find(cur => cur[currency]);
-//       callback(err, rate);
-//     }).select({'travelCurrencies': 1, '_id': 0});
-//   } else {
-//     await mongoose.model('Travel').findOne({_id: this.travel}, (err, travel) => {
-//       let rate = travel.perMileAmount;
-//       callback(err, rate);
-//     }).select({'perMileAmount': 1, '_id': 0});
-//   }
-//
-// }
 
 const Expense = mongoose.model('Expense', ExpenseSchema);
 

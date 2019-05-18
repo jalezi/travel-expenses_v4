@@ -1,9 +1,21 @@
+/*
+ * Travel Schema
+ * _user: link to user => user._id from users collection
+ * descprition: travel description
+ * dateFrom: travel start date
+ * dateTo: travel end date
+ * homeCurrency: currency to calculate all amounts to
+ * perMileAmount: amount to convert distance to expense
+ * expenses: array of expense' ids - links to expenses collection in DB => ExpenseSchema in ./models/Expense.js
+ * total: total of all expenes linked to this travel
+ * useNestedStrict: TODO useNestedStrict description
+ * timestamps: creates two values => createdAr, updatedAt - Mongoose Schema option
+ */
+
 const mongoose = require('mongoose');
 
 const User = require('../models/User');
 const Expense = require('../models/Expense');
-// const Currency = require('../models/Currency');
-// const CurrencySchema = Currency.schema.paths;
 
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
@@ -45,6 +57,16 @@ const TravelSchema = new mongoose.Schema({
   useNestedStrict: true,
   timestamps: true });
 
+/*
+ * Helper method to update travel's total amount
+ * Returns same document for which the total is calculated.
+ * Before use you have to find document with populate expenses
+ * EXAMPLE:
+ * Travel
+ * .findOne({_id: doc._id, _user: req.user.id})
+ * .populate({path: 'expenses', populate: {path: 'curRate'}})
+ * .then((doc) => {doc.updateTotal()}
+ */
 TravelSchema.methods.updateTotal = function  (cb) {
   this.total = 0;
   this.expenses.forEach((expense) => {

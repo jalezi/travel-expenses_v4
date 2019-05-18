@@ -283,18 +283,13 @@ app.get('/import', passportConfig.isAuthenticated, importController.getImport);
 app.post('/import', passportConfig.isAuthenticated, importController.postImport);
 app.get('/travels/:id/pdf', passportConfig.isAuthenticated, travelController.getTravelExpensesPDF);
 
-
-
 /**
  * OAuth authentication routes. (Sign in)
  */
-
 app.get('/auth/google', passport.authenticate('google', { scope: 'profile email' }));
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
   res.redirect(req.session.returnTo || '/');
 });
-
-
 
 /**
  * Error Handler.
@@ -302,19 +297,22 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
 if (process.env.NODE_ENV === 'development') {
   // only use in development
   app.use(errorHandler({log: (err, str, req, res) => {
-    if (err instanceof imprortFileError) {
+    if (err instanceof imprortFileError || err instanceof mongoose.CastError) {
       console.log(str);
     } else {
       console.log(err);
     }
   }}));
-
 } else {
   app.use((err, req, res, next) => {
     if (err instanceof imprortFileError) {
       console.log(err.stack);
       res.status(400);
       res.redirect(req.path);
+    } else if (err instanceof mongoose.CastError) {
+      console.log(err.stack);
+      res.status(400);
+      res.redirect('/travels');
     } else {
       console.log(err);
       res.status(500).render('error', {
@@ -322,7 +320,6 @@ if (process.env.NODE_ENV === 'development') {
         title: 'Error'
       });
     }
-
   });
 }
 

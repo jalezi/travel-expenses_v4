@@ -1,3 +1,21 @@
+/*
+ * User Schema
+ * email: login email
+ * password: login password
+ * passwordResetToken: token send to user to reset the password
+ * passwordResetExpires: when passwordResetToken expires
+ * google: google id when user signin or link the account
+ * tokens: array of tokens
+ * profile: object with user's name, gender, location, website, picture, first name (fName), last name (lName)
+ * team: user's team
+ * jobPosition: user's job
+ * travels: array of travel' ids - links to travels collection in DB => TravelSchema in ./models/Expense.js
+ * homeCurrency: currency to calculate all amounts to
+ * homeDistance: to which linear measure expense will be calculate to: miles(mi) or kilometers(km)
+ * perMileAmount: amount to convert distance to expense
+ * timestamps: creates two values => createdAr, updatedAt - Mongoose Schema option
+ */
+
 const bcrypt = require('bcrypt-nodejs');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
@@ -8,14 +26,7 @@ const userSchema = new mongoose.Schema({
   passwordResetToken: String,
   passwordResetExpires: Date,
 
-  snapchat: String,
-  facebook: String,
-  twitter: String,
   google: String,
-  github: String,
-  instagram: String,
-  linkedin: String,
-  steam: String,
   tokens: Array,
 
   profile: {
@@ -92,7 +103,6 @@ userSchema.methods.gravatar = function gravatar(size) {
 /**
 * Helper method for getting user's full name
 */
-
 userSchema.methods.fullName = function fullName() {
   const result = this.profile.fName + ' ' + this.profile.lName;
   return result;

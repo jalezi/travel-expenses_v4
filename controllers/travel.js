@@ -20,6 +20,7 @@ const travelsTotalToPDF = require('../utils/travelsTotalToPDF');
 
 /*
  * GET /travels/total_pdf
+ * Create, open in new tab and save PDF file for filtered travels
  */
 exports.getTravelsTotalPDF = async function(req, res, next) {
 // Create and open PDF
@@ -74,6 +75,7 @@ exports.getTravelsTotalPDF = async function(req, res, next) {
 
 /*
  * GET /travels/:id/pdf
+ * Create, open in new tab and save PDF for displayed travel
  */
 exports.getTravelExpensesPDF = async function(req, res, next) {
   const stream = travelExpensesToPDF(res.locals.travel, res.locals.user);
@@ -86,6 +88,7 @@ exports.getTravelExpensesPDF = async function(req, res, next) {
 
 /*
  * GET /travels
+ * All travels
  */
 exports.getTravels = async function(req, res) {
   let minDate;
@@ -95,7 +98,7 @@ exports.getTravels = async function(req, res) {
   let years = [];
   const travels = await Travel.find({_id: {$in: req.user.travels}}).sort('-dateFrom');
 
-  // TODO create new Promise
+  // TODO create new Promise?
   const minMaxTravelsDates = await Travel.aggregate([
     {'$match': {'_user': req.user._id}},
     {'$group': {'_id': req.user._id,'minDate': {'$min': '$dateFrom'}, 'maxDate': {'$max': '$dateFrom'}}}
@@ -125,6 +128,7 @@ res.render('travels/travels', {
 
 /*
  * GET /travels/new
+ * Form to post new travel
  */
 exports.getNewTravel = async function(req, res) {
   res.render('travels/new', {
@@ -135,6 +139,7 @@ exports.getNewTravel = async function(req, res) {
 
 /*
  * POST /travels/new
+ * Create new travel based on user input
  */
 exports.postNewTravel = async function(req, res, next) {
 
@@ -176,6 +181,7 @@ exports.postNewTravel = async function(req, res, next) {
 
 /*
  * GET /travels/:id
+ * Show choosen travel
  */
 exports.getTravel = async function(req, res, next) {
   const id = req.params.id;
@@ -207,6 +213,7 @@ exports.getTravel = async function(req, res, next) {
 
 /*
  * DELETE /travels/:id
+ * Delete chosen/displayed travel
  */
 exports.deleteTravel = async function(req, res, next) {
   const id = req.params.id;
@@ -235,6 +242,8 @@ exports.deleteTravel = async function(req, res, next) {
 
 /*
  * PATCH /travels/new
+ * Update travel information
+ * If travel's expenses dates are not within travel date range, update expenses and recalculate travel total
  */
 exports.updateTravel = async function(req, res, next) {
   const currencyOptions = {
@@ -262,17 +271,24 @@ exports.updateTravel = async function(req, res, next) {
     return res.redirect(`/travels/${id}`);
   }
 
+  // Get data from html form to update travel
   const body = _.pick(req.body, ['description', 'dateFrom', 'dateTo', 'homeCurrency', 'perMileAmount']);
 
   if (!ObjectId.isValid(id)) {return next(new Error('Not valid Object Id'));}
 
   try {
+    // Update travel with new data
     let travel = await Travel.findOneAndUpdate(
       {_id: id, _user: req.user.id},
       {$set: body}, {new: true})
       .populate({path: 'expenses', populate: {path: 'curRate'}});
 
     if (!travel) {return next(new Error('Travel not found'));}
+    /*
+     * Check expenses dates and set them within travel dates.
+     * Calculate travel total. New expenses date, new rate.
+     * Rates for same currency are not the same for different dates.
+     */
     updateExpensesToMatchTravelRangeDates(travel, res.locals.rates).then(() => {
       travel.save()
         .then((doc) => {

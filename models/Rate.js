@@ -1,3 +1,12 @@
+/*
+ * Rates Schema
+ * Same object as data from data.fixer.io
+ * success: if response was successful
+ * timestamp: when was data collected in Unix timestamp - multiple with 1000 to get time in milliseconds and then convert to date
+ * base: for which currency are rates
+ * rates: object with all rates to convert from => {USD: 1.12, HRK: 7.45, GBP: 0.88, ....}
+ * timestamps: creates two values => createdAr, updatedAt - Mongoose Schema option
+ */
 const mongoose = require('mongoose');
 
 const RateSchema = new mongoose.Schema({
@@ -10,6 +19,10 @@ const RateSchema = new mongoose.Schema({
   {timestamps: true}
  );
 
+/*
+ * Returns array with rates between two dates.
+ * keys: [rates, date]
+ */
 RateSchema.statics.findRatesOnDate = function (travel, callback) {
   return this.find({ $and: [ { date: { $gte: travel.dateFrom } }, { date: { $lte: travel.dateTo } } ] },  (err, rates) => {
 
@@ -17,6 +30,14 @@ RateSchema.statics.findRatesOnDate = function (travel, callback) {
 
 }
 
+/*
+ * Returns array with rate close to travel dates
+ * Use in case there is no rate for date inbetween travel dates
+ * Rates are sorted ascending.
+ * Limit to only one rates object.
+ * keys: [rates, date]
+ * TODO check if you can get better algorithm
+ */
 RateSchema.statics.findRateBeforeOrAfterDate = function (travel, callback) {
   return this.find({$or: [ { date: { $gte: travel.dateFrom } }, { date: { $lte: travel.dateFrom } } ]}, (err, rates) => {
 

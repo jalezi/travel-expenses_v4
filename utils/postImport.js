@@ -111,9 +111,9 @@ const getOnlyNewCurrency = (currency, value) => {
   });
 };
 
-/* prepare new currencies which will save later.
-*  check if currencies are only in DB and return array with new currencies
-*/
+/* Prepare new currencies which will save later.
+ * Check if currencies are only in DB and return array with new currencies
+ */
 async function expensesImportNewCurrenciesForSave(array) {
   let notExistingCurrenciesDB = [];
   let existingCurrenciesDB = []
@@ -144,9 +144,9 @@ async function expensesImportNewCurrenciesForSave(array) {
 }
 
 /* read file, check file and return data or error
-*  if file is not validate return custom error imprortFileError otherwise
-*  return array with expenses data
-*/
+ * if file is not validate return custom error imprortFileError otherwise
+ * return array with expenses data
+ */
 async function readCheckFileAndGetData(myFile, option) {
   let error = null;
   const myFilePath = myFile.path;
@@ -183,11 +183,11 @@ async function readCheckFileAndGetData(myFile, option) {
   return err;
 }}
 
-/*  Get and prepare currencies from imported file
-*   remove rate & base from passed array @param dataArray
-*   add property _user to passed array @param dataArray
-*   add property curRate to passed array @param dataArray
-*/
+/* Get and prepare currencies from imported file
+ * remove rate & base from passed array @param dataArray
+ * add property _user to passed array @param dataArray
+ * add property curRate to passed array @param dataArray
+ */
 async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
   let message = '';
   let error = null;

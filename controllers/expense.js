@@ -11,6 +11,11 @@ const ObjectId = mongoose.Types.ObjectId;
 const {expenseTypes} = require('../lib/globals');
 const constants = require('../lib/constants');
 
+// TODO PATCH /travels/:id/expenses/:id
+
+/*
+ * POST /travels/:id/expenses/new
+ */
 exports.postNewExpense = async function  (req, res, next) {
   const currencyOptions = {
       allow_negatives: false,
@@ -46,7 +51,6 @@ exports.postNewExpense = async function  (req, res, next) {
   }
 
   const errors = req.validationErrors();
-  // console.log(req.body);
 
   if (errors) {
     req.flash('errors', errors);
@@ -56,27 +60,10 @@ exports.postNewExpense = async function  (req, res, next) {
   let expense = {};
   const invoiceDate = new Date(req.body.invoiceDate);
 
-
   const invoiceCurrency = req.body.invoiceCurrency.toUpperCase();
   let invDate = moment(invoiceDate).format('YYYY-MM-DD');
-  // const rate = req.body.rate;
-  // let cur = {};
-  //
-  // cur[invoiceCurrency] = Number(rate);
-  // let curRate = {};
-  // await Currency.find({base: res.locals.travel.homeCurrency, date: invoiceDate, rate: cur}, async (err, item) => {
-  //   if (item.length === 1) {
-  //     curRate = item[0];
-  //   } else {
-  //     curRate = new Currency({
-  //       base: res.locals.travel.homeCurrency,
-  //       date: invoiceDate,
-  //       rate: cur
-  //     })
-  //     await curRate.save();
-  //   }
-  // });
 
+  // Different data if expense type is Mileage
   if (req.body.expenseType != 'Mileage') {
     const invoiceCurrency = req.body.invoiceCurrency.toUpperCase();
     let invDate = moment(invoiceDate).format('YYYY-MM-DD');
@@ -126,25 +113,21 @@ exports.postNewExpense = async function  (req, res, next) {
   try {
     const doc = await expense.save();
     const travel = await Travel.findByIdAndUpdate(res.locals.travel._id, {
-      $addToSet: {
-        'expenses': doc._id
-      }
-    }, (err, travel) => {
+      $addToSet: {'expenses': doc._id}}, (err, travel) => {
       if (err) {
         return next(err);
       }
     });
+    // TODO refactor if statement. No need for if statement.
     if (doc.type != 'Mileage') {
       const result = Number(travel.total) + Number(doc.amountConverted);
       travel.total = result.toFixed(2);
       travel.save();
     } else {
-
       const result = Number(travel.total) + Number(doc.amountConverted);
       travel.total = result.toFixed(2);
       travel.save();
     }
-
   } catch (err) {
     return next(err);
   }

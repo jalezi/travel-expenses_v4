@@ -84,31 +84,34 @@ module.exports = async (travel, rates) => {
                 const rateObjectId = curRate._id
                 await updateExpense(expense._id, expense.amount, expense.date, convertedRate, rateObjectId).then((doc) => {
                   result.push(doc);
+                  if (result.length === expenses.length) {
+                    resolve(result);
+                  }
                 });
-                console.log(result.length, expenses.length);
-                if (result.length === expenses.length) {
-                  resolve(result);
-                }
+
               } else {
                 const convertedRate = filertedRatesFromDB[0].rate[invoiceCurrency];
                 const rateObjectId = filertedRatesFromDB[0]._id
                 await updateExpense(expense._id, expense.amount, expense.date, convertedRate, rateObjectId).then((doc) => {
                   result.push(doc);
+                  if (result.length === expenses.length) {
+                    resolve(result);
+                  }
                 });
-                console.log(result.length, expenses.length);
-                if (result.length === expenses.length) {
-                  resolve(result);
-                }
               }
             });
           } else {
-            await expense.save((doc) => {
+            let doc = await expense.save((doc) => {
               result.push(doc);
-              console.log(result.length, expenses.length);
               if (result.length === expenses.length) {
                 resolve(result);
               }
             });
+          }
+        } else {
+          result.push(expense);
+          if (result.length === expenses.length) {
+            resolve(result);
           }
         }
       });

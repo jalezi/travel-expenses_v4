@@ -77,7 +77,6 @@ module.exports = async (travel, rates) => {
               const filertedRatesFromDB = curRates.filter((item) => {
                 return !isNaN(item.rate[invoiceCurrency]);
               });
-
               if (filertedRatesFromDB.length === 0) {
                 const {curRate, convertedRate} = await createNewCurrency(expense.date, travelHomeCurrency, invoiceCurrency);
                 await curRate.save();
@@ -88,7 +87,6 @@ module.exports = async (travel, rates) => {
                     resolve(result);
                   }
                 });
-
               } else {
                 const convertedRate = filertedRatesFromDB[0].rate[invoiceCurrency];
                 const rateObjectId = filertedRatesFromDB[0]._id

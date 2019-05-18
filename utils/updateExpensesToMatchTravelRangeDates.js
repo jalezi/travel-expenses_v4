@@ -5,8 +5,8 @@ const Expense = require('../models/Expense');
 const Rate = require('../models/Rate');
 const Currency = require('../models/Currency');
 
-const findRatesByExactOrClosestDate = require('./findRatesByExactOrClosestDate');
-const convertRateToHomeCurrencyRate = require('./convertRateToHomeCurrencyRate');
+const findRatesByExactOrClosestDate = require('./utils').findRatesByExactOrClosestDate;
+const convertRateToHomeCurrencyRate = require('./utils').convertRateToHomeCurrencyRate;
 
 function checkExpenseDate(expDate, travelDateFrom, travelDateTo) {
   if (expDate < travelDateFrom || expDate > travelDateTo) {
@@ -44,13 +44,14 @@ async function createNewCurrency(expenseDate, homeCurrency, invoiceCurrency) {
 async function updateExpense(expenseId, expenseAmount, expenseDate, convertedRate, rateObjectId) {
   try {
     const amountConverted = Number((expenseAmount / convertedRate).toFixed(2));
-    await Expense.findByIdAndUpdate(expenseId, {
+    let doc = await Expense.findByIdAndUpdate(expenseId, {
       $set: {
         date: expenseDate,
         curRate: rateObjectId,
         amountConverted: amountConverted
       }
     });
+    return doc;
   } catch (err) {
     throw new Error(err);
   }
@@ -62,6 +63,7 @@ module.exports = async (travel, rates) => {
     const dateTo = travel.dateTo;
     const travelHomeCurrency = travel.homeCurrency;
     const expenses = travel.expenses;
+    const result = []
 
     try {
       await expenses.forEach(async (expense) => {
@@ -80,21 +82,36 @@ module.exports = async (travel, rates) => {
                 const {curRate, convertedRate} = await createNewCurrency(expense.date, travelHomeCurrency, invoiceCurrency);
                 await curRate.save();
                 const rateObjectId = curRate._id
-                await updateExpense(expense._id, expense.amount, expense.date, convertedRate, rateObjectId);
-
+                await updateExpense(expense._id, expense.amount, expense.date, convertedRate, rateObjectId).then((doc) => {
+                  result.push(doc);
+                });
+                console.log(result.length, expenses.length);
+                if (result.length === expenses.length) {
+                  resolve(result);
+                }
               } else {
                 const convertedRate = filertedRatesFromDB[0].rate[invoiceCurrency];
                 const rateObjectId = filertedRatesFromDB[0]._id
-                await updateExpense(expense._id, expense.amount, expense.date, convertedRate, rateObjectId);
-
+                await updateExpense(expense._id, expense.amount, expense.date, convertedRate, rateObjectId).then((doc) => {
+                  result.push(doc);
+                });
+                console.log(result.length, expenses.length);
+                if (result.length === expenses.length) {
+                  resolve(result);
+                }
               }
             });
           } else {
-            await expense.save();
+            await expense.save((doc) => {
+              result.push(doc);
+              console.log(result.length, expenses.length);
+              if (result.length === expenses.length) {
+                resolve(result);
+              }
+            });
           }
         }
       });
-      resolve();
     } catch (err) {
       reject (new Error(err));
     }

@@ -7,7 +7,7 @@ const passport = require('passport');
 const User = require('../models/User');
 const Travel = require('../models/Travel');
 const Expense = require('../models/Expense');
-const toTitleCase = require('../utils/toTitleCase');
+const toTitleCase = require('../utils/utils').toTitleCase;
 
 const mailjet = require('node-mailjet').connect(
   process.env.MJ_APIKEY_PUBLIC,

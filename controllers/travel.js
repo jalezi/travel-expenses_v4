@@ -289,7 +289,7 @@ exports.updateTravel = async function(req, res, next) {
      * Calculate travel total. New expenses date, new rate.
      * Rates for same currency are not the same for different dates.
      */
-    updateExpensesToMatchTravelRangeDates(travel, res.locals.rates).then(() => {
+    updateExpensesToMatchTravelRangeDates(travel, res.locals.rates).then((expenses) => {
       travel.save()
         .then((doc) => {
           Travel.findOne({_id: doc._id, _user: req.user.id})

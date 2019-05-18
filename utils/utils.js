@@ -1,6 +1,16 @@
 const Rate = require('../models/Rate');
 
-module.exports = async (date = new Date()) => {
+const convertRateToHomeCurrencyRate = (rates, homeCurrency, invoiceCurrency) => {
+  homeCurrency = homeCurrency.toUpperCase();
+  invoiceCurrency = invoiceCurrency.toUpperCase();
+  const homeCurrencyRate = rates[homeCurrency];
+  const convertedRate = 1 / homeCurrencyRate;
+  const baseRate = rates[invoiceCurrency];
+  const invoiceRate = Number((baseRate * convertedRate).toFixed(2));
+  return invoiceRate;
+}
+
+const findRatesByExactOrClosestDate = async (date = new Date()) => {
   try {
     const exactDate = await Rate.find({date: date}, (err, items) => {
       return items;
@@ -38,9 +48,17 @@ module.exports = async (date = new Date()) => {
       return 'FUCK AGAIN!';
     }
   } catch (err) {
-
-  } finally {
-
+    return err;
   }
+}
 
+const toTitleCase = (str) => {
+  return str.replace(/\w\S*/g,
+    txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+};
+
+module.exports = {
+  convertRateToHomeCurrencyRate,
+  findRatesByExactOrClosestDate,
+  toTitleCase
 }

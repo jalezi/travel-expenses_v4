@@ -2,11 +2,9 @@
 
 {{> travelsHeader}}
 
-
-
-<div class="input-group input-group-sm md-6 w-50 mb-1" id="dateRangePicker">
-  <select class="form-control" name="dateRangePickerSelect" id="dateRangePickerSelect">
-    <option selected>All</option>
+<div class="input-group input-group-sm md-6 w-100 mb-1" id="dateRangePicker">
+  <select class="form-control" name="dateRangePickerSelect" id="dateRangePickerSelect" value={{filter}}>
+    <option>All</option>
     <option>This Month</option>
     <option>Last Month</option>
     <option>Year</option>
@@ -22,12 +20,13 @@
   <div class="input-group-prepend " id="divLabelDateFrom">
     <label class="input-group-text" for="dateFrom" id="lableDateFrom">From</label>
   </div>
-  <input type="date" class="form-control " name="dateFrom" id="dateFrom" placeholder="" value="{{minDate}}" disabled />
+  <input type="date" class="form-control " name="dateFrom" id="dateFrom" placeholder="" value={{searchMinDate}} disabled />
 
   <div class="input-group-prepend " id="divLableDateTo">
     <label class="input-group-text" for="dateTo" id="lableDateTo">To</label>
   </div>
-  <input type="date" class="form-control " name="dateTo" id="dateTo" placeholder="" value="{{maxDate}}" disabled />
+  <input type="date" class="form-control " name="dateTo" id="dateTo" placeholder="" value={{searchMaxDate}} disabled />
+
   <div class="input-group-append " id="divShowCustomRange">
     <button class="btn btn-outline-secondary" id="showCustomRange" type="button" disabled>Show</button>
   </div>
@@ -36,13 +35,12 @@
       <i class="far fa-file-pdf"></i>Create PDF
     </button>
   </div>
-
 </div>
 
-<table class="table table-hover table-bordered table-responsive-md" id="travelTotalTable">
+<table class="table table-hover table-bordered" id="travelTotalTable">
   <tbody>
     <tr class="bg-success">
-      <th scope="row" class="text-right">TOTAL</th>
+      <th scope="row" class="text-right ">TOTAL</th>
       <td class="text-left" id="travelsFilteredTotal"><strong>{{toCurrency travel.total}} {{user.homeCurrency}}</strong></td>
       <td class="" id="travelsCount"><strong>{{travels.length}} travels</strong></td>
     </tr>
@@ -50,13 +48,13 @@
   </tbody>
 </table>
 
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered" id="travelsTable">
   <thead>
     <tr class="text-center">
       <th scope="col">#</th>
-      <th scope="col">Description</th>
-      <th scope="col">From</th>
-      <th scope="col">To</th>
+      <th scope="col">Description<i onclick="sortData()" class="mx-1 float-right fas fa-arrow-up"></i><i onclick="sortData()" class="mx-1 float-right fas fa-arrow-down"></i></th>
+      <th scope="col">From<i onclick="sortData()" class="px-1 float-right fas fa-arrow-up"></i><i onclick="sortData()" class="px-1 float-right fas fa-arrow-down"></i></th>
+      <th scope="col">To<i onclick="sortData()" class="px-1 float-right fas fa-arrow-up"></i><i onclick="sortData()" class="px-1 float-right fas fa-arrow-down"></i></th>
       <th scope="col">Total</th>
     </tr>
   </thead>
@@ -75,6 +73,7 @@
 </table>
 
 <script type="text/javascript">
+
   function travelsTotalToPDF() {
     let team = '{{user.team}}';
     let jobPosition = '{{user.jobPosition}}'
@@ -90,6 +89,36 @@
 </script>
 
 <script type="text/javascript">
+  function sortData() {
+    let search = {}
+    let target = event.target;
+    let targetClassName = target.className.split(" ");
+    let setSearch = new Promise(function(resolve, reject) {
+      switch (target.parentNode.innerText.toLowerCase()) {
+        case 'description':
+          resolve('description');
+          break;
+        case 'from':
+          resolve('dateFrom');
+          break;
+        case 'to':
+          resolve('dateTo');
+          break;
+        default:
+          resolve('error');
+      }
+    });
+    setSearch.then( sortBy => {
+      if (targetClassName.indexOf("fa-arrow-down") != -1) {
+        sortBy = "-" + sortBy;
+      };
+
+      searchText = `filter=${dateRangePickerSelect.value}&sortBy=${sortBy}&minDate=${dateFrom.value}&maxDate=${dateTo.value}`
+      location.search = searchText;
+    });
+
+  }
+
   function showTravels(df, dt) {
     $("#tableBody tr").filter(function(index, row) {
 
@@ -102,7 +131,6 @@
     });
     let el = $("#travelsCount")[0];
     let count = countRows();
-    console.log(count);
     el.innerHTML =`<strong>${count} travels</strong>`
   }
 
@@ -160,7 +188,6 @@
       default:
         return new Error(`${option} is not a valid option!`);
     }
-    console.log('return', option, df, dt);
     return [df, dt];
   }
 
@@ -176,15 +203,23 @@
   }
 
   $(document).ready(() => {
+    dateRangePickerSelect.value = "{{filter}}";
+    console.log(dateFrom.value.substring(0, 4));
+    choosenYear.value= dateTo.value.substring(0, 4);
     let arr = [$("#choosenYear"), $("#divShowCustomRange"), $("#dateFrom"), $("#dateTo"), $("#showCustomRange")];
     toggleFilterInputs(arr, true, true);
     $("#divLabelDateFrom").hide();
     $("#divLableDateTo").hide();
-
+    if (dateRangePickerSelect.value === "Year") {
+      $("#choosenYear").prop('disabled', false).show();
+    } else {
+      $("#choosenYear").prop('disabled', true).hide();
+    }
 
     showCustomRange.onclick = (event) => {
       const df = $("#dateFrom").val();
       const dt = $("#dateTo").val();
+      console.log(dt, df);
       showTravels(df, dt);
     }
 
@@ -196,13 +231,12 @@
       dateTo.value = dt;
       showTravels(df, dt);
       displayFilteredTravelsTotal();
+      searchText = `filter=${dateRangePickerSelect.value}&sortBy=-dateFrom&minDate=${dateFrom.value}&maxDate=${dateTo.value}`
+      location.search = searchText;
     }
 
     dateRangePickerSelect.onchange = (event) => {
-      let df;
-      let dt;
-      let dayArray;
-      let dateRange = [];
+      let df, dt, dayArray, searchText, dateRange = [];
       const today = moment();
       const year = today.format("YYYY");
       const month = today.format("MM");
@@ -212,15 +246,18 @@
           dayArray = [year, month, "01"];
           df = dayArray.join("-")
           dt = today.format("YYYY-MM-DD");
+
           break;
         case "All":
           df = "2015-01-01";
           dt = moment().format("YYYY-MM-DD");
+
           break;
         case "This Month":
           dayArray = [year, month, "01"];
           df = dayArray.join("-")
           dt = today.format("YYYY-MM-DD");
+
           break;
         case "Last Month":
           let previous = today.subtract(1, "months");
@@ -231,20 +268,20 @@
           df = dayArray.join("-");
           dayArray = [prevYear, prevMonth, daysInMonth.toString()];
           dt = dayArray.join("-");
+
           break;
         case "Year":
           dateRange = setDateRange(dateRangePickerSelect.value);
           df = dateRange[0];
           dt = dateRange[1];
-          // showTravels(df, dt);
+
           break;
         default:
-          console.log('Default');
           df = "2000-01-01";
           dt = "2000-01-31";
 
       }
-
+      console.log(dt, df);
       dateFrom.value = df;
       dateTo.value = dt;
       if (dateRangePickerSelect.value === "Custom") {
@@ -255,7 +292,6 @@
         $("#choosenYear").prop('disabled', true).hide();
 
       } else {
-
         if (dateRangePickerSelect.value === "Year") {
           $("#choosenYear").prop('disabled', false).show();
         } else {
@@ -266,6 +302,8 @@
         $("#divLableDateTo").hide();
         toggleFilterInputs(arr, true, true);
         showTravels(df, dt);
+        searchText = `filter=${dateRangePickerSelect.value}&sortBy=-dateFrom&minDate=${dateFrom.value}&maxDate=${dateTo.value}`
+        location.search = searchText;
       }
       displayFilteredTravelsTotal();
     }

@@ -17,11 +17,13 @@ const Rate = require('../models/Rate');
 const dataFixier = async () => {
   try {
     const response = await axios.get(`http://data.fixer.io/api/latest?access_key=${process.env.DATA_FIXER_IO}`);
-    if (response.data.success) {
+    if (response.data.success && moment(response.data.date).format('YYYY-MM-DD') === moment().format('YYYY-MM-DD')) {
       const data = new Rate(response.data);
       await data.save().then((rates) => {
         console.log(`Rates for ${moment(rates.date)},\ncollected on ${new Date(rates.timestamp*1000)},\ncreated on ${moment(rates.createdAt)}`);
       });
+    } else if (moment(response.data.date).format('YYYY-MM-DD') != moment().format('YYYY-MM-DD')) {
+      console.log(`Wrong response data date: ${moment(response.data.date).format('YYYY-MM-DD')} - Should be ${moment().format('YYYY-MM-DD')}`);
     } else {
         console.log(`Could't get rates from data.fixer.io`);
         console.log(response.data);
@@ -47,7 +49,7 @@ const dataFixier = async () => {
  * @return Promise<Rate> Array of MongoDB documents
  */
 const checkDbForTodayRates = new Promise(async function(resolve, reject) {
-  const today = moment().format('YYYY-MM-DD');
+  const today = moment(new Date()).format('YYYY-MM-DD');
   try {
     const rates = await Rate.find({date: today});
     resolve(rates);

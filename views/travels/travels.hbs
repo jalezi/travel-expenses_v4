@@ -204,10 +204,14 @@
 
   $(document).ready(() => {
     dateRangePickerSelect.value = "{{filter}}";
-    console.log(dateFrom.value.substring(0, 4));
     choosenYear.value= dateTo.value.substring(0, 4);
     let arr = [$("#choosenYear"), $("#divShowCustomRange"), $("#dateFrom"), $("#dateTo"), $("#showCustomRange")];
-    toggleFilterInputs(arr, true, true);
+    if (dateRangePickerSelect.value === 'Custom') {
+      toggleFilterInputs(arr, false, false);
+    } else {
+      toggleFilterInputs(arr, true, true);
+    }
+    // toggleFilterInputs(arr, true, true);
     $("#divLabelDateFrom").hide();
     $("#divLableDateTo").hide();
     if (dateRangePickerSelect.value === "Year") {
@@ -221,6 +225,8 @@
       const dt = $("#dateTo").val();
       console.log(dt, df);
       showTravels(df, dt);
+      searchText = `filter=${dateRangePickerSelect.value}&sortBy=-dateFrom&minDate=${dateFrom.value}&maxDate=${dateTo.value}`
+      location.search = searchText;
     }
 
     choosenYear.onchange = (event) => {
@@ -290,6 +296,8 @@
         $("#divLableDateTo").show();
         toggleFilterInputs(arr, false, false);
         $("#choosenYear").prop('disabled', true).hide();
+        // searchText = `filter=${dateRangePickerSelect.value}&sortBy=-dateFrom&minDate=${dateFrom.value}&maxDate=${dateTo.value}`
+        // location.search = searchText;
 
       } else {
         if (dateRangePickerSelect.value === "Year") {

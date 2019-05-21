@@ -1,4 +1,9 @@
+// jshint esversion: 8
 const nodemailer = require('nodemailer');
+const mailjet = require('node-mailjet').connect(
+  process.env.MJ_APIKEY_PUBLIC,
+  process.env.MJ_APIKEY_PRIVATE
+);
 
 // TODO implement contact form
 
@@ -8,7 +13,6 @@ const nodemailer = require('nodemailer');
  */
 exports.getContact = (req, res) => {
   const unknownUser = !(req.user);
-
   res.render('contact', {
     title: 'Contact',
     unknownUser,
@@ -19,7 +23,7 @@ exports.getContact = (req, res) => {
  * POST /contact
  * Send a contact form via Nodemailer.
  */
-exports.postContact = (req, res) => {
+exports.postContact = (req, res, next) => {
   let fromName;
   let fromEmail;
   if (!req.user) {
@@ -42,54 +46,45 @@ exports.postContact = (req, res) => {
     fromName = req.user.profile.name || '';
     fromEmail = req.user.email;
   }
+  console.log(fromEmail);
+  
+  const sendContactForm = async () => {
+    const sendEmail = mailjet.post('send', {version: 'v3.1'});
+    const emailData = {
+      "Messages": [{
+        "From": {
+          "Email": "jaka.daneu@siol.net",
+          "Name": `${fromName} - ${fromEmail}`
+        },
+        "To": [{
+          "Email": "jakad@me.com",
+          "Name": 'TExpenses App'
+        }],
+        'Subject': 'Contact TExpenses App',
+        'TextPart': req.body.message
+      }]
+    };
 
-  let transporter = nodemailer.createTransport({
-    service: 'SendGrid',
-    auth: {
-      user: process.env.SENDGRID_USER,
-      pass: process.env.SENDGRID_PASSWORD
+    try {
+      await sendEmail.request(emailData);
+      return req.flash('info', {
+        msg: `An e-mail has been sent to TExpenses App.`
+      });
     }
-  });
-  const mailOptions = {
-    to: 'your@email.com',
-    from: `${fromName} <${fromEmail}>`,
-    subject: 'Contact Form | Hackathon Starter',
-    text: req.body.message
+    catch (err) {
+      console.log(err);
+      
+      req.flash('errors', {
+        msg: 'Error sending the contact message. Please try again shortly.'
+      });
+      return err;
+    }
   };
-
-  return transporter.sendMail(mailOptions)
+  
+  sendContactForm()
     .then(() => {
-      req.flash('success', { msg: 'Email has been sent successfully!' });
-      res.redirect('/contact');
+      res.redirect('/');
     })
-    .catch((err) => {
-      if (err.message === 'self signed certificate in certificate chain') {
-        console.log('WARNING: Self signed certificate in certificate chain. Retrying with the self signed certificate. Use a valid certificate if in production.');
-        transporter = nodemailer.createTransport({
-          service: 'SendGrid',
-          auth: {
-            user: process.env.SENDGRID_USER,
-            pass: process.env.SENDGRID_PASSWORD
-          },
-          tls: {
-            rejectUnauthorized: false
-          }
-        });
-        return transporter.sendMail(mailOptions);
-      }
-      console.log('ERROR: Could not send contact email after security downgrade.\n', err);
-      req.flash('errors', { msg: 'Error sending the message. Please try again shortly.' });
-      return false;
-    })
-    .then((result) => {
-      if (result) {
-        req.flash('success', { msg: 'Email has been sent successfully!' });
-        return res.redirect('/contact');
-      }
-    })
-    .catch((err) => {
-      console.log('ERROR: Could not send contact email.\n', err);
-      req.flash('errors', { msg: 'Error sending the message. Please try again shortly.' });
-      return res.redirect('/contact');
-    });
+    .catch(next);
+
 };

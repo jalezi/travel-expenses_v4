@@ -1,6 +1,6 @@
-const {
-  promisify
-} = require('util');
+// jshint esversion: 6
+
+const {promisify} = require('util');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const passport = require('passport');
@@ -337,7 +337,7 @@ exports.postReset = (req, res, next) => {
             resolve(user);
           });
         })).catch((err) => {return err;});
-      }).catch((err) => {return err});
+      }).catch((err) => {return err;});
 
   const sendResetPasswordEmail = (user) => {
     if (!user) {return;}
@@ -370,13 +370,13 @@ exports.postReset = (req, res, next) => {
         req.flash('warning', {msg: 'Your password has been changed, however we were unable to send you a confirmation email. We will be looking into it shortly.'});
         return err;
       });
-  }
+  };
 
 resetPassword()
   .then(sendResetPasswordEmail)
   .then(() => {if (!res.finished) res.redirect('/');})
   .catch(err => next(err));
-}
+};
 
 /**
  * GET /forgot
@@ -441,7 +441,7 @@ exports.postForgot = (req, res, next) => {
             //       If you did not request this, please ignore this email and your password will remain unchanged.\n`
 
       }]
-    }
+    };
 
     return sendEmail
       .request(emailData)
@@ -450,8 +450,8 @@ exports.postForgot = (req, res, next) => {
       })
       .catch((err) => {
         if (err.message === 'self signed certificate in certificate chain') {
-          console.log('WARNING: Self signed certificate in certificate chain. Retrying with the self signed certificate. Use a valid certificate if in production.')
-        };
+          console.log('WARNING: Self signed certificate in certificate chain. Retrying with the self signed certificate. Use a valid certificate if in production.');
+        }
         req.flash('errors', {msg: 'Error sending the password reset message. Please try again shortly.'});
         return err;
       });

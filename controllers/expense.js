@@ -11,7 +11,117 @@ const ObjectId = mongoose.Types.ObjectId;
 const {expenseTypes} = require('../lib/globals');
 const constants = require('../lib/constants');
 
+
+/*
+ * GET /travels/:id/expenses/:id
+ */
+ exports.getExpense = (req, res, next) => {
+   
+   const id = req.params.id;
+   if (!ObjectId.isValid(id)) {  return next(new Error('Not valid Object Id'));}
+   let mileageType;
+   const expense = res.locals.expense;
+   const travel = res.locals.travel;
+   const tDateFrom = travel.dateFrom;
+   const tDateTo = travel.dateTo;
+
+   if (expense.type != 'Mileage') {
+     const rate = Object.values(expense.curRate.rate)[0];
+     expense.rate = rate.toFixed(2);
+     mileageType = false;
+   } else {
+     expense.rate = travel.perMileAmount;
+     mileageType = true;
+   }
+
+
+   res.render('expenses/expense', {
+     title: 'Expense',
+     travel,
+     expense,
+     mileageType,
+     tDateFrom,
+     tDateTo,
+     constants,
+     rates: JSON.stringify(res.locals.rates),
+     expenseCurRate: JSON.stringify(expense.curRate),
+     expenseTypes
+   });
+ }
 // TODO PATCH /travels/:id/expenses/:id
+exports.updateExpense = async (req, res, next) => {
+  const travel = res.locals.travel;
+  const expense = res.locals.expense;
+  const body = _.pick(req.body, ['expenseType', 'expenseDescription', 'invoiceDate', 'amountDistance', 'amountDistance2', 'amountConverted', 'amountConverted2', 'invoiceCurrency', 'rate', 'amount']);
+  console.log('body', body.amountConverted);
+  console.log('expense', Number(expense.amountConverted), Number(body.amountConverted2));
+  // console.log('travel', travel);
+  const invoiceDate = new Date(req.body.invoiceDate);
+  console.log(Number(travel.total));
+  travel.total = travel.total - Number(expense.amountConverted) + Number(body.amountConverted) + Number(body.amountConverted2);
+  console.log(Number(travel.total));
+  // Different data if expense type is Mileage
+  if (req.body.expenseType != 'Mileage') {
+    const invoiceCurrency = req.body.invoiceCurrency.toUpperCase();
+    let invDate = moment(invoiceDate).format('YYYY-MM-DD');
+    const rate = req.body.rate;
+    let cur = {};
+
+    cur[invoiceCurrency] = Number(rate);
+    let curRate = {};
+    await Currency.find({base: res.locals.travel.homeCurrency, date: invoiceDate, rate: cur}, async (err, item) => {
+      if (item.length === 1) {
+        curRate = item[0];
+        // console.log('findCurRate', curRate);
+      } else {
+        curRate = new Currency({
+          base: res.locals.travel.homeCurrency,
+          date: invoiceDate,
+          rate: cur
+        })
+        await curRate.save().then((doc) => {
+          // console.log('saveCurRate', doc);
+        }).catch((err) => {
+          next(err);
+        });
+      }
+    });
+
+    expense.type = body.expenseType;
+    expense.description = body.expenseDescription;
+    expense.date = invoiceDate;
+    expense.currency = body.invoiceCurrency.toUpperCase();
+    expense.curRate = curRate;
+    expense.amount = body.amount;
+    expense.amountConverted = body.amountConverted;
+    expense.unit = undefined;
+  } else {
+    expense.type = body.expenseType;
+    expense.description = body.expenseDescription;
+    expense.date = invoiceDate;
+    expense.unit = req.user.homeDistance;
+    expense.amount = body.amountDistance;
+    expense.amountConverted = body.amountConverted2;
+    expense.currency = undefined;
+    expense.curRate = undefined;
+
+  }
+
+  await expense.save()
+  .then((doc) => {
+    // console.log('expense', doc);
+    travel.save()
+    .then(() => {
+      res.redirect(`/travels/${travel._id}`);
+    }).catch((err) => {
+      next(err);
+    });
+  })
+  .catch((err) => {
+    next(err);
+  });
+
+}
 
 /*
  * POST /travels/:id/expenses/new

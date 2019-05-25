@@ -13,13 +13,13 @@ function calcAmount(rate, amount, currency=true) {
 
 $(document).ready(() => {
 
-
   // Place JavaScript code here...
 
   // show/hide form row 2 & 3 based on selection
   expenseType.onchange = function (data, data1) {
-
+    console.log('expenseType.onchange() - newExpense.js');
     if (expenseType.value === 'Mileage') {
+      console.log('Mileage', expenseType.value);
       invoiceCurrency.value = "";
       amount.value = 0;
       rate.value = 0;
@@ -38,6 +38,8 @@ $(document).ready(() => {
 
       document.getElementById('invoiceCurrency').required = false;
       } else {
+      console.log('not Mileage', expenseType.value);
+      console.log(rate.value);
       amountDistance.value = 0;
       amountDistance2.value = 0;
       amountConverted2.value = 0.00;
@@ -111,7 +113,4 @@ $(document).ready(() => {
       amountDistance2.value = parseFloat($('#amountDistance2').val()).toFixed(2);
     }
   }
-
-
-
 });

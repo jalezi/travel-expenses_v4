@@ -88,7 +88,7 @@
       <tr>
         <th scope="row" class="text-center">{{countList @index}}</th>
         <td class="text-center">{{this.type}}</td>
-        <td><a href="/travels/{{travel._id}}/{{this._id}}">{{this.description}}</a></td>
+        <td><a href="/travels/{{travel._id}}/expenses/{{this._id}}">{{this.description}}</a></td>
         <td class="text-center">{{formatDate this.date}}</td>
 
         <td class="text-right">{{toCurrency this.amount}}</td>
@@ -185,7 +185,7 @@
       if (invoiceCurrency.value.length === 3) {
         try {
           const date = new Date(invoiceDate.value).toISOString();
-          const rates = JSON.parse('{{{rates}}}')
+          const rates = JSON.parse(`{{{rates}}}`);
           let rts = rates.find((r) => {
             return r.date === date;
           });
@@ -227,5 +227,12 @@
         rate.readOnly = false;
       }
     }
-  })
+
+    invoiceDate.onchange = () => {
+      if (expenseType.value != "Mileage") {
+        invoiceCurrency.onchange();
+        invoiceCurrency.onfocusout();
+      }
+    }
+  });
 </script>

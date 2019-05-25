@@ -29,6 +29,7 @@ const hbsHelpers = require('./utils/hbsHelpers/hbsHelpers');
 const getRates = require('./utils/getRates');
 
 const Travel = require('./models/Travel');
+const Expense = require('./models/Expense');
 const Rate = require('./models/Rate');
 const myErrors = require('./utils/myErrors');
 const imprortFileError = myErrors.imprortFileError;
@@ -209,6 +210,46 @@ app.use('/import', async (req, res, next) => {
   }
 });
 
+/*
+ * Add by me
+ * Save to res.locals.expense current expense
+ */
+app.use('/travels/:id/expenses/:id', async (req, res, next) => {
+  if ((!res.locals.expense || res.locals.expense._id != req.params.id) && req.params.id != 'new') {
+    try {
+      const baseUrl = req.baseUrl.split('/');
+      const travelId = baseUrl[2];
+      const travel = await Travel.findById(travelId).populate({
+        path: 'expenses',
+        populate: {path: 'curRate'}
+      });
+      const expense = await Expense.findById(req.params.id).populate({
+        path: 'curRate'
+      });
+      let rates = await Rate.findRatesOnDate(travel, (err, result) => {
+        if (err) {
+          throw err;
+        }
+      });
+
+      if (rates.length === 0) {
+        rates = await Rate.findRateBeforeOrAfterDate(travel, (err, result) => {
+          if (err) {
+            throw new Error(err);
+          }
+        })
+      }
+      res.locals.expense = expense;
+      res.locals.rates = rates;
+      next();
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    next();
+  }
+})
+
 /**
   * Added by me
   * Save to res.locals.travels current travel
@@ -243,6 +284,7 @@ app.use('/travels/:id', async (req, res, next) => {
     next();
   }
 });
+
 
 /**
   * Added by me
@@ -280,6 +322,8 @@ app.get('/travels/:id', passportConfig.isAuthenticated, travelController.getTrav
 app.delete('/travels/:id', passportConfig.isAuthenticated, travelController.deleteTravel);
 app.patch('/travels/:id', passportConfig.isAuthenticated, travelController.updateTravel);
 app.post('/travels/:id/expenses/new', passportConfig.isAuthenticated, expenseController.postNewExpense);
+app.get('/travels/:id/expenses/:id', passportConfig.isAuthenticated, expenseController.getExpense);
+app.patch('/travels/:id/expenses/:id', passportConfig.isAuthenticated, expenseController.updateExpense);
 app.get('/import', passportConfig.isAuthenticated, importController.getImport);
 app.post('/import', passportConfig.isAuthenticated, importController.postImport);
 app.get('/travels/:id/pdf', passportConfig.isAuthenticated, travelController.getTravelExpensesPDF);

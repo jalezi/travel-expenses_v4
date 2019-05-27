@@ -223,7 +223,6 @@
     showCustomRange.onclick = (event) => {
       const df = $("#dateFrom").val();
       const dt = $("#dateTo").val();
-      console.log(dt, df);
       showTravels(df, dt);
       searchText = `filter=${dateRangePickerSelect.value}&sortBy=-dateFrom&minDate=${dateFrom.value}&maxDate=${dateTo.value}`
       location.search = searchText;
@@ -287,7 +286,7 @@
           dt = "2000-01-31";
 
       }
-      console.log(dt, df);
+      
       dateFrom.value = df;
       dateTo.value = dt;
       if (dateRangePickerSelect.value === "Custom") {

@@ -229,18 +229,14 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
       // if no travel for expense delete expense
       if (!travel) {
         noTravelKeys.push(key)
-        console.log(key + 2, value.type, value.travelName, value.date);
-        // console.log(key+2, value.currency, value.curRate, value.amountConverted);
         return
       } else {
-        // console.log(key + 2, object[key+2]);
         object[key].travel = travel._id;
       }
     });
 
     // delete expenses that not belong to any existing travel
     for (value of noTravelKeys.sort(function(a, b){return b-a})) {
-      // console.log('key', value, dataArray[value]);
       dataArray.splice(value, 1);
     }
 

@@ -1,4 +1,5 @@
 {{!< layout}}
+
 <div class="pb-2 mt-2 mb-4 border-bottom">
   <h3><a href="/travels/{{travel._id}}">{{travel.description}}</a></h3>
 </div>
@@ -117,7 +118,6 @@
       if (invoiceUnit.value === 'km') {
         const kmToMiles = parseFloat({{constants.KILOMETERS_TO_MILES}});
         const miles = (amountDistance2.value * kmToMiles).toFixed(2);
-        // console.log(miles);
         amountDistance.value = miles;
         const convertedAmount = (travelPerMileAmount.value * amountDistance.value).toFixed(2);
         amountConverted2.value = convertedAmount;
@@ -125,7 +125,6 @@
     }
 
     invoiceCurrency.onfocusout = () => {
-      console.log('invoiceCurrency.onfocusout()');
       if (rate.value != 0) {
         amountConverted.value = (amount.value / rate.value).toFixed(2);
       }
@@ -133,7 +132,6 @@
 
     // to be moved somewhere else because of api key
     invoiceCurrency.onchange = async function() {
-      console.log('invoiceCurrency.onchange()');
       invoiceCurrency.value = invoiceCurrency.value.toUpperCase();
       if (invoiceCurrency.value.length === 3) {
         try {

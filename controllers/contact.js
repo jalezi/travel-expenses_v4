@@ -46,7 +46,6 @@ exports.postContact = (req, res, next) => {
     fromName = req.user.profile.name || '';
     fromEmail = req.user.email;
   }
-  console.log(fromEmail);
   
   const sendContactForm = async () => {
     const sendEmail = mailjet.post('send', {version: 'v3.1'});

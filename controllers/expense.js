@@ -60,7 +60,7 @@ exports.deleteExpense = async (req, res, next) => {
   const splitUrl = req.url.split('/');
   Expense.findOneAndDelete({_id: expenseId, travel: travel._id})
   .then((result) => {
-    console.log('result', result);
+
     Travel.findByIdAndUpdate(travel._id, {
       $pullAll: {'expenses': [expenseId]},
       $inc: { "total" : -expense.amountConverted }
@@ -83,13 +83,8 @@ exports.updateExpense = async (req, res, next) => {
   const travel = res.locals.travel;
   const expense = res.locals.expense;
   const body = _.pick(req.body, ['expenseType', 'expenseDescription', 'invoiceDate', 'amountDistance', 'amountDistance2', 'amountConverted', 'amountConverted2', 'invoiceCurrency', 'rate', 'amount']);
-  console.log('body', body.amountConverted);
-  console.log('expense', Number(expense.amountConverted), Number(body.amountConverted2));
-  // console.log('travel', travel);
   const invoiceDate = new Date(req.body.invoiceDate);
-  console.log(Number(travel.total));
   travel.total = travel.total - Number(expense.amountConverted) + Number(body.amountConverted) + Number(body.amountConverted2);
-  console.log(Number(travel.total));
   // Different data if expense type is Mileage
   if (req.body.expenseType != 'Mileage') {
     const invoiceCurrency = req.body.invoiceCurrency.toUpperCase();
@@ -102,7 +97,6 @@ exports.updateExpense = async (req, res, next) => {
     await Currency.find({base: res.locals.travel.homeCurrency, date: invoiceDate, rate: cur}, async (err, item) => {
       if (item.length === 1) {
         curRate = item[0];
-        // console.log('findCurRate', curRate);
       } else {
         curRate = new Currency({
           base: res.locals.travel.homeCurrency,
@@ -110,7 +104,6 @@ exports.updateExpense = async (req, res, next) => {
           rate: cur
         })
         await curRate.save().then((doc) => {
-          // console.log('saveCurRate', doc);
         }).catch((err) => {
           next(err);
         });
@@ -139,7 +132,6 @@ exports.updateExpense = async (req, res, next) => {
 
   await expense.save()
   .then((doc) => {
-    // console.log('expense', doc);
     travel.save()
     .then(() => {
       res.redirect(`/travels/${travel._id}`);

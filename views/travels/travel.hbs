@@ -165,7 +165,6 @@
       if (invoiceUnit.value === 'km') {
         const kmToMiles = parseFloat({{constants.KILOMETERS_TO_MILES}});
         const miles = (amountDistance2.value * kmToMiles).toFixed(2);
-        // console.log(miles);
         amountDistance.value = miles;
         const convertedAmount = (travelPerMileAmount.value * amountDistance.value).toFixed(2);
         amountConverted2.value = convertedAmount;
@@ -173,7 +172,6 @@
     }
 
     invoiceCurrency.onfocusout = () => {
-      console.log(this.arguments);
       if (rate.value != 0) {
         amountConverted.value = (amount.value / rate.value).toFixed(2);
       }

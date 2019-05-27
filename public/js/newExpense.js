@@ -17,9 +17,8 @@ $(document).ready(() => {
 
   // show/hide form row 2 & 3 based on selection
   expenseType.onchange = function (data, data1) {
-    console.log('expenseType.onchange() - newExpense.js');
+
     if (expenseType.value === 'Mileage') {
-      console.log('Mileage', expenseType.value);
       invoiceCurrency.value = "";
       amount.value = 0;
       rate.value = 0;
@@ -29,7 +28,6 @@ $(document).ready(() => {
       $('#row2Mileage').show();
       $('#row2noMileage').hide();
 
-      // console.log(invoiceUnit.selectedIndex);
       if (invoiceUnit.selectedIndex === 0) {
         $('#row3Mileage').hide();
       } else {
@@ -38,8 +36,6 @@ $(document).ready(() => {
 
       document.getElementById('invoiceCurrency').required = false;
       } else {
-      console.log('not Mileage', expenseType.value);
-      console.log(rate.value);
       amountDistance.value = 0;
       amountDistance2.value = 0;
       amountConverted2.value = 0.00;

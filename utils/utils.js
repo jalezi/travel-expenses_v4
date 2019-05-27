@@ -32,10 +32,8 @@ const findRatesByExactOrClosestDate = async (date = new Date()) => {
       const diffLower = Math.abs(date.getTime() - lowerDate.date.getTime());
 
       if (diffGreater < diffLower) {
-        console.log('greaterDate');
         return greaterDate;
       } else {
-        console.log('lowerDate');
         return lowerDate;
       }
     } else if (!greaterDate && !lowerDate) {

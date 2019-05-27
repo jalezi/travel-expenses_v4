@@ -324,6 +324,7 @@ app.patch('/travels/:id', passportConfig.isAuthenticated, travelController.updat
 app.post('/travels/:id/expenses/new', passportConfig.isAuthenticated, expenseController.postNewExpense);
 app.get('/travels/:id/expenses/:id', passportConfig.isAuthenticated, expenseController.getExpense);
 app.patch('/travels/:id/expenses/:id', passportConfig.isAuthenticated, expenseController.updateExpense);
+app.delete('/travels/:id/expenses/:id', passportConfig.isAuthenticated, expenseController.deleteExpense);
 app.get('/import', passportConfig.isAuthenticated, importController.getImport);
 app.post('/import', passportConfig.isAuthenticated, importController.postImport);
 app.get('/travels/:id/pdf', passportConfig.isAuthenticated, travelController.getTravelExpensesPDF);

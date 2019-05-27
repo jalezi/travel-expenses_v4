@@ -1,8 +1,14 @@
 {{!< layout}}
+<div class="pb-2 mt-2 mb-4 border-bottom">
+  <h3><a href="/travels/{{travel._id}}">{{travel.description}}</a></h3>
+</div>
 
-<h1>{{expense.description}}</h1>
 
 <div class="pb-2 mt-2 mb-4 border-bottom" id="newExpenseForm">
+  <div class="pb-2 mt-2">
+    <h4>Expense</h4>
+  </div>
+
   <form class="" action="/travels/{{travel._id}}/expenses/{{expense._id}}" method="POST">
     <input type="hidden" name="_csrf" value={{_csrf}} />
     <div class="form-group row">
@@ -37,6 +43,12 @@
         <button class="btn btn-outline-primary col-md-4 mb-1" type="button" id="cancelButton"<i class="fas fa-ban"></i>Cancel</button>
       </div>
     </div>
+
+    <div class="form-group row">
+      <div class="col-md-7">
+        <hr />
+      </div>
+    </div>
   </form>
   <form class="" method="POST" action="/travels/{{travel._id}}/expenses/{{expense._id}}" enctype="application/x-www-form-urlencoded">
     <div class="form-group row">
@@ -58,7 +70,6 @@
     $('#row2noMileage').show();
   }
 
-  // console.log(invoiceUnit.selectedIndex);
   if (invoiceUnit.selectedIndex === 0) {
     $('#row3Mileage').hide();
   } else {
@@ -71,26 +82,17 @@
     let r = JSON.parse(`{{{expenseCurRate}}}`);
     rate.value = r.rate[invoiceCurrency.value];
     amount.value = {{expense.amount}};
+    amountConverted.value = {{expense.amountConverted}};
     document.getElementById('invoiceCurrency').required = true;
   } else {
     invoiceUnit.value = "{{expense.unit}}";
     travelPerMileAmount.value = "{{travel.perMileAmount}}";
-    amountDistance.value = "{{expense.amount}}";
+    amountDistance.value = {{expense.amount}};
+    amountConverted2.value = "{{expense.amountConverted}}";
     document.getElementById('invoiceCurrency').required = false;
   }
 
-
-  amountConverted.value = {{expense.amountConverted}};
-
   $(document).ready(() => {
-
-    expenseType.onchange = () => {
-      if (expenseType.value =! "Mileage") {
-
-      } else {
-
-      }
-    }
 
     cancelButton.onclick =() => {
       let splitPath = location.pathname.split("/");

@@ -16,7 +16,7 @@ const constants = require('../lib/constants');
  * GET /travels/:id/expenses/:id
  */
  exports.getExpense = (req, res, next) => {
-   
+
    const id = req.params.id;
    if (!ObjectId.isValid(id)) {  return next(new Error('Not valid Object Id'));}
    let mileageType;
@@ -48,7 +48,37 @@ const constants = require('../lib/constants');
      expenseTypes
    });
  }
-// TODO PATCH /travels/:id/expenses/:id
+
+ /*
+  * DELETE /travels/:id/expenses/:id
+  */
+exports.deleteExpense = async (req, res, next) => {
+
+  const expenseId = req.params.id;
+  const travel = res.locals.travel;
+  const expense = res.locals.expense;
+  const splitUrl = req.url.split('/');
+  Expense.findOneAndDelete({_id: expenseId, travel: travel._id})
+  .then((result) => {
+    console.log('result', result);
+    Travel.findByIdAndUpdate(travel._id, {
+      $pullAll: {'expenses': [expenseId]},
+      $inc: { "total" : -expense.amountConverted }
+    }, (err, travel) => {
+      if (!err) {return next(err);}
+    });
+  }).then(() => {
+    req.flash('info', {msg: "Expense successfully deleted!!"});
+    res.redirect(`/travels/${travel._id}`);
+  }).catch( err => {
+      next(err);
+  });
+
+}
+
+/*
+ * PATCH /travels/:id/expenses/:id
+ */
 exports.updateExpense = async (req, res, next) => {
   const travel = res.locals.travel;
   const expense = res.locals.expense;

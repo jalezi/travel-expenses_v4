@@ -258,7 +258,7 @@ exports.deleteTravel = async function(req, res, next) {
     User.findByIdAndUpdate(req.user._id, {$pullAll: {'travels': [travel._id]}}, (err, user) => {
       if (!err) {return next(err);}
     });
-    req.flash('success', {msg: 'Travel successfully deleted!'});
+    req.flash('info', {msg: 'Travel successfully deleted!'});
     res.redirect('/travels');
   } catch (err) {return next(err);}
 };

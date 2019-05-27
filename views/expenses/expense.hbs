@@ -130,7 +130,6 @@
       }
     }
 
-    // to be moved somewhere else because of api key
     invoiceCurrency.onchange = async function() {
       invoiceCurrency.value = invoiceCurrency.value.toUpperCase();
       if (invoiceCurrency.value.length === 3) {
@@ -149,7 +148,6 @@
           const converted = 1 / homeCur;
 
           const invCur = invoiceCurrency.value.toUpperCase();
-          // const toEuro = rts.rates[invoiceCurrency.value];
 
           if (isNaN(rts.rates[invCur])) {
             throw new Error('No such currency exist!')
@@ -160,7 +158,6 @@
 
           }
 
-
         } catch (err) {
           rate.value = 0;
           amountConverted.value = 0.00;
@@ -168,6 +165,7 @@
           amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
           rate.readOnly = false;
           invoiceCurrency.value = '';
+          window.alert(err.message);
           throw new Error(err);
         }
       } else {

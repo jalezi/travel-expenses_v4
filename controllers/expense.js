@@ -82,6 +82,48 @@ exports.deleteExpense = async (req, res, next) => {
 exports.updateExpense = async (req, res, next) => {
   const travel = res.locals.travel;
   const expense = res.locals.expense;
+
+  const currencyOptions = {
+      allow_negatives: false,
+      allow_negative_sign_placeholder: true,
+      thousands_separator: ',',
+      decimal_separator: '.',
+      allow_decimal: true,
+      require_decimal: false,
+      digits_after_decimal: [2],
+      allow_space_after_digits: false
+    };
+  const decimalOptions = {decimal_digits: 2};
+
+  req.assert('expenseDescription', 'Description is empty or to long (max 60 characters)!').isLength({min: 1, max: 60});
+  let dateCompare = moment(res.locals.travel.dateFrom).add(-1, 'days').format('YYYY-MM-DD');
+  req.assert('invoiceDate', 'Invoice date should be within travel dates').isAfter(dateCompare);
+  dateCompare = moment(res.locals.travel.dateTo).add(1, 'days').format('YYYY-MM-DD');
+  req.assert('invoiceDate', 'Invoice date should be within travel dates').isBefore(dateCompare);
+
+  if (req.body.expenseType === 'Mileage') {
+    req.assert('travelPerMileAmount', 'Per mile amount should be positive number with 2 decimals!').isDecimal(decimalOptions);
+    req.assert('invoiceUnit', 'Must be "km" or "mi"').custom(() => {
+      return 'km' === req.body.invoiceUnit || 'mi' === req.body.invoiceUnit
+    });
+    req.assert('amountDistance', 'Number with 2 decimals').isDecimal(decimalOptions);
+    req.assert('amountDistance2', 'Number with 2 decimals').isDecimal(decimalOptions);
+    req.assert('amountConverted2', 'Number with 2 decimals').isDecimal(decimalOptions);
+  } else {
+    req.assert('invoiceCurrency', 'Currency name must be 3 charachters long').isLength({min: 3, max: 3});
+    req.assert('rate', 'Currency rate with 2 decimals').isNumeric().isCurrency(currencyOptions);
+    req.assert('amount', 'Number with 2 decimals').isDecimal(decimalOptions);
+    req.assert('amountConverted', 'Number with 2 decimals').isDecimal(decimalOptions);
+  }
+
+  const errors = req.validationErrors();
+
+  if (errors) {
+    req.flash('errors', errors);
+    return res.redirect(`/travels/${travel._id}`);
+  }
+
+
   const body = _.pick(req.body, ['expenseType', 'expenseDescription', 'invoiceDate', 'amountDistance', 'amountDistance2', 'amountConverted', 'amountConverted2', 'invoiceCurrency', 'rate', 'amount']);
   const invoiceDate = new Date(req.body.invoiceDate);
   travel.total = travel.total - Number(expense.amountConverted) + Number(body.amountConverted) + Number(body.amountConverted2);
@@ -134,6 +176,7 @@ exports.updateExpense = async (req, res, next) => {
   .then((doc) => {
     travel.save()
     .then(() => {
+      req.flash('info', {msg: 'Expense successfully updated!'})
       res.redirect(`/travels/${travel._id}`);
     }).catch((err) => {
       next(err);
@@ -176,7 +219,7 @@ exports.postNewExpense = async function  (req, res, next) {
     req.assert('amountDistance2', 'Number with 2 decimals').isDecimal(decimalOptions);
     req.assert('amountConverted2', 'Number with 2 decimals').isDecimal(decimalOptions);
   } else {
-    req.assert('invoiceCurrency', 'Must be 3 charachters long').isLength({min: 3, max: 3});
+    req.assert('invoiceCurrency', 'Currency name must be 3 charachters long').isLength({min: 3, max: 3});
     req.assert('rate', 'Currency rate with 2 decimals').isNumeric().isCurrency(currencyOptions);
     req.assert('amount', 'Number with 2 decimals').isDecimal(decimalOptions);
     req.assert('amountConverted', 'Number with 2 decimals').isDecimal(decimalOptions);

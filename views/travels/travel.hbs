@@ -215,6 +215,7 @@
           amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
           rate.readOnly = false;
           invoiceCurrency.value = '';
+          window.alert(err.message);
           throw new Error(err);
         }
       } else {

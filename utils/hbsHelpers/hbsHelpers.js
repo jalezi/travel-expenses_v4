@@ -67,6 +67,17 @@ expressHbs.registerHelper ("setChecked", function (value, currentValue) {
    }
  });
 
+ expressHbs.registerHelper('formatMonth', (date) => {
+   if (!date) {
+     const today = moment().format('MMMM, YYYY');
+     return today;
+   }
+   else {
+     const today = moment(date).format('MMMM, YYYY');
+     return today;
+   }
+ })
+
  expressHbs.registerHelper('travelsList', function(items, options) {
   let out = "<ul>";
 
@@ -112,4 +123,8 @@ expressHbs.registerHelper('toCurrency', (number) => {
   const formatter = new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   let numberString = formatter.format(number);
   return numberString;
+});
+
+expressHbs.registerHelper('byYear_byMonth', (value) => {
+  console.log(value);
 });

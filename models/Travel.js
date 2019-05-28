@@ -76,6 +76,99 @@ TravelSchema.methods.updateTotal = function  (cb) {
   return this.save();
 }
 
+TravelSchema.statics.byYear_byMonth = function (user, cb) {
+  return this.aggregate([
+{
+  '$match': {
+    '_user': user._id
+  }
+}, {
+  '$sort': {
+    'dateFrom': 1
+  }
+}, {
+  '$group': {
+    '_id': {
+      'month': {
+        '$month': '$dateFrom'
+      },
+      'year': {
+        '$year': '$dateFrom'
+      }
+    },
+    'byMonth': {
+      '$push': '$$ROOT'
+    },
+    'count': {
+      '$sum': 1
+    },
+    'dateFirst': {
+      '$first': '$dateFrom'
+    },
+    'dateLast': {
+      '$last': '$dateFrom'
+    }
+  }
+},
+{ $sort : { 'dateFirst' : 1} },
+{
+  '$group': {
+    '_id': {
+      'year': {
+        '$year': '$dateFirst'
+      }
+    },
+    'byYear': {
+      '$push': '$$ROOT'
+    },
+    'count': {
+      '$sum': 1
+    },
+    'countTotal': {$sum: "$count"},
+    'dateFirst': {
+      '$first': '$dateFirst'
+    },
+    'dateLast': {
+      '$last': '$dateLast'
+    }
+  }
+},
+{ $sort : { 'dateFirst' : -1} }
+]);
+}
+
+TravelSchema.statics.byMonth = function (user, cb) {
+  return this.aggregate([
+    {
+      $match: {
+          _user: user._id
+        }
+      },
+      {
+        $group: {
+          _id: {
+            month: {$month: "$dateFrom"},
+            year: {$year: "$dateFrom"}
+          },
+          travels: {$addToSet: "$_id"},
+          myArray: {'$push': '$$ROOT'},
+          count: {$sum: 1},
+          date: {$first: "$dateFrom"}
+        }
+      },
+      {
+        $project: {
+          date: {$dateToString: {format: "%Y-%m",date: "$date"}},
+          travels: '$travels',
+          myArray: '$myArray',
+          count: 1,
+          _id: 0
+        }
+      }
+    ]
+  );
+}
+
 const Travel = mongoose.model('Travel', TravelSchema);
 
 module.exports = Travel;

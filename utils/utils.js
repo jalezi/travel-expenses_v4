@@ -55,8 +55,46 @@ const toTitleCase = (str) => {
     txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 };
 
+String.prototype.splice = function(idx, rem, str) {
+    return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
+};
+
+const createElement = (tag, options, text="Hello World", closingTag=true ) => {
+  let tagStart = `<${tag}>`;
+  let tagEnd = `</${tag}>`;
+  let attrs = ''
+  let result = '';
+  const insertIndex = tagStart.length - 1;
+  const attrArray = [" "];
+  for (let [attr, val] of Object.entries(options)) {
+    attr = attr.replace('_', '-');
+    const arr = [];
+    if (val instanceof Array) {
+      val.forEach((val1) => {
+        let val2 = `${val1} `
+        arr.push(val2);
+      });
+    } else {
+      arr.push(val);
+    }
+    let rAttr = arr.join('');
+    let lAttr = `${attr}="${rAttr}"`
+    attrArray.push(lAttr);
+}
+  attrs = attrArray.join(' ');
+  tagStart = tagStart.splice(insertIndex, 0, attrs);
+
+  if (closingTag) {
+    result = tagStart + text + tagEnd;
+  } else {
+    result = tagStart + text;
+  }
+  return result;
+}
+
 module.exports = {
   convertRateToHomeCurrencyRate,
   findRatesByExactOrClosestDate,
-  toTitleCase
+  toTitleCase,
+  createElement
 }

@@ -84,9 +84,16 @@ TravelSchema.statics.byYear_byMonth = function (user, cb) {
   }
 }, {
   '$sort': {
-    'dateFrom': 1
+    'dateFrom': -1
   }
 }, {
+  '$lookup': {
+    from: 'expenses',
+    localField: 'expenses',
+    foreignField: '_id',
+    as: 'expenses'
+  }
+},{
   '$group': {
     '_id': {
       'month': {
@@ -110,7 +117,7 @@ TravelSchema.statics.byYear_byMonth = function (user, cb) {
     }
   }
 },
-{ $sort : { 'dateFirst' : 1} },
+{ $sort : { 'dateFirst' : -1} },
 {
   '$group': {
     '_id': {

@@ -1,16 +1,14 @@
-{{!< layout}}
+{{!< LAYOUT}}
 
 {{#if user}}
   {{> travelsHeader}}
   <hr />
-  {{#each docs}}
-    <p>{{this.countTotal}} {{this._id.year}}</p>
-    {{byYear_byMonth this.byYear}}
-    {{debug index}}
-    {{#each this.byYear}}
-      {{byYear_byMonth this.byMonth}}
+  <div class="accordion" id="travelsAccordion">
+    {{#each docs}}
+      {{{byYearAccordion this}}}
     {{/each}}
-  {{/each}}
+  </div>
+
 {{else}}
   <h2>Login or Sign up
     <!-- <p class="lead">Neki Neki</p> -->
@@ -33,3 +31,9 @@
   </div>
 
 {{/if}}
+
+<script type="text/javascript">
+  $(document).ready(() => {
+
+  });
+</script>

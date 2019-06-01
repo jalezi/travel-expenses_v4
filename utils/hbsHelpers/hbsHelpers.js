@@ -148,14 +148,65 @@ expressHbs.registerHelper('byYearAccordion', (value) => {
         const expenseId = expense._id;
         const expenseDate = expense.date;
         const expenseDateString = moment(expenseDate).format('YYYY-MM-DD');
+        const formatter = new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-        const expenseCardTitle = createElement('h6', {class:'card-title', id:`heading${expenseId}_CardTitle`}, expense.type);
-        const expenseTypeElem = createElement('p', {class:'card-text'}, expense.description);
-        const expenseDateElem = createElement('p', {class:'card-text'}, expenseDateString);
-        const expenseBodyElements = expenseCardTitle + expenseDateElem + expenseTypeElem;
+        let currency_unit, rate, rateText, amountLabelText;
+        const amountString = formatter.format(expense.amount);
+        const amountConvertedString = formatter.format(expense.amountConverted);
+        // Different data if expense.type = Mileage
+        if (expense.type != 'Mileage') {
+          currency_unit = expense.currency;
+          let curRate = travel.curRates.find((exp) => {
+            return exp._id.toString() === expense.curRate.toString();
+          });
+          if (curRate) {
+            rate = formatter.format(curRate.rate[expense.currency]);
+          } else {
+            rate = formatter.format(0);
+          }
+          rateText = `1 ${travel.homeCurrency} = ${rate} ${currency_unit}`;
+          amountLabelText = 'Amount in local currency'
+        } else {
+          currency_unit = expense.unit;
+          rate = formatter.format(Number(travel.perMileAmount));
+          rateText = `1 ${currency_unit} = ${rate} ${travel.homeCurrency}`;
+          amountLabelText = 'Distance'
+        }
+
+        // HTML element attributes
+        const titleOption = {class:'card-title', id:`heading${expenseId}_CardTitle`};
+        const labelTextOption = {class:'card-text'};
+        const labelOption = {class: 'card-text text-warning mb-0'};
+        const expenseOption = {class:'card-text mb-1'};
+
+        // Card Body tags and attributes for expense values
+        const htmlTagsArr = ['small', 'p', 'p'];
+        const htmlOptionsArr = [labelTextOption, labelOption, expenseOption];
+
+        /*
+         * Returns 2 HTML elements as one string
+         */
+        const createCardTextElems = (tagArr, optionArr, textArr) => {
+          const labelText = createElement(tagArr[0], optionArr[0], textArr[0]);
+          const labelElem = createElement(tagArr[1], optionArr[1], labelText);
+          const expenseElem = createElement(tagArr[2], optionArr[2], textArr[1]);
+          return labelElem + expenseElem;
+        };
+
+        // Expense Card HTML elements
+        const expenseCardTitle = createElement('h6', titleOption, expense.type);
+        const expenseDescriptionElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, ['Description', expense.description]);
+        const expenseDateElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, ['Date', expenseDateString]);
+        const expenseRateElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, ['Rate', rateText]);
+        const aText = amountString + ' ' + currency_unit;
+        const expenseAmountElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, [amountLabelText, aText]);
+        const acText = amountConvertedString + ' ' + travel.homeCurrency;
+        const expenseAmountConvertedElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, ['Amount', acText]);
+
+        const expenseBodyElements = expenseCardTitle + expenseDateElem + expenseDescriptionElem + expenseAmountElem + expenseRateElem + expenseAmountConvertedElem;
 
         const expenseCardBody = createElement('div', {class:'card-body', id:`heading${expenseId}_CardBody`},  expenseBodyElements);
-        const expenseCard = createElement('div', {class:['card', 'mx-2', 'my-2'], id:`expense_${expenseId}_Card`},  expenseCardBody);
+        const expenseCard = createElement('div', {class:['card', 'text-white', 'bg-secondary', 'mx-2', 'my-2'], id:`expense_${expenseId}_Card`},  expenseCardBody);
         expensesByTravel.push(expenseCard);
       });
 

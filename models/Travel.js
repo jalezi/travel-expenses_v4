@@ -1,7 +1,7 @@
 /*
  * Travel Schema
  * _user: link to user => user._id from users collection
- * descprition: travel description
+ * decription: travel description
  * dateFrom: travel start date
  * dateTo: travel end date
  * homeCurrency: currency to calculate all amounts to
@@ -93,7 +93,14 @@ TravelSchema.statics.byYear_byMonth = function (user, cb) {
     foreignField: '_id',
     as: 'expenses'
   }
-},{
+}, {
+  '$lookup': {
+    from: 'currencies',
+    localField: 'expenses.curRate',
+    foreignField: '_id',
+    as: 'curRates'
+  }
+}, {
   '$group': {
     '_id': {
       'month': {

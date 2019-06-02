@@ -2,9 +2,9 @@
  * Expense Schema
  * travel: link to travel => travel._id from travels collection
  * type: possible expense type => ./lib/globals.expenseTypes
- * descprition: expense description
+ * decription: expense description
  * date: expense date
- * curency: TODO implement validation => length=3 & make upper case
+ * currency: TODO implement validation => length=3 & make upper case
  * curRate: link to currency => currency._id from currencies collection
  * unit: only if expense type is Mileage based on user's unit(user.homeDistance) => userSchema in ./models/User.js
  * amount: amount spent in local currency or distance in unit

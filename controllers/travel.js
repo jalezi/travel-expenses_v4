@@ -103,11 +103,9 @@ exports.getTravels = async function(req, res) {
   searchMinDate = req.query.minDate;
   searchMaxDate = req.query.maxDate;
 
-
-  // TODO create new Promise?
   try {
     await Travel.aggregate([
-      {'$match': {'_user': req.user._id}},
+      {'$match': {'_user': req.user._id, _id: {$in: req.user.travels}}},
       {'$group': {'_id': req.user._id,'minDate': {'$min': '$dateFrom'}, 'maxDate': {'$max': '$dateFrom'}}}
   ], (err, doc) => {
     if (err) {next(err);}

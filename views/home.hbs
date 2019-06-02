@@ -1,8 +1,14 @@
-{{!< layout}}
+{{!< LAYOUT}}
 
 {{#if user}}
   {{> travelsHeader}}
   <hr />
+  <div class="accordion" id="travelsAccordion">
+    {{#each docs}}
+      {{{byYearAccordion this}}}
+    {{/each}}
+  </div>
+
 {{else}}
   <h2>Login or Sign up
     <!-- <p class="lead">Neki Neki</p> -->
@@ -25,3 +31,29 @@
   </div>
 
 {{/if}}
+
+<script type="text/javascript">
+function toggleTravelButtonText(event) {
+  let button = event.target;
+
+  if (button.getAttribute("data-text-swap") == button.innerText) {
+    console.log("hide", button.innerHTML, button.innerText);
+    button.innerHTML = button.getAttribute("data-text-original");
+    let badge = document.createElement("SPAN");
+    let textnode = document.createTextNode(button.getAttribute("data-text-badge"));
+    badge.setAttribute("class", "badge badge-warning mx-1");
+    badge.appendChild(textnode);
+    button.appendChild(badge);
+  } else {
+    console.log("show", button.innerHTML, button.innerText);
+    button.removeChild(button.childNodes[1]);
+    button.innerHTML = button.getAttribute("data-text-swap");
+
+  }
+}
+
+  $(document).ready(() => {
+
+  });
+
+</script>

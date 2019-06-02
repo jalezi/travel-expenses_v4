@@ -125,6 +125,7 @@ expressHbs.registerHelper('toCurrency', (number) => {
 });
 
 expressHbs.registerHelper('byYearAccordion', (value) => {
+  const formatter = new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   const year = value._id.year;
   const byYear = value.byYear;
 
@@ -138,8 +139,11 @@ expressHbs.registerHelper('byYearAccordion', (value) => {
     // Month Collapse
     const travelsByMonth = [];
     byMonth.forEach((travel) => {
-      travelId = travel._id;
+      const travelId = travel._id;
       const dateFrom = moment(travel.dateFrom).format('YYYY-MM-DD');
+      const totalString = formatter.format(travel.total);
+      const totalStringWithCurrency = totalString + ' ' + travel.homeCurrency;
+      const expensesCount = travel.expenses.length;
       const hrefTravel = `/travels/${travelId}`;
 
       // Travel Collapse
@@ -148,7 +152,6 @@ expressHbs.registerHelper('byYearAccordion', (value) => {
         const expenseId = expense._id;
         const expenseDate = expense.date;
         const expenseDateString = moment(expenseDate).format('YYYY-MM-DD');
-        const formatter = new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
         let currency_unit, rate, rateText, amountLabelText;
         const amountString = formatter.format(expense.amount);
@@ -206,22 +209,33 @@ expressHbs.registerHelper('byYearAccordion', (value) => {
         const expenseBodyElements = expenseCardTitle + expenseDateElem + expenseDescriptionElem + expenseAmountElem + expenseRateElem + expenseAmountConvertedElem;
 
         const expenseCardBody = createElement('div', {class:'card-body', id:`heading${expenseId}_CardBody`},  expenseBodyElements);
-        const expenseCard = createElement('div', {class:['card', 'text-white', 'bg-secondary', 'mx-2', 'my-2'], id:`expense_${expenseId}_Card`},  expenseCardBody);
+        const expenseCard = createElement('div', {class:['card', 'text-white', 'bg-secondary', 'mx-2', 'my-2', 'border-warning'], id:`expense_${expenseId}_Card`},  expenseCardBody);
         expensesByTravel.push(expenseCard);
       });
 
       // Travel Card
+      const travelButtonBadge = createElement('span', {class: 'badge badge-warning mx-1'}, expensesCount);
       const travelButtonOptions = {
-        class: ['btn', 'btn-secondary'],
+        class: ['btn', 'btn-sm', 'btn-secondary', 'text-warning'],
         type: 'button',
         data_toggle: 'collapse',
         data_target: `#collapse${travelId}`,
         aria_expanded: 'true',
-        aria_controls: `collapse${travelId}`
+        aria_controls: `collapse${travelId}`,
+        data_text_swap: 'hide',
+        data_text_original: 'show',
+        data_text_badge: `${expensesCount}`,
+        onclick: 'toggleTravelButtonText(event)'
       }
-      const travelButton = createElement('button', travelButtonOptions, `${dateFrom} ${travel.description}`);
-      const travelAttr = createElement('h6', {class: 'mb-0'}, travelButton);
-      const travelCardHeader = createElement('div', {class: 'card-header', id: `heading${travelId}_CardHeader`}, travelAttr);
+
+
+      const travelButtonText = createElement('button', travelButtonOptions, 'show' + travelButtonBadge);
+      const travelButtonElem = createElement('span', {class: 'mb-0 float-right'}, travelButtonText);
+      const travelHeaderText = createElement('h6', {class: 'mb-0'}, `${dateFrom} ${travel.description}` + travelButtonElem);
+      const travelHeaderElem = createElement('div', {class: 'text-white'}, travelHeaderText)
+      const travelCardHeader = createElement('div', {class: 'card-header', id: `heading${travelId}_CardHeader`}, travelHeaderElem);
+      const travelCardBodyTitle = createElement('h6', {class: 'card-title mb-0 text-warning'}, totalStringWithCurrency);
+      const travelCardBody = createElement('div', {class: 'card-body'}, travelCardBodyTitle);
 
       const travelCollapseOptions = {
         id: `collapse${travelId}`,
@@ -230,7 +244,7 @@ expressHbs.registerHelper('byYearAccordion', (value) => {
         data_parent: `#travel_${travelId}Accordion`
       }
       const travelCollapse = createElement('div', travelCollapseOptions, expensesByTravel.join(""));
-      const travelCard = createElement('div', {class: 'card', id: `travel_${travelId}_Card`}, travelCardHeader + travelCollapse);
+      const travelCard = createElement('div', {class: 'card mx-2 my-2 bg-secondary', id: `travel_${travelId}_Card`}, travelCardHeader + travelCardBody + travelCollapse);
       // Travel Accordion
       const travelAccordion = createElement('div', {class: 'accordion', id: `travel_${travelId}Accordion`}, travelCard);
       travelsByMonth.push(travelAccordion);

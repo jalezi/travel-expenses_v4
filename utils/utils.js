@@ -67,7 +67,7 @@ const createElement = (tag, options, text="Hello World", closingTag=true ) => {
   const insertIndex = tagStart.length - 1;
   const attrArray = [" "];
   for (let [attr, val] of Object.entries(options)) {
-    attr = attr.replace('_', '-');
+    attr = attr.replace(/_/g, '-');
     const arr = [];
     if (val instanceof Array) {
       val.forEach((val1) => {

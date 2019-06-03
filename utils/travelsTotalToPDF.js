@@ -49,8 +49,22 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
               dataRowObject.alignment = 'center';
             }
             dataRow.push(dataRowObject);
-        })
-
+        });
+        const invoiceNumberStyle = {
+          alignment: 'left',
+          bold: true,
+          fontSize: 8
+        }
+        let idRow = [{
+          colSpan: 1,
+          text: `invoice:`,
+          style: invoiceNumberStyle
+        }, {
+          colSpan: 1,
+          text: row._id,
+          style: invoiceNumberStyle
+        }, {}, {}, {}, {}];
+        body.push(idRow);
         body.push(dataRow);
     });
     const totalRowStyle = {
@@ -73,7 +87,6 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
 
 function table(data, columns, tableHeader, style = {}, sum = 0) {
     return {
-
         style: style,
         layout: 'lightHorizontalLines',
         alignment: 'center',
@@ -84,11 +97,12 @@ function table(data, columns, tableHeader, style = {}, sum = 0) {
                 case 0:
                   return 10;
                   break;
-                case data.length + 1:
-                  return 5
-                default:
-                  return 20
+                case data.length * 2 + 1:
+                  return 5;
+                  break;
               }
+              let h = row % 2 === 0 ? 20 : 10;
+              return h;
             },
             headerRows: 1,
             body: buildTableBody(data, columns, tableHeader, sum)
@@ -101,6 +115,7 @@ function createTravelsTotalTableData(travels) {
 
   travels.forEach((travel, key, object) => {
     const newObject = {};
+    newObject._id = travel._id.toString();
     newObject.dateFrom = moment(travel.dateFrom).format('l');
     newObject.dateTo = moment(travel.dateTo).format('l');
     newObject.description = travel.description;
@@ -157,7 +172,7 @@ module.exports = (travels, user, dateRange, sum) => {
       // you can apply any logic and return any valid pdfmake element
       return [
         {columns: [
-          {text: 'Created with TExpenses', alignment: (currentPage % 2) ? 'left' : 'right', fontSize: 10},
+          {text: 'Created with TExpApp', alignment: (currentPage % 2) ? 'left' : 'right', fontSize: 10},
           {text: moment().format('YYYY-MM-DD'), alignment: (currentPage % 2) ? 'right' : 'left', fontSize: 10}
         ]},
         {canvas: [{type: 'rect', x: 170, y: 32, w: pageSize.width - 170, h: 100, fillColor: 'red'}]}

@@ -1,6 +1,8 @@
 // test change gitflow again
 const PdfPrinter = require('pdfmake');
 const moment = require('moment');
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 const fs = require('fs');
 
@@ -126,6 +128,7 @@ module.exports = (travel, user) => {
     user.profile.name = 'Unknown';
   }
 
+  const invoiceNumber = ObjectId(travel._id).toString();
   const dateFrom = moment(travel.dateFrom).format('ddd, MMM Do YYYY');
   const dateTo = moment(travel.dateTo).format('ddd, MMM Do YYYY');
 
@@ -158,14 +161,14 @@ module.exports = (travel, user) => {
       // you can apply any logic and return any valid pdfmake element
       return [
         {columns: [
-          {text: 'Created with TExpenses', alignment: (currentPage % 2) ? 'left' : 'right', fontSize: 10},
+          {text: 'Created with TExpApp', alignment: (currentPage % 2) ? 'left' : 'right', fontSize: 10},
           {text: moment().format('YYYY-MM-DD'), alignment: (currentPage % 2) ? 'right' : 'left', fontSize: 10}
         ]},
         {canvas: [{type: 'rect', x: 170, y: 32, w: pageSize.width - 170, h: 100, fillColor: 'red'}]}
       ]
     },
     info: {
-      producer: 'myApp',
+      producer: 'TExpApp',
       title: titlePdf,
       author: authorPdf,
       subject: subjectPdf,
@@ -192,6 +195,7 @@ module.exports = (travel, user) => {
         }}
       ]},
       {stack: [
+        {text: `invoice: ${invoiceNumber}`},
         {text: travel.description, style: 'description'},
         {
           layout: 'noBorders',

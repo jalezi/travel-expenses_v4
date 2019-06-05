@@ -17,7 +17,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const expressValidator = require('express-validator');
-const expressStatusMonitor = require('express-status-monitor');
+
 const sass = require('node-sass-middleware');
 const multer = require('multer');
 
@@ -102,7 +102,6 @@ app.engine( 'hbs', expressHbs.express4( {
 
 app.set('view engine', '.hbs');
 
-app.use(expressStatusMonitor());
 app.use(compression());
 app.use(sass({
   src: path.join(__dirname, 'public'),

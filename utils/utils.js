@@ -83,7 +83,7 @@ const createElement = (tag, options, text="Hello World", closingTag=true ) => {
 }
   attrs = attrArray.join(' ');
   tagStart = tagStart.splice(insertIndex, 0, attrs);
-
+  
   if (closingTag) {
     result = tagStart + text + tagEnd;
   } else {

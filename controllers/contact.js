@@ -46,7 +46,7 @@ exports.postContact = (req, res, next) => {
     fromName = req.user.profile.name || '';
     fromEmail = req.user.email;
   }
-  
+
   const sendContactForm = async () => {
     const sendEmail = mailjet.post('send', {version: 'v3.1'});
     const emailData = {
@@ -72,14 +72,14 @@ exports.postContact = (req, res, next) => {
     }
     catch (err) {
       console.log(err);
-      
+
       req.flash('errors', {
         msg: 'Error sending the contact message. Please try again shortly.'
       });
       return err;
     }
   };
-  
+
   sendContactForm()
     .then(() => {
       res.redirect('/');

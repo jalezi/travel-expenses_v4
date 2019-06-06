@@ -78,8 +78,8 @@ exports.getTravelsTotalPDF = async function(req, res, next) {
  * Create, open in new tab and save PDF for displayed travel
  */
 exports.getTravelExpensesPDF = async function(req, res, next) {
-  const stream = travelExpensesToPDF(res.locals.travel, res.locals.user);
-  let filename = "travelReportDocument.pdf";  // Be careful of special characters
+  const stream = travelExpensesToPDF(res.locals.travel, req.user);
+  let filename = `TReport_${req.user._id}_${res.locals.travel._id}.pdf`;  // Be careful of special characters
   filename = encodeURIComponent(filename);  // Ideally this should strip them
   res.setHeader('Content-disposition', 'inline; filename="' + filename + '"');
   res.setHeader('Content-type', 'application/pdf');

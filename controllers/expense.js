@@ -126,7 +126,7 @@ exports.updateExpense = async (req, res, next) => {
 
   const body = _.pick(req.body, ['expenseType', 'expenseDescription', 'invoiceDate', 'amountDistance', 'amountDistance2', 'amountConverted', 'amountConverted2', 'invoiceCurrency', 'rate', 'amount']);
   const invoiceDate = new Date(req.body.invoiceDate);
-  travel.total = travel.total - Number(expense.amountConverted) + Number(body.amountConverted) + Number(body.amountConverted2);
+  travel.total = (travel.total - Number(expense.amountConverted) + Number(body.amountConverted) + Number(body.amountConverted2)).toFixed(2);
   // Different data if expense type is Mileage
   if (req.body.expenseType != 'Mileage') {
     const invoiceCurrency = req.body.invoiceCurrency.toUpperCase();

@@ -124,216 +124,211 @@ expressHbs.registerHelper('toCurrency', (number) => {
   return numberString;
 });
 
-expressHbs.registerHelper('byYearAccordion', (value) => {
+/*
+ * Returns HTML elements
+ * @param {object} value Array with travels mongo aggregate group by year and each year group by month
+ * more in Travel Schema /models/Travel.js Travel.byYear_byMonth
+ */
+expressHbs.registerHelper('yearsAccordion', (value) => {
   const formatter = new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  const year = value._id.year;
-  const byYear = value.byYear;
-
-  // Months Collapse
-  const accordionsByMonths = [];
-  byYear.forEach((val, idx) => {
-    const monthValue = val._id.month;
-    const monthString = moment().month(monthValue-1).format("MMMM");
-    const byMonth = val.byMonth;
-
-    // Month Collapse
-    const travelsByMonth = [];
-    byMonth.forEach((travel) => {
-      const travelId = travel._id;
-      const dateFrom = moment(travel.dateFrom).format('YYYY-MM-DD');
-      const totalString = formatter.format(travel.total);
-      const totalStringWithCurrency = totalString + ' ' + travel.homeCurrency;
-      const expensesCount = travel.expenses.length;
-      const hrefTravel = `/travels/${travelId}`;
-
-      // Travel Collapse
-      expensesByTravel = [];
-      travel.expenses.forEach((expense) => {
-        const expenseId = expense._id;
-        const expenseDate = expense.date;
-        const expenseDateString = moment(expenseDate).format('YYYY-MM-DD');
-
-        let currency_unit, rate, rateText, amountLabelText;
-        const amountString = formatter.format(expense.amount);
-        const amountConvertedString = formatter.format(expense.amountConverted);
-        // Different data if expense.type = Mileage
-        if (expense.type != 'Mileage') {
-          currency_unit = expense.currency;
-          let curRate = travel.curRates.find((exp) => {
-            return exp._id.toString() === expense.curRate.toString();
-          });
-          if (curRate) {
-            rate = formatter.format(curRate.rate[expense.currency]);
+  // HTML Accordion - RESULT
+  const yearObjectsArray = [];
+  value.forEach((yearObject) => {
+    const yearString = yearObject._id.year.toString();
+    // HTML Year Card COLLAPSE - BODY
+    const monthObjectsArray = [];
+    yearObject.byYear.forEach((monthObject) => {
+      const monthValue = monthObject._id.month-1;
+      const monthString = moment().month(monthValue).format('MMMM');
+      const travelObjectsArray = [];
+      // HTML Month Card COLLAPSE - BODY
+      monthObject.byMonth.forEach((travelObject) => {
+        console.log(travelObject);
+        const dateFromString = moment(travelObject.dateFrom).format('YYYY-MM-DD');
+        const travelId = travelObject._id;
+        const expensesCount = travelObject.expenses.length;
+        const hrefTravel = `/travels/${travelId}`;
+        // HTML Travel Card COLLAPSE - BODY
+        const expenseObjectsArray = [];
+        travelObject.expenses.forEach((expenseObject) => {
+          const expenseId = expenseObject._id;
+          const expenseDate = expenseObject.date;
+          const expenseDateString = moment(expenseDate).format('YYYY-MM-DD');
+          const amountString = formatter.format(expenseObject.amount);
+          const amountConvertedString = formatter.format(expenseObject.amountConverted);
+          // Different data if expenseObject.type = Mileage
+          let currency_unit, rate, rateText, amountLabelText;
+          if (expenseObject.type != 'Mileage') {
+            currency_unit = expenseObject.currency;
+            let curRate = travelObject.curRates.find((exp) => {
+              return exp._id.toString() === expenseObject.curRate.toString();
+            });
+            if (curRate) {
+              rate = formatter.format(curRate.rate[expenseObject.currency]);
+            } else {
+              rate = formatter.format(0);
+            }
+            rateText = `1 ${travelObject.homeCurrency} = ${rate} ${currency_unit}`;
+            amountLabelText = 'Amount in local currency'
           } else {
-            rate = formatter.format(0);
+            currency_unit = expenseObject.unit;
+            rate = formatter.format(Number(travelObject.perMileAmount));
+            rateText = `1 ${currency_unit} = ${rate} ${travelObject.homeCurrency}`;
+            amountLabelText = 'Distance'
           }
-          rateText = `1 ${travel.homeCurrency} = ${rate} ${currency_unit}`;
-          amountLabelText = 'Amount in local currency'
-        } else {
-          currency_unit = expense.unit;
-          rate = formatter.format(Number(travel.perMileAmount));
-          rateText = `1 ${currency_unit} = ${rate} ${travel.homeCurrency}`;
-          amountLabelText = 'Distance'
-        }
-
-        // HTML element attributes
-        const titleOption = {class:'card-title', id:`heading${expenseId}_CardTitle`};
-        const labelTextOption = {class:'card-text'};
-        const labelOption = {class: 'card-text text-warning mb-0'};
-        const expenseOption = {class:'card-text mb-1'};
-
-        // Card Body tags and attributes for expense values
-        const htmlTagsArr = ['small', 'p', 'p'];
-        const htmlOptionsArr = [labelTextOption, labelOption, expenseOption];
-
+          // HTML Expense Card ELEMENTS OPTIONS
+          const titleOption = {class:'card-title', id:`heading${expenseId}_CardTitle`};
+          const labelTextOption = {class:'card-text'};
+          const labelOption = {class: 'card-text text-warning mb-0'};
+          const expenseOption = {class:'card-text mb-1'};
+          // Card Body tags and attributes for expenseObject values
+          const htmlTagsArr = ['small', 'p', 'p'];
+          const htmlOptionsArr = [labelTextOption, labelOption, expenseOption];
+          /*
+           * Returns 2 HTML elements as one string
+           */
+          const createCardTextElems = (tagArr, optionArr, textArr) => {
+            const labelText = createElement(tagArr[0], optionArr[0], textArr[0]);
+            const labelElem = createElement(tagArr[1], optionArr[1], labelText);
+            const expenseElem = createElement(tagArr[2], optionArr[2], textArr[1]);
+            return labelElem + expenseElem;
+          };
+          // HTML Expense Card ELEMENTS
+          const expenseCardTitle = createElement('h6', titleOption, expenseObject.type);
+          const expenseDescriptionElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, ['Description', expenseObject.description]);
+          const expenseDateElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, ['Date', expenseDateString]);
+          const expenseRateElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, ['Rate', rateText]);
+          const aText = amountString + ' ' + currency_unit;
+          const expenseAmountElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, [amountLabelText, aText]);
+          const acText = amountConvertedString + ' ' + travelObject.homeCurrency;
+          const expenseAmountConvertedElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, ['Amount', acText]);
+          const expenseBodyElements = expenseCardTitle + expenseDateElem + expenseDescriptionElem + expenseAmountElem + expenseRateElem + expenseAmountConvertedElem;
+          const expenseCardBody = createElement('div', {class:'card-body', id:`heading${expenseId}_CardBody`},  expenseBodyElements);
+          const expenseCard = createElement('div', {class:['card', 'text-white', 'bg-secondary', 'mx-2', 'my-2', 'border-warning'], id:`expense_${expenseId}_Card`},  expenseCardBody);
+          expenseObjectsArray.push(expenseCard);
+        });
+        const expenses = expenseObjectsArray.join('')
+        // HTML Travel Card ELEMENTS OPTIONS
+        const travelButtonBadgeOptions = {class: 'badge badge-warning mx-1'};
         /*
-         * Returns 2 HTML elements as one string
+         * travelButtonShowOptions's class badge-secondary is related to toggleTravelButtonText() in home.hbs
+         * if else statement where checks class.indexOf(class)
          */
-        const createCardTextElems = (tagArr, optionArr, textArr) => {
-          const labelText = createElement(tagArr[0], optionArr[0], textArr[0]);
-          const labelElem = createElement(tagArr[1], optionArr[1], labelText);
-          const expenseElem = createElement(tagArr[2], optionArr[2], textArr[1]);
-          return labelElem + expenseElem;
-        };
-
-        // Expense Card HTML elements
-        const expenseCardTitle = createElement('h6', titleOption, expense.type);
-        const expenseDescriptionElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, ['Description', expense.description]);
-        const expenseDateElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, ['Date', expenseDateString]);
-        const expenseRateElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, ['Rate', rateText]);
-        const aText = amountString + ' ' + currency_unit;
-        const expenseAmountElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, [amountLabelText, aText]);
-        const acText = amountConvertedString + ' ' + travel.homeCurrency;
-        const expenseAmountConvertedElem = createCardTextElems(htmlTagsArr, htmlOptionsArr, ['Amount', acText]);
-
-        const expenseBodyElements = expenseCardTitle + expenseDateElem + expenseDescriptionElem + expenseAmountElem + expenseRateElem + expenseAmountConvertedElem;
-
-        const expenseCardBody = createElement('div', {class:'card-body', id:`heading${expenseId}_CardBody`},  expenseBodyElements);
-        const expenseCard = createElement('div', {class:['card', 'text-white', 'bg-secondary', 'mx-2', 'my-2', 'border-warning'], id:`expense_${expenseId}_Card`},  expenseCardBody);
-        expensesByTravel.push(expenseCard);
+        const travelButtonShowOptions = {
+          class: ['badge', 'badge-secondary', 'text-warning'],
+          type: 'button',
+          data_toggle: 'collapse',
+          data_target: `#collapse${travelId}`,
+          aria_expanded: 'true',
+          aria_controls: `collapse${travelId}`,
+          data_text_swap: 'hide',
+          data_text_original: 'show',
+          data_text_badge: `${expensesCount}`,
+          data_text_badge_sr: 'expenses count in travel',
+          onclick: 'toggleTravelButtonText(event)',
+          style: 'width: 70px'
+        }
+        const travelButtonEditOptions = {
+          class: ['badge', 'badge-secondary', 'text-white'],
+          type: 'button',
+          onclick: `location.href='${hrefTravel}'`
+        }
+        const travelCollapseOptions = {
+          id: `collapse${travelId}`,
+          class: 'collapse',
+          aria_labelledby: `heading${travelId}_CardHeader`,
+          // data_parent: `#travel_${travelId}Accordion`
+        }
+        // HTML Travel ELEMENTS
+        const travelButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
+        const travelButtonBadge = createElement('span', travelButtonBadgeOptions, expensesCount);
+        const travelButtonShowText = createElement('button', travelButtonShowOptions, 'show' + travelButtonBadge + travelButtonBadgeSr);
+        const travelButtonShowElem = createElement('h6', {class: 'mb-0 d-inline mx-1'}, travelButtonShowText);
+        const travelButtonEditText = createElement('button', travelButtonEditOptions, 'edit');
+        const travelButtonEditElem = createElement('h6', {class: 'mb-0 d-inline mx-1'}, travelButtonEditText);
+        const travelHeaderText = createElement('h6', {class: 'mb-1'}, `${dateFromString} ${travelObject.description}`);
+        const travelHeaderElem = createElement('div', {class: ''}, travelHeaderText + travelButtonShowElem + travelButtonEditElem);
+        const travelCardHeader = createElement('div', {class: 'card-header py-2'}, travelHeaderElem);
+        const travelCardBody = createElement('div', {class: 'card-body'}, expenses);
+        const travelCollapse = createElement('div', travelCollapseOptions, travelCardBody);
+        const travelCard = createElement('div', {class: 'card  bg-secondary text-white', id: `travel_${travelId}_Card`}, travelCardHeader + travelCollapse);
+        travelObjectsArray.push(travelCard);
       });
-
-      // Travel Card
-      const travelButtonBadgeOptions = {class: 'badge badge-warning mx-1'};
-      const travelButtonShowOptions = {
-        class: ['badge', 'badge-secondary', 'text-warning'],
+      const travels = travelObjectsArray.join("");
+      // HTML Month ELEMENTS OPTIONS
+      const monthButtonBadgeOptions = {class: 'badge badge-dark mx-1'};
+      /*
+       * monthButtonShowOptions's class badge-secondary is related to toggleTravelButtonText() in home.hbs
+       * if else statement where checks class.indexOf(class)
+       */
+      const monthButtonShowOptions = {
+        class: ['badge', 'badge-light', 'text-dark'],
         type: 'button',
         data_toggle: 'collapse',
-        data_target: `#collapse${travelId}`,
+        data_target: `#collapse${yearString}_${monthValue}`,
         aria_expanded: 'true',
-        aria_controls: `collapse${travelId}`,
+        aria_controls: `collapse${yearString}_${monthValue}`,
         data_text_swap: 'hide',
         data_text_original: 'show',
-        data_text_badge: `${expensesCount}`,
-        data_text_badge_sr: 'expenses count in travel',
+        data_text_badge: `${monthObject.count}`,
+        data_text_badge_sr: 'travels count in month',
         onclick: 'toggleTravelButtonText(event)',
         style: 'width: 70px'
-      }
-      const travelButtonEditOptions = {
-        class: ['badge', 'badge-secondary', 'text-white'],
-        type: 'button',
-        onclick: `location.href='${hrefTravel}'`
-      }
-
-      const travelButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
-      const travelButtonBadge = createElement('span', travelButtonBadgeOptions, expensesCount);
-      const travelButtonShowText = createElement('button', travelButtonShowOptions, 'show' + travelButtonBadge + travelButtonBadgeSr);
-      const travelButtonShowElem = createElement('h6', {class: 'mb-0 d-inline mx-1'}, travelButtonShowText);
-      const travelButtonEditText = createElement('button', travelButtonEditOptions, 'edit');
-      const travelButtonEditElem = createElement('h6', {class: 'mb-0 d-inline mx-1'}, travelButtonEditText);
-      const travelHeaderText = createElement('h6', {class: 'mb-1'}, `${dateFrom} ${travel.description}`);
-      const travelHeaderElem = createElement('div', {class: 'text-white'}, travelHeaderText + travelButtonShowElem + travelButtonEditElem);
-      const travelCardHeader = createElement('div', {class: 'card-header', id: `heading${travelId}_CardHeader`}, travelHeaderElem);
-      const travelCardBodyTitle = createElement('h6', {class: 'card-title mb-0 text-warning'}, totalStringWithCurrency);
-      const travelCardBody = createElement('div', {class: 'card-body'}, travelCardBodyTitle);
-
-      const travelCollapseOptions = {
-        id: `collapse${travelId}`,
+      };
+      const monthCollapseOptions = {
+        id: `collapse${yearString}_${monthValue}`,
         class: 'collapse',
-        aria_labelledby: `heading${travelId}_CardHeader`,
-        data_parent: `#travel_${travelId}Accordion`
-      }
-      const travelCollapse = createElement('div', travelCollapseOptions, expensesByTravel.join(""));
-      const travelCard = createElement('div', {class: 'card mx-2 my-2 bg-secondary border-danger', id: `travel_${travelId}_Card`}, travelCardHeader + travelCardBody + travelCollapse);
-      // Travel Accordion
-      const travelAccordion = createElement('div', {class: 'accordion', id: `travel_${travelId}Accordion`}, travelCard);
-      travelsByMonth.push(travelAccordion);
+        aria_labelledby: `heading${yearString}_${monthValue}_CardHeader`,
+        // data_parent: `#travels_${year}_${monthValue}Accordion`
+      };
+      // HTML Month ELEMENTS
+      const monthButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
+      const monthButtonBadge = createElement('span', monthButtonBadgeOptions, monthObject.count);
+      const monthButtonShowText = createElement('button', monthButtonShowOptions, 'show' + monthButtonBadge + monthButtonBadgeSr);
+      const monthButtonShowElem = createElement('h6', {class: 'mb-0 mx-1 d-inline float-right'}, monthButtonShowText);
+      const monthCardHeader = createElement('div', {class: 'card-header py-2'}, monthString + monthButtonShowElem);
+      const monthCardBody = createElement('div', {class: 'card-body'}, travels);
+      const monthCollapse = createElement('div', monthCollapseOptions, monthCardBody);
+      const monthCard = createElement('div', {class: 'card', style: 'border: none'}, monthCardHeader + monthCollapse);
+      monthObjectsArray.push(monthCard);
     });
-
-    const monthCollapseOptions = {
-      id: `collapse${year}_${monthValue}`,
-      class: 'collapse',
-      aria_labelledby: `heading${year}_${monthValue}_CardHeader`,
-      data_parent: `#travels_${year}_${monthValue}Accordion`
-    };
-    const monthCollapse = createElement('div', monthCollapseOptions, travelsByMonth.join(""));
-
-    // Month Card
-    const monthButtonBadgeOptions = {class: 'badge badge-dark mx-1'};
-    const monthButtonShowOptions = {
-      class: ['badge', 'badge-light', 'text-dark'],
+    const months = monthObjectsArray.join('');
+    // HTML Year ELEMENTS OPTIONS
+    const yearButtonBadgeOptions = {class: 'badge badge-light mx-1'};
+    /*
+     * yearlButtonShowOptions's class badge-secondary is related to toggleTravelButtonText() in home.hbs
+     * if else statement where checks class.indexOf(class)
+     */
+    const yearButtonShowOptions = {
+      class: ['badge', 'badge-dark', 'text-white'],
       type: 'button',
       data_toggle: 'collapse',
-      data_target: `#collapse${year}_${monthValue}`,
-      aria_expanded: 'true',
-      aria_controls: `collapse${year}_${monthValue}`,
+      data_target: `#collapse${yearString}`,
+      aria_expanded: 'false',
+      aria_controls: `collapse${yearString}`,
       data_text_swap: 'hide',
       data_text_original: 'show',
-      data_text_badge: `${val.count}`,
-      data_text_badge_sr: 'travels count in year',
+      data_text_badge: `${yearObject.countTotal}`,
+      data_text_badge_sr: 'travels count in month',
       onclick: 'toggleTravelButtonText(event)',
       style: 'width: 70px'
     };
-
-    const monthButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
-    const monthButtonBadge = createElement('span', monthButtonBadgeOptions, val.count);
-    const monthButtonShowText = createElement('button', monthButtonShowOptions, 'show' + monthButtonBadge + monthButtonBadgeSr);
-    const monthButtonShowElem = createElement('h6', {class: 'mb-0 mx-1 d-inline float-right'}, monthButtonShowText);
-    const monthHeaderText = createElement('h6', {class: 'mb-1  mx-2 d-inline'}, monthString);
-    const monthHeaderElem = createElement('div', {class: 'text-dark'}, monthHeaderText + monthButtonShowElem);
-    const monthCardHeader = createElement('div', {class: 'card-header', id: `heading${year}_${monthValue}_CardHeader`}, monthHeaderElem);
-    const monthCard = createElement('div', {class: 'card', id: `month_${year}_${monthValue}_Card`}, monthCardHeader + monthCollapse);
-
-    // Month Accordion
-    const accordionByMonth = createElement('div', {class: 'accordion', id: `travels_${year}_${monthValue}Accordion`}, monthCard);
-    accordionsByMonths.push(accordionByMonth);
+    const monthsCollapseOptions = {
+      id: `collapse${yearString}`,
+      class: 'collapse',
+      aria_labelledby: `heading${yearString}_CardHeader`
+    };
+    // HTML Year ELEMENTS
+    const yearButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
+    const yearButtonBadge = createElement('span', yearButtonBadgeOptions, yearObject.countTotal);
+    const yearButtonShowText = createElement('button', yearButtonShowOptions, 'show' + yearButtonBadge + yearButtonBadgeSr);
+    const yearButtonShowElem = createElement('h6', {class: 'mb-0 mx-1 d-inline float-right'}, yearButtonShowText);
+    const yearCardHeader = createElement('div', {class: 'card-header py-2', id: `heading${yearString}_CardHeader`}, yearString + yearButtonShowElem);
+    const yearCardBody = createElement('div', {class: 'card-body p-0'}, months);
+    const yearCollapse = createElement('div', monthsCollapseOptions, yearCardBody);
+    const yearCard = createElement('div', {class: 'card'}, yearCardHeader + yearCollapse );
+    yearObjectsArray.push(yearCard);
   });
-
-  // Year Card
-  const yearButtonBadgeOptions = {class: 'badge badge-light mx-1'};
-  const yearButtonShowOptions = {
-    class: ['badge', 'badge-dark', 'text-white'],
-    type: 'button',
-    data_toggle: 'collapse',
-    data_target: `#collapse${year}`,
-    aria_expanded: 'true',
-    aria_controls: `collapse${year}`,
-    data_text_swap: 'hide',
-    data_text_original: 'show',
-    data_text_badge: `${value.countTotal}`,
-    data_text_badge_sr: 'travels count in month',
-    onclick: 'toggleTravelButtonText(event)',
-    style: 'width: 70px'
-  };
-
-  const yearButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
-  const yearButtonBadge = createElement('span', yearButtonBadgeOptions, value.countTotal);
-  const yearButtonShowText = createElement('button', yearButtonShowOptions, 'show' + yearButtonBadge + yearButtonBadgeSr);
-  const yearButtonShowElem = createElement('h6', {class: 'mb-0 mx-1 d-inline float-right'}, yearButtonShowText);
-  const yearHeaderText = createElement('h6', {class: 'mb-1  mx-2 d-inline'}, year);
-  const yearHeaderElem = createElement('div', {class: 'text-dark'}, yearHeaderText + yearButtonShowElem);
-  // const yearButton = createElement('button', yearButtonOptions, year);
-  // const yearAttr = createElement('h5', {class: 'mb-0'}, yearButton);
-  const yearCardHeader = createElement('div', {class: 'card-header', id: `heading${year}_CardHeader`}, yearHeaderElem);
-
-  const monthsCollapseOptions = {
-    id: `collapse${year}`,
-    class: 'collapse',
-    aria_labelledby: `heading${year}_CardHeader`,
-    data_parent: `#travelsAccordion`
-  };
-  const monthsCollapse = createElement('div', monthsCollapseOptions, accordionsByMonths.join(""));
-  const yearCard = createElement('div', {class: 'card', id: `${year}_Card`}, yearCardHeader + monthsCollapse);
-
-  return yearCard;
+  const result = createElement('div', {id: 'yearsAccordion'}, yearObjectsArray.join('\n'));
+  return result;
 });

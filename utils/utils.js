@@ -59,7 +59,7 @@ String.prototype.splice = function(idx, rem, str) {
     return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
 };
 
-const createElement = (tag, options, text="Hello World", closingTag=true ) => {
+const createElement = (tag, options={}, text="Hello World", closingTag=true ) => {
   let tagStart = `<${tag}>`;
   let tagEnd = `</${tag}>`;
   let attrs = ''
@@ -83,7 +83,7 @@ const createElement = (tag, options, text="Hello World", closingTag=true ) => {
 }
   attrs = attrArray.join(' ');
   tagStart = tagStart.splice(insertIndex, 0, attrs);
-  
+
   if (closingTag) {
     result = tagStart + text + tagEnd;
   } else {

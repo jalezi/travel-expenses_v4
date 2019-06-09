@@ -59,6 +59,13 @@ String.prototype.splice = function(idx, rem, str) {
     return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
 };
 
+/*
+ * Creates HTML elements
+ * @param {string} tag
+ * @param {object} options
+ * @param {string} text
+ * @param {boolean} closingTag
+ */
 const createElement = (tag, options={}, text="Hello World", closingTag=true ) => {
   let tagStart = `<${tag}>`;
   let tagEnd = `</${tag}>`;

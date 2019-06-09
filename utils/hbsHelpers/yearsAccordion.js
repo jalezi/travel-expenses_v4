@@ -27,7 +27,9 @@ expressHbs.registerHelper('yearsAccordion', (value) => {
         const travelId = travelObject._id;
         const expensesCount = travelObject.expenses.length;
         const hrefTravel = `/travels/${travelId}`;
-        const travelHeaderTextString =  `${dateFromString} ${travelObject.description}`;
+        const homeCurrency = travelObject.homeCurrency;
+        const totalString = `${formatter.format(travelObject.total)} ${homeCurrency}`;
+        const travelHeaderTextString =  `${dateFromString} ${travelObject.description} ${totalString}`;
         // HTML Travel Card COLLAPSE - BODY
         const expenseObjectsArray = [];
         travelObject.expenses.forEach((expenseObject) => {
@@ -60,6 +62,7 @@ expressHbs.registerHelper('yearsAccordion', (value) => {
           const labelTextOptions = {class:'card-text'};
           const labelOptions = {class: 'card-text text-warning mb-0'};
           const expenseOptions = {class:'card-text mb-1'};
+          // TODO titleOptions, expenseCardBodyOptions & expenseCard id not needed?
           const titleOptions = {class:'card-title', id:`heading${expenseId}_CardTitle`};
           const expenseCardBodyOptions = {class:'card-body', id:`heading${expenseId}_CardBody`};
           const expenseCardOptions = {class:['card', 'text-white', 'bg-secondary', 'mx-2', 'my-2', 'border-warning'], id:`expense_${expenseId}_Card`};

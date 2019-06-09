@@ -83,7 +83,6 @@ const createElement = (tag, options={}, text="Hello World", closingTag=true ) =>
 }
   attrs = attrArray.join(' ');
   tagStart = tagStart.splice(insertIndex, 0, attrs);
-
   if (closingTag) {
     result = tagStart + text + tagEnd;
   } else {
@@ -92,9 +91,20 @@ const createElement = (tag, options={}, text="Hello World", closingTag=true ) =>
   return result;
 }
 
+/*
+ * Returns 2 HTML elements as one string
+ */
+const createTwoCardElements = (tagArr, optionArr, textArr) => {
+  const labelText = createElement(tagArr[0], optionArr[0], textArr[0]);
+  const labelElem = createElement(tagArr[1], optionArr[1], labelText);
+  const expenseElem = createElement(tagArr[2], optionArr[2], textArr[1]);
+  return labelElem + expenseElem;
+};
+
 module.exports = {
   convertRateToHomeCurrencyRate,
   findRatesByExactOrClosestDate,
   toTitleCase,
-  createElement
+  createElement,
+  createTwoCardElements
 }

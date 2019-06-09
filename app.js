@@ -25,7 +25,8 @@ const formidable = require('express-formidable');
 const expressHbs = require('express-hbs');
 const methodOverride = require('method-override')
 
-const hbsHelpers = require('./utils/hbsHelpers/hbsHelpers');
+require('./utils/hbsHelpers/hbsHelpers');
+require('./utils/hbsHelpers/yearsAccordion');
 const getRates = require('./utils/getRates');
 
 const Travel = require('./models/Travel');

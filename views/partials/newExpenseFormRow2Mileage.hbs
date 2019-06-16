@@ -14,13 +14,13 @@
 
   <div class="col-md-3">
     <label class="col-form-label font-weight-bold" id="labelAmoutDistance"for="amountDistance">Distance[{{setUnit user.homeDistance}}]</label>
-    <input class="form-control text-right" type="number" id="amountDistance" name="amountDistance"  min=0 value="0.00" placeholder="0.00" autofocus="autofocus" autocomplete="amountDistance" required="required">
+    <input class="form-control text-right" type="number" id="amountDistance" name="amountDistance"  min=0 value="0.00" step="0.01" placeholder="0.00" autofocus="autofocus" autocomplete="amountDistance" required="required">
   </div>
 
   <div class="col-md-4 input-group">
     <label class="input-group col-form-label font-weight-bold" for="amountConverted2">Converted amount</label>
     <div class="input-group-prepend">
-      <span class="input-group-text" id="currency-addon">{{travel.homeCurrency}}</span>
+      <span class="input-group-text" id="currency-addon2">{{travel.homeCurrency}}</span>
     </div>
     <input class="form-control text-right input-group" type="number" id="amountConverted2" name="amountConverted2" value="0.00" placeholder="0.00" autofocus="autofocus" autocomplete="amountConverted2" required="required" readonly>
   </div>

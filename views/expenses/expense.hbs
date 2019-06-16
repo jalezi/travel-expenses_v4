@@ -11,7 +11,7 @@
   </div>
 
   <form class="" action="/travels/{{travel._id}}/expenses/{{expense._id}}" method="POST">
-    <input type="hidden" name="_csrf" value={{_csrf}} />
+    <input type="hidden" name="_csrf" value={{_csrf}}>
     <div class="form-group row">
       <div class="col-md-3">
         <label class="col-form-label font-weight-bold" for="expenseType">Type</label>
@@ -23,6 +23,7 @@
       </div>
       <div class="col-md-5">
         <label class="col-form-label font-weight-bold" for="expenseDescription">Description</label>
+        <!-- TODO checl input attr type => should be text? same with travel form -->
         <input class="form-control" id="expenseDescription" type="expenseDescription" value="{{expense.description}}" name="expenseDescription" placeholder="Description" autofocus="autofocus" autocomplete="expenseDescription" required="required" />
       </div>
       <div class="col-md-4">

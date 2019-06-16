@@ -96,22 +96,45 @@ const createElement = (tag, options={}, text="Hello World", closingTag=true ) =>
     result = tagStart + text;
   }
   return result;
-}
+};
 
 /*
  * Returns 2 HTML elements as one string
  */
-const createTwoCardElements = (tagArr, optionArr, textArr) => {
-  const labelText = createElement(tagArr[0], optionArr[0], textArr[0]);
-  const labelElem = createElement(tagArr[1], optionArr[1], labelText);
-  const expenseElem = createElement(tagArr[2], optionArr[2], textArr[1]);
-  return labelElem + expenseElem;
+const createTwoCardElements = (tagArr, optionArr, textArr=['', ''], closingArr=[true, true, true], insert = '') => {
+
+  const labelText = createElement(tagArr[0], optionArr[0], textArr[0], closingArr[0]);
+  const labelElem = createElement(tagArr[1], optionArr[1], labelText, closingArr[1]);
+  const expenseElem = createElement(tagArr[2], optionArr[2], textArr[1], closingArr[2]);
+  return labelElem + insert + expenseElem;
 };
+
+const createOptions = (options, selected, elemAttrs={}, valueToLowerCase = false) => {
+  let result = '';
+  selected = (!selected) ? '' : selected;
+  options.forEach((val) => {
+    // console.log(val);
+    const optionVal = (valueToLowerCase) ? val.toLowerCase() : val;
+    // console.log(optionVal, val, selected);
+    elemAttrs.value = optionVal;
+    if (optionVal.toLowerCase() === selected.toLowerCase()) {
+      elemAttrs.selected = 'selected';
+    };
+    const htmlElem = createElement('option', elemAttrs, val);
+    if (elemAttrs.selected) {
+      delete elemAttrs.selected;
+    }
+    result = result + htmlElem;
+  });
+  delete elemAttrs.value;
+  return result;
+}
 
 module.exports = {
   convertRateToHomeCurrencyRate,
   findRatesByExactOrClosestDate,
   toTitleCase,
   createElement,
-  createTwoCardElements
+  createTwoCardElements,
+  createOptions
 }

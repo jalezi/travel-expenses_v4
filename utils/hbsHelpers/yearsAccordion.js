@@ -3,6 +3,7 @@ const moment = require('moment');
 const createElement = require('../utils').createElement;
 const createTwoCardElements = require('../utils').createTwoCardElements;
 const {expenseTypes} = require('../../lib/globals');
+const constants = require('../../lib/constants');
 
 /*
  * Returns expense curRate object-
@@ -27,7 +28,7 @@ const findCurRate = (travel, expense) => {
 
 /*
  * Creates HTML 'option' elements
- * @parama {array} options            Select or datalist options
+ * @param {array} options            Select or datalist options
  * @param {string} selected           Option to be selected
  * @param {object} elemAttrs          HTML element attributes
  * @param {boolean} valueToLowerCase  whether to set option's value to lower case
@@ -91,7 +92,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
     autofocus: 'autofocus',
     required: 'required',
     style: '',
-    // disabled: 'disabled',
+    readonly: 'readonly',
   };
 
   // ALWAYS SHOW
@@ -146,7 +147,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   elemOptions.value = moment(expense.date).format('YYYY-MM-DD');
   elemOptions.min = moment(travel.dateFrom).format('YYYY-MM-DD');
   elemOptions.max = moment(travel.dateTo).format('YYYY-MM-DD');
-  elemOptions.style =  elemOptions.style + '-webkit-text-fill-color: white;';
+  // elemOptions.style =  elemOptions.style + '-webkit-text-fill-color: white;';
 
   // expense date INPUT TAGS & OPTONS
   htmlTagsArr[2] = 'input';
@@ -162,7 +163,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   delete elemOptions.type;
   delete elemOptions.min;
   delete elemOptions.max;
-  elemOptions.style.replace('-webkit-text-fill-color: white;', '');
+  // elemOptions.style.replace('-webkit-text-fill-color: white;', '');
 
   // NOT MILEAGE
   // EXPENSE.CURRENCY - HTML INPUT text
@@ -291,11 +292,18 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   }
 
   // MILEAGE
+  const aDistanceId = `amountDistance${expense._id}`;
+  const aDistance2Id = `amountDistance2${expense._id}`;
+  const aDistanceRowId =  `amountDistanceRow${expense._id}`;
+  const aDistanceRow2Id =  `amountDistance2Row${expense._id}`;
+
   // EXPENSE.UNIT - HTML SELECT
   labelOptions.for =  `invoiceUnit${expense._id}`;
   elemOptions.id = `invoiceUnit${expense._id}`;
   elemOptions.name = 'invoiceUnit';
   elemOptions.autocomplete = 'invoiceUnit';
+  elemOptions.onchange = 'invoiceUnitChange(event)';
+
 
   // expense type INPUT TAGS & OPTONS
   htmlTagsArr[2] = 'select';
@@ -308,6 +316,8 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   const unitElemDiv = createElement('div', divElemOptions, unitElem);
   const unitElemRow = createElement('div', divRowOptions, unitElemDiv);
   delete elemOptions.autocomplete;
+  delete elemOptions.onchange;
+
 
   // EXPENSE.PERMILEAMOUNT - HTML INPUT number
   labelOptions.for =  `travelPerMileAmount${expense._id}`;
@@ -320,6 +330,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   elemOptions.min = 0;
   elemOptions.placeholder = '0.00';
   elemOptions.readonly = 'readonly';
+
 
   // expense type INPUT TAGS & OPTONS
   htmlTagsArr[2] = 'input';
@@ -351,6 +362,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   elemOptions.step = '0.01';
   elemOptions.min = 0;
   elemOptions.placeholder = '0.00';
+  divRowOptions.id = aDistanceRowId;
 
   // expense type INPUT TAGS & OPTONS
   htmlTagsArr[2] = 'input';
@@ -368,6 +380,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   delete elemOptions.step;
   delete elemOptions.min;
   delete elemOptions.placeholder;
+  delete divRowOptions.id;
 
   // EXPENSE.AMOUNTCONVERTED2 - HTML INPUT number
   // expense amountConverted2 INPUT OPTIONS
@@ -415,6 +428,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   elemOptions.placeholder = '0.00';
   elemOptions.readonly = 'readonly';
   divRowOptions.style = divRowOptions.style + 'display: none;'
+  divRowOptions.id = aDistanceRow2Id;
 
 
   // expense type INPUT TAGS & OPTONS
@@ -435,6 +449,17 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   delete elemOptions.placeholder;
   delete elemOptions.readonly;
   divRowOptions.style.replace('display: none;', '');
+  delete divRowOptions.id;
+
+  const expenseButtonEditOptions = {
+    class: ['badge', 'badge-secondary', 'text-white'],
+    type: 'button',
+    onclick: `editExpense(event)`
+  }
+  const expenseButtonElemOptions = {class: 'mb-0 d-inline mx-1'};
+  const expenseButtonEditText = createElement('button', expenseButtonEditOptions, 'edit');
+  const expenseButtonEditElem = createElement('h6', expenseButtonElemOptions, expenseButtonEditText);
+
 
 
 
@@ -460,10 +485,182 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   const formNotMileageDiv = createElement('div', notMileageDivOptions, formNotMIleageElem);
   const formMileageElem = unitElemRow + perMileAmountElemRow + amountDistanceElemRow + amountDistance2ElemRow + amountConverted2ElemRow;
   const formMileageDiv = createElement('div', mileageDivOptions, formMileageElem);
-  const formElements = hiddenInput + formAlwaysShowDiv + formNotMileageDiv + formMileageDiv;
+  const formElements = hiddenInput + formAlwaysShowDiv + formNotMileageDiv + formMileageDiv + expenseButtonEditElem;
   const form = createElement('form', formOptions, formElements);
   return form;
 }
+/*
+ * Returns HTML elements
+ * @param {object} value Array with travels mongo aggregate group by year and each year group by month
+ * more in Travel Schema /models/Travel.js Travel.byYear_byMonth
+ */
+expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
+
+  const formatter = new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  // HTML Accordion - RESULT
+  const yearObjectsArray = [];
+  value.forEach((yearObject) => {
+    const yearString = yearObject._id.year.toString();
+    // HTML Year Card COLLAPSE - BODY
+    const monthObjectsArray = [];
+    yearObject.byYear.forEach((monthObject) => {
+      const monthValue = monthObject._id.month-1;
+      const monthString = moment().month(monthValue).format('MMMM');
+      const travelObjectsArray = [];
+      // HTML Month Card COLLAPSE - BODY
+      monthObject.byMonth.forEach((travelObject) => {
+        const dateFromString = moment(travelObject.dateFrom).format('YYYY-MM-DD');
+        const travelId = travelObject._id;
+        const expensesCount = travelObject.expenses.length;
+        const hrefTravel = `/travels/${travelId}`;
+        const homeCurrency = travelObject.homeCurrency;
+        const totalString = `${formatter.format(travelObject.total)} ${homeCurrency}`;
+        const travelHeaderTextString =  `${dateFromString} ${travelObject.description} ${totalString}`;
+        // HTML Travel Card COLLAPSE - BODY
+        const expenseObjectsArray = [];
+        travelObject.expenses.forEach((expenseObject) => {
+          const expenseId = expenseObject._id;
+
+          const expenseCardBodyOptions = {class:'card-body', id:`heading${expenseId}_CardBody`};
+          const expenseCardOptions = {class:['card', 'text-white', 'bg-secondary', 'mx-2', 'my-2', 'border-warning'], id:`expense_${expenseId}_Card`};
+
+
+          const form = createExpenseForm('post', 'patch', csrf, expenseTypes, travelObject, expenseObject, formatter);
+          const expenseCardBody = createElement('div', expenseCardBodyOptions,  form);
+          const expenseCard = createElement('div', expenseCardOptions,  expenseCardBody);
+          expenseObjectsArray.push(expenseCard);
+        });
+        const expenses = expenseObjectsArray.join('')
+        // HTML Travel Card ELEMENTS OPTIONS
+        const travelButtonBadgeOptions = {class: 'badge badge-warning mx-1'};
+        /*
+         * travelButtonShowOptions's class badge-secondary is related to toggleTravelButtonText() in home.hbs
+         * if else statement where checks class.indexOf(class)
+         */
+        const travelButtonShowOptions = {
+          class: ['badge', 'badge-secondary', 'text-warning'],
+          type: 'button',
+          data_toggle: 'collapse',
+          data_target: `#collapse${travelId}`,
+          aria_expanded: 'true',
+          aria_controls: `collapse${travelId}`,
+          data_text_swap: 'hide',
+          data_text_original: 'show',
+          data_text_badge: `${expensesCount}`,
+          data_text_badge_sr: 'expenses count in travel',
+          onclick: 'toggleTravelButtonText(event)',
+          style: 'width: 70px'
+        }
+        const travelButtonEditOptions = {
+          class: ['badge', 'badge-secondary', 'text-white'],
+          type: 'button',
+          onclick: `location.href='${hrefTravel}'`
+        }
+        const travelButtonElemOptions = {class: 'mb-0 d-inline mx-1'};
+        const travelHeaderTextOptions = {class: 'mb-1'};
+        const travelCollapseOptions = {
+          id: `collapse${travelId}`,
+          class: 'collapse',
+          aria_labelledby: `heading${travelId}_CardHeader`,
+          // data_parent: `#travel_${travelId}Accordion`
+        }
+        const travelCardOptions = {
+          class: 'card  bg-secondary text-white',
+          id: `travel_${travelId}_Card`
+        }
+        // HTML Travel ELEMENTS
+        const travelButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
+        const travelButtonBadge = createElement('span', travelButtonBadgeOptions, expensesCount);
+        const travelButtonShowText = createElement('button', travelButtonShowOptions, 'show' + travelButtonBadge + travelButtonBadgeSr);
+        const travelButtonShowElem = createElement('h6', travelButtonElemOptions, travelButtonShowText);
+        const travelButtonEditText = createElement('button', travelButtonEditOptions, 'edit');
+        const travelButtonEditElem = createElement('h6', travelButtonElemOptions, travelButtonEditText);
+        const travelHeaderText = createElement('h6', travelHeaderTextOptions, travelHeaderTextString);
+        const travelHeaderElem = createElement('div', {class: ''}, travelHeaderText + travelButtonShowElem + travelButtonEditElem);
+        const travelCardHeader = createElement('div', {class: 'card-header py-2'}, travelHeaderElem);
+        const travelCardBody = createElement('div', {class: 'card-body'}, expenses);
+        const travelCollapse = createElement('div', travelCollapseOptions, travelCardBody);
+        const travelCard = createElement('div', travelCardOptions, travelCardHeader + travelCollapse);
+        travelObjectsArray.push(travelCard);
+      });
+      const travels = travelObjectsArray.join("");
+      // HTML Month ELEMENTS OPTIONS
+      const monthButtonBadgeOptions = {class: 'badge badge-dark mx-1'};
+      /*
+       * monthButtonShowOptions's class badge-secondary is related to toggleTravelButtonText() in home.hbs
+       * if else statement where checks class.indexOf(class)
+       */
+      const monthButtonShowOptions = {
+        class: ['badge', 'badge-light', 'text-dark'],
+        type: 'button',
+        data_toggle: 'collapse',
+        data_target: `#collapse${yearString}_${monthValue}`,
+        aria_expanded: 'true',
+        aria_controls: `collapse${yearString}_${monthValue}`,
+        data_text_swap: 'hide',
+        data_text_original: 'show',
+        data_text_badge: `${monthObject.count}`,
+        data_text_badge_sr: 'travels count in month',
+        onclick: 'toggleTravelButtonText(event)',
+        style: 'width: 70px'
+      };
+      const monthCollapseOptions = {
+        id: `collapse${yearString}_${monthValue}`,
+        class: 'collapse',
+        aria_labelledby: `heading${yearString}_${monthValue}_CardHeader`
+      };
+      // HTML Month ELEMENTS
+      const monthButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
+      const monthButtonBadge = createElement('span', monthButtonBadgeOptions, monthObject.count);
+      const monthButtonShowText = createElement('button', monthButtonShowOptions, 'show' + monthButtonBadge + monthButtonBadgeSr);
+      const monthButtonShowElem = createElement('h6', {class: 'mb-0 mx-1 d-inline float-right'}, monthButtonShowText);
+      const monthCardHeader = createElement('div', {class: 'card-header py-2'}, monthString + monthButtonShowElem);
+      const monthCardBody = createElement('div', {class: 'card-body'}, travels);
+      const monthCollapse = createElement('div', monthCollapseOptions, monthCardBody);
+      const monthCard = createElement('div', {class: 'card', style: 'border: none'}, monthCardHeader + monthCollapse);
+      monthObjectsArray.push(monthCard);
+    });
+    const months = monthObjectsArray.join('');
+    // HTML Year ELEMENTS OPTIONS
+    const yearButtonBadgeOptions = {class: 'badge badge-light mx-1'};
+    /*
+     * yearlButtonShowOptions's class badge-secondary is related to toggleTravelButtonText() in home.hbs
+     * if else statement where checks class.indexOf(class)
+     */
+    const yearButtonShowOptions = {
+      class: ['badge', 'badge-dark', 'text-white'],
+      type: 'button',
+      data_toggle: 'collapse',
+      data_target: `#collapse${yearString}`,
+      aria_expanded: 'false',
+      aria_controls: `collapse${yearString}`,
+      data_text_swap: 'hide',
+      data_text_original: 'show',
+      data_text_badge: `${yearObject.countTotal}`,
+      data_text_badge_sr: 'travels count in month',
+      onclick: 'toggleTravelButtonText(event)',
+      style: 'width: 70px'
+    };
+    const monthsCollapseOptions = {
+      id: `collapse${yearString}`,
+      class: 'collapse',
+      aria_labelledby: `heading${yearString}_CardHeader`
+    };
+    // HTML Year ELEMENTS
+    const yearButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
+    const yearButtonBadge = createElement('span', yearButtonBadgeOptions, yearObject.countTotal);
+    const yearButtonShowText = createElement('button', yearButtonShowOptions, 'show' + yearButtonBadge + yearButtonBadgeSr);
+    const yearButtonShowElem = createElement('h6', {class: 'mb-0 mx-1 d-inline float-right'}, yearButtonShowText);
+    const yearCardHeader = createElement('div', {class: 'card-header py-2', id: `heading${yearString}_CardHeader`}, yearString + yearButtonShowElem);
+    const yearCardBody = createElement('div', {class: 'card-body p-0'}, months);
+    const yearCollapse = createElement('div', monthsCollapseOptions, yearCardBody);
+    const yearCard = createElement('div', {class: 'card'}, yearCardHeader + yearCollapse );
+    yearObjectsArray.push(yearCard);
+  });
+  const result = createElement('div', {id: 'yearsAccordion'}, yearObjectsArray.join('\n'));
+  return result;
+});
+
 
 /*
  * Returns HTML elements

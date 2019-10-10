@@ -128,6 +128,10 @@ module.exports = (travel, user) => {
     user.profile.name = 'Unknown';
   }
 
+  console.log(typeof ObjectId(travel._id).getTimestamp());
+  console.log(typeof ObjectId(travel._id).toString());
+  console.log(typeof ObjectId(travel._id).valueOf());
+
   const invoiceNumber = ObjectId(travel._id).toString();
   const dateFrom = moment(travel.dateFrom).format('ddd, MMM Do YYYY');
   const dateTo = moment(travel.dateTo).format('ddd, MMM Do YYYY');

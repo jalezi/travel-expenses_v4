@@ -122,6 +122,13 @@
         amountDistance.value = miles;
         const convertedAmount = (travelPerMileAmount.value * amountDistance.value).toFixed(2);
         amountConverted2.value = convertedAmount;
+      } else {
+
+{{!--const milesToKm = parseFloat({{constants.MILES_TO_KILOMETERS}});
+        const km = (amountDistance2.value * milesToKm).toFixed(2);
+        amountDistance.value = km;
+        const convertedAmount = (travelPerMileAmount.value * amountDistance.value).toFixed(2);
+        amountConverted2.value = convertedAmount;--}}
       }
     }
 

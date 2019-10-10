@@ -1,5 +1,6 @@
 const moment = require('moment');
 const Travel = require('../models/Travel');
+const constants = require('../lib/constants')
 /**
  * GET /
  * Home page.
@@ -13,7 +14,8 @@ exports.index = (req, res, next) => {
     Travel.byYear_byMonth(req.user).then((docs) => {
       res.render('home', {
         title: 'Home',
-        docs
+        docs,
+        constants
       });
     }).catch((err) => {
       next(err);

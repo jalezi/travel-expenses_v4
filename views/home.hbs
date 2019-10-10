@@ -4,7 +4,7 @@
   {{> travelsHeader}}
   <hr>
   <div class="">
-    {{{yearsAccordion docs _csrf}}}
+    {{{yearsAccordionWithForm docs _csrf}}}
   </div>
 
   <hr>
@@ -33,6 +33,9 @@
 {{/if}}
 
 <script type="text/javascript">
+  function editExpense (event) {
+    console.log(event);
+  }
   function toggleTravelButtonText(event) {
 
     let button;
@@ -78,7 +81,35 @@
       button.innerHTML = button.getAttribute("data-text-swap");
     }
   }
+  function invoiceUnitChange(event) {
+    console.log('event', event);
+    console.log('target', event.target);
+    console.log('id', event.target.attributes['id']);
+    const expenseId = event.target.attributes['id'].value.replace('invoiceUnit', '');
+    const aDistanceRowId = `amountDistanceRow${expenseId}`;
+    const aDistanceRow2Id = `amountDistance2Row${expenseId}`;
+    const aDistanceElem = document.getElementById(`amountDistance${expenseId}`);
+    const aDistance2Elem = document.getElementById(`amountDistance2${expenseId}`);
+    console.log(aDistance2Elem);
 
+    aDistance2Elem.readOnly = !aDistance2Elem.readOnly;
+    aDistanceElem.readOnly = !aDistanceElem.readOnly;
+
+    if (!aDistance2Elem.readOnly) {
+      aDistance2Elem.value = aDistanceElem.value * {{constants.MILES_TO_KILOMETERS}};
+      aDistance2Elem.value = parseFloat($(`#amountDistance2${expenseId}`).val()).toFixed(2);
+      console.log(aDistanceElem.value);
+      console.log(aDistance2Elem.value);
+      $(`#${aDistanceRow2Id}`).show();
+    } else {
+      aDistanceElem.value = aDistance2Elem.value * {{constants.KILOMETERS_TO_MILES}};
+      aDistanceElem.value = parseFloat($(`#amountDistance${expenseId}`).val()).toFixed(2);
+      console.log(aDistanceElem.value);
+      console.log(aDistance2Elem.value);
+      $(`#${aDistanceRow2Id}`).hide();
+    }
+
+  }
   $(document).ready(() => {
 
   });

@@ -122,17 +122,17 @@ function createTravelExpensesTableData (travel) {
   return dataObjects;
 }
 
-module.exports = (travel, user) => {
+module.exports = (travel, user, idx) => {
 
   if (!user.profile.name) {
     user.profile.name = 'Unknown';
   }
 
-  console.log(typeof ObjectId(travel._id).getTimestamp());
-  console.log(typeof ObjectId(travel._id).toString());
-  console.log(typeof ObjectId(travel._id).valueOf());
+  // console.log(typeof ObjectId(travel._id).getTimestamp());
+  // console.log(typeof ObjectId(travel._id).toString());
+  // console.log(typeof ObjectId(travel._id).valueOf());
 
-  const invoiceNumber = ObjectId(travel._id).toString();
+  const invoiceNumber = ObjectId(travel._id).toString() + "-" + idx;
   const dateFrom = moment(travel.dateFrom).format('ddd, MMM Do YYYY');
   const dateTo = moment(travel.dateTo).format('ddd, MMM Do YYYY');
 

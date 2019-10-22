@@ -24,8 +24,8 @@ const travelsTotalToPDF = require('../utils/travelsTotalToPDF');
  */
 exports.getTravelsTotalPDF = async function(req, res, next) {
 // Create and open PDF
-  function createTravelsTotalPDF(res, travels, user, dateRange, sum) {
-    const stream = travelsTotalToPDF(travels, user, dateRange, sum);
+  function createTravelsTotalPDF(res, travels, user, dateRange, sum, indexes) {
+    const stream = travelsTotalToPDF(travels, user, dateRange, sum, indexes);
     let filename = `TOTAL_${user._id}_${df}_${dt}.pdf`;  // Be careful of special characters
     filename = encodeURIComponent(filename);  // Ideally this should strip them
     res.setHeader('Content-disposition', 'inline; filename="' + filename + '"');
@@ -38,7 +38,22 @@ exports.getTravelsTotalPDF = async function(req, res, next) {
   const df = req.query.df;
   const dt = req.query.dt;
   const dateRange = {df, dt};
+  const indexes = []
+  const travelIndexesArray = await User.aggregate([
 
+    {
+      '$project': {
+        'travels': 1
+      }
+    },
+    {'$match': {
+      '_id': req.user._id
+    }}
+
+  ], (err, docs) => {
+    // console.log(docs);
+  });
+  const travelIndexes = travelIndexesArray[0].travels;
   // if statement is safety in case date range is not passed as url query
   if (df === '' || dt === '') {
     travels = await Travel.find({_user: res.locals.user._id});
@@ -50,10 +65,11 @@ exports.getTravelsTotalPDF = async function(req, res, next) {
     } else {
       let sum;
       if (result.length === 0) {sum = 0;} else {sum = Number(result[0].sum);}
-      createTravelsTotalPDF(res, travels, res.locals.user, dateRange, sum);
+      createTravelsTotalPDF(res, travels, res.locals.user, dateRange, sum, indexes);
     }
 });
   } else {
+
     queryDateFrom = new Date(df);
     queryDateTo = new Date(dt);
     travels = await Travel.find({
@@ -69,7 +85,18 @@ exports.getTravelsTotalPDF = async function(req, res, next) {
   } else {
     let sum;
     if (result.length === 0) {sum = 0;} else {sum = Number(result[0].sum);}
-    createTravelsTotalPDF(res, travels, res.locals.user, dateRange, sum);
+    let x = 'x';
+    // console.log(typeof x);
+    // console.log(travelIndexes);
+    // console.log(typeof travelIndexes[63]);
+    travels.forEach((item, idx) => {
+      travelIndexes.forEach((item, idx, object) => {
+        object[idx] = item.toString()
+      });
+      const matchIndex = travelIndexes.indexOf(item._id.toString()) + 1;
+      indexes.push(matchIndex);
+    })
+    createTravelsTotalPDF(res, travels, res.locals.user, dateRange, sum, indexes);
   }
 });}}
 
@@ -78,7 +105,24 @@ exports.getTravelsTotalPDF = async function(req, res, next) {
  * Create, open in new tab and save PDF for displayed travel
  */
 exports.getTravelExpensesPDF = async function(req, res, next) {
-  const stream = travelExpensesToPDF(res.locals.travel, req.user);
+  const invoiceNumberArray = await User.aggregate([
+    {
+      '$project': {
+        'index': {
+          '$indexOfArray': [
+            '$travels', new ObjectId(res.locals.travel._id)
+          ]
+        }
+      }
+    }, {
+      '$match': {
+        '_id': new ObjectId(req.user._id)
+      }
+    }
+  ]);
+  const idx = invoiceNumberArray[0].index + 1;
+  console.log(idx);
+  const stream = travelExpensesToPDF(res.locals.travel, req.user, idx);
   let filename = `TReport_${req.user._id}_${res.locals.travel._id}.pdf`;  // Be careful of special characters
   filename = encodeURIComponent(filename);  // Ideally this should strip them
   res.setHeader('Content-disposition', 'inline; filename="' + filename + '"');

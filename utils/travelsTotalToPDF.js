@@ -4,6 +4,11 @@ const moment = require('moment');
 
 const fs = require('fs');
 
+const mongoose = require('mongoose');
+
+const User = require('../models/User');
+const ObjectId = mongoose.Schema.Types.ObjectId;
+
 const fonts = {
   Helvetica: {
     normal: 'Helvetica',
@@ -110,12 +115,11 @@ function table(data, columns, tableHeader, style = {}, sum = 0) {
     };
 }
 
-function createTravelsTotalTableData(travels) {
+function createTravelsTotalTableData(travels, indexes) {
   const dataObjects = [];
-
   travels.forEach((travel, key, object) => {
     const newObject = {};
-    newObject._id = travel._id.toString();
+    newObject._id = travel._id.toString() + "-" + indexes[key];
     newObject.dateFrom = moment(travel.dateFrom).format('l');
     newObject.dateTo = moment(travel.dateTo).format('l');
     newObject.description = travel.description;
@@ -127,8 +131,8 @@ function createTravelsTotalTableData(travels) {
   return dataObjects;
 }
 
-module.exports = (travels, user, dateRange, sum) => {
-
+module.exports = (travels, user, dateRange, sum, indexes) => {
+  console.log(indexes);
   const titlePdf = `TOTAL`;
   const authorPdf = `${user.profile.name}`;
   const subjectPdf = 'Travel expenses';
@@ -138,7 +142,7 @@ module.exports = (travels, user, dateRange, sum) => {
   const dateFrom = moment(df).format('ddd, MMM Do YYYY');
   const dateTo = moment(dt).format('ddd, MMM Do YYYY');
 
-  const tableData = createTravelsTotalTableData(travels);
+  const tableData = createTravelsTotalTableData(travels, indexes);
 
   const dataProperties = ['dateFrom', 'dateTo', 'description', 'currency', 'perMile', 'amount'];
   let homeDistance;

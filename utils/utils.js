@@ -51,8 +51,10 @@ const findRatesByExactOrClosestDate = async (date = new Date()) => {
 const toTitleCase = (str) => str.replace(/\w\S*/g,
   (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 
-// eslint-disable-next-line max-len
-// String.prototype.splice = (idx, rem, str) => this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
+// eslint-disable-next-line no-extend-native
+String.prototype.splice = function (idx, rem, str) { // eslint-disable-line func-names
+  return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
+};
 
 /*
  * Creates HTML elements

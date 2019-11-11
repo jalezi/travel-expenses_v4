@@ -18,6 +18,7 @@ const myErrors = require('../utils/myErrors');
 // read and parse file
 async function readAndParseFile(filePath, enc = 'utf8') {
   try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     const myFile = fs.readFileSync(filePath, enc);
     const parsedData = Papa.parse(myFile, {
       quoteChar: '"',
@@ -38,7 +39,9 @@ async function readAndParseFile(filePath, enc = 'utf8') {
 // delete uploaded file
 function deleteFile(filePath, message = '') {
   try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     if (fs.existsSync(filePath)) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       fs.unlink(filePath, (err) => {
         if (err) {
           throw err;
@@ -70,12 +73,12 @@ const checkFile = (myFile) => new Promise((resolve) => {
     let error;
     try {
       error = checkFileFor(myFile.name === '', 'No file selected!');
-      if (error) { return error; }
+      // if (error) { return error; }
       error = checkFileFor(myFile.size === 0, 'Empty file!');
-      if (error) { return error; }
+      // if (error) { return error; }
       error = checkFileFor(myFile.path.split('.').pop() !== 'csv', 'Not a CSV file!');
-      if (error) { return error; }
-      return;
+      // if (error) { return error; }
+      resolve(error);
     } catch (err) {
       resolve(err);
     }
@@ -228,6 +231,7 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
       if (!travel) {
         noTravelKeys.push(key);
       } else {
+        // eslint-disable-next-line security/detect-object-injection
         object[key].travel = travel._id;
       }
     });
@@ -290,20 +294,30 @@ const updateTravels = function (uniqueTravelObjectIds) {
 const expenseImport = function (dataArray) {
   return new Promise(((resolve) => {
     try {
-      const expenses = Expense.insertMany(dataArray).catch(() => {
-        throw new myErrors.SaveToDbError('Something went wrong during saving expenses to DB!');
-      });
-      if (!expenses) {
-        throw new myErrors.SaveToDbError('No expenses saved!');
-      }
-      const travelObjectIds = expenses.map((expense) => expense.travel);
-      const uniqueTravelObjectIds = [...new Set(travelObjectIds)];
-      const updatedTravels = updateTravels(uniqueTravelObjectIds, expenses).catch(() => {
-        throw new myErrors.SaveToDbError('Something went wrong during updating travels with expenses!');
-      });
+      Expense.insertMany(dataArray)
+        .then((expenses) => {
+          console.log(expenses);
+          if (!expenses) {
+            resolve(new myErrors.SaveToDbError('No expenses saved!'));
+          }
+          const travelObjectIds = expenses.map((expense) => expense.travel);
+          const uniqueTravelObjectIds = [...new Set(travelObjectIds)];
+          return expenses, uniqueTravelObjectIds;
+        })
+        .then((expenses, uniqueTravelObjectIds) => {
+          const updatedTravels = updateTravels(uniqueTravelObjectIds,
+            expenses).catch((err) => {
+            console.log('update Travels', err);
+            resolve(new myErrors.SaveToDbError('Something went wrong during updating travels with expenses!'));
+          });
 
-      const message = `${expenses.length} imported. ${updatedTravels.length} travels updated!`;
-      resolve(message);
+          const message = `${expenses.length} imported. ${updatedTravels.length} travels updated!`;
+          resolve(message);
+        })
+        .catch((err) => {
+          console.log(err);
+          resolve(new myErrors.SaveToDbError('Something went wrong during saving expenses to DB!'));
+        });
     } catch (err) {
       resolve({ error: err, msg: 'Something went wrong during expense import!' });
     }

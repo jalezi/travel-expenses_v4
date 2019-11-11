@@ -1,10 +1,10 @@
 const passport = require('passport');
-const request = require('request');
+// const request = require('request');
 
 const { Strategy: LocalStrategy } = require('passport-local');
 const { OAuth2Strategy: GoogleStrategy } = require('passport-google-oauth');
-const { OAuthStrategy } = require('passport-oauth');
-const { OAuth2Strategy } = require('passport-oauth');
+// const { OAuthStrategy } = require('passport-oauth');
+// const { OAuth2Strategy } = require('passport-oauth');
 
 const User = require('../models/User');
 

@@ -298,15 +298,18 @@ exports.postNewExpense = async function (req, res, next) {
         }
       });
     // TODO refactor if statement. No need for if statement.
-    if (doc.type !== 'Mileage') {
-      const result = Number(travel.total) + Number(doc.amountConverted);
-      travel.total = result.toFixed(2);
-      travel.save();
-    } else {
-      const result = Number(travel.total) + Number(doc.amountConverted);
-      travel.total = result.toFixed(2);
-      travel.save();
-    }
+    const result = Number(travel.total) + Number(doc.amountConverted);
+    travel.total = result.toFixed(2);
+    travel.save();
+    // if (doc.type !== 'Mileage') {
+    //   const result = Number(travel.total) + Number(doc.amountConverted);
+    //   travel.total = result.toFixed(2);
+    //   travel.save();
+    // } else {
+    //   const result = Number(travel.total) + Number(doc.amountConverted);
+    //   travel.total = result.toFixed(2);
+    //   travel.save();
+    // }
   } catch (err) {
     return next(err);
   }

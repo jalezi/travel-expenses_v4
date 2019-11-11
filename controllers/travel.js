@@ -274,9 +274,12 @@ exports.getTravel = async function (req, res, next) {
   const id = req.params.id;
   if (!ObjectId.isValid(id)) { return next(new Error('Not valid Object Id')); }
   const travel = res.locals.travel;
+  let expenses;
 
   try {
-    const expenses = travel.expenses;
+    if (travel !== null) {
+      expenses = travel.expenses;
+    }
 
     expenses.forEach((expense) => {
       if (expense.type !== 'Mileage') {

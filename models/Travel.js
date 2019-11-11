@@ -1,23 +1,26 @@
+/* eslint-disable func-names */
+/* eslint-disable quote-props */
 /*
  * Travel Schema
  * _user: link to user => user._id from users collection
- * decription: travel description
+ * description: travel description
  * dateFrom: travel start date
  * dateTo: travel end date
  * homeCurrency: currency to calculate all amounts to
  * perMileAmount: amount to convert distance to expense
- * expenses: array of expense' ids - links to expenses collection in DB => ExpenseSchema in ./models/Expense.js
- * total: total of all expenes linked to this travel
+ * expenses: array of expense' ids -
+ *  links to expenses collection in DB => ExpenseSchema in ./models/Expense.js
+ * total: total of all expenses linked to this travel
  * useNestedStrict: TODO useNestedStrict description
  * timestamps: creates two values => createdAr, updatedAt - Mongoose Schema option
  */
 
 const mongoose = require('mongoose');
 
-const User = require('../models/User');
-const Expense = require('../models/Expense');
+// const User = require('../models/User');
+// const Expense = require('../models/Expense');
 
-const ObjectId = mongoose.Schema.Types.ObjectId;
+const { ObjectId } = mongoose.Schema.Types;
 
 const TravelSchema = new mongoose.Schema({
   _user: {
@@ -55,7 +58,8 @@ const TravelSchema = new mongoose.Schema({
   }
 }, {
   useNestedStrict: true,
-  timestamps: true });
+  timestamps: true
+});
 
 /*
  * Helper method to update travel's total amount
@@ -67,121 +71,116 @@ const TravelSchema = new mongoose.Schema({
  * .populate({path: 'expenses', populate: {path: 'curRate'}})
  * .then((doc) => {doc.updateTotal()}
  */
-TravelSchema.methods.updateTotal = function  (cb) {
+TravelSchema.methods.updateTotal = () => {
   this.total = 0;
   this.expenses.forEach((expense) => {
     this.total = Number(this.total) + Number(expense.amountConverted);
   });
   this.total = parseFloat(this.total).toFixed(2);
   return this.save();
-}
+};
 
-TravelSchema.statics.byYear_byMonth = function (user, cb) {
-  return this.aggregate([
-{
-  '$match': {
-    '_user': user._id
-  }
-}, {
-  '$sort': {
-    'dateFrom': -1
-  }
-}, {
-  '$lookup': {
-    from: 'expenses',
-    localField: 'expenses',
-    foreignField: '_id',
-    as: 'expenses'
-  }
-}, {
-  '$lookup': {
-    from: 'currencies',
-    localField: 'expenses.curRate',
-    foreignField: '_id',
-    as: 'curRates'
-  }
-}, {
-  '$group': {
-    '_id': {
-      'month': {
-        '$month': '$dateFrom'
+TravelSchema.statics.byYear_byMonth = function (user) {return this.aggregate([
+  {
+    '$match': {
+      '_user': user._id
+    }
+  }, {
+    '$sort': {
+      'dateFrom': -1
+    }
+  }, {
+    '$lookup': {
+      from: 'expenses',
+      localField: 'expenses',
+      foreignField: '_id',
+      as: 'expenses'
+    }
+  }, {
+    '$lookup': {
+      from: 'currencies',
+      localField: 'expenses.curRate',
+      foreignField: '_id',
+      as: 'curRates'
+    }
+  }, {
+    '$group': {
+      '_id': {
+        'month': {
+          '$month': '$dateFrom'
+        },
+        'year': {
+          '$year': '$dateFrom'
+        }
       },
-      'year': {
-        '$year': '$dateFrom'
+      'byMonth': {
+        '$push': '$$ROOT'
+      },
+      'count': {
+        '$sum': 1
+      },
+      'dateFirst': {
+        '$first': '$dateFrom'
+      },
+      'dateLast': {
+        '$last': '$dateFrom'
       }
-    },
-    'byMonth': {
-      '$push': '$$ROOT'
-    },
-    'count': {
-      '$sum': 1
-    },
-    'dateFirst': {
-      '$first': '$dateFrom'
-    },
-    'dateLast': {
-      '$last': '$dateFrom'
+    }
+  },
+  { $sort: { 'dateFirst': -1 } },
+  {
+    '$group': {
+      '_id': {
+        'year': {
+          '$year': '$dateFirst'
+        }
+      },
+      'byYear': {
+        '$push': '$$ROOT'
+      },
+      'count': {
+        '$sum': 1
+      },
+      'countTotal': { $sum: '$count' },
+      'dateFirst': {
+        '$first': '$dateFirst'
+      },
+      'dateLast': {
+        '$last': '$dateLast'
+      }
+    }
+  },
+  { $sort: { 'dateFirst': -1 } }
+])};
+
+TravelSchema.statics.byMonth = function (user) {return this.aggregate([
+  {
+    $match: {
+      _user: user._id
+    }
+  },
+  {
+    $group: {
+      _id: {
+        month: { $month: '$dateFrom' },
+        year: { $year: '$dateFrom' }
+      },
+      travels: { $addToSet: '$_id' },
+      myArray: { '$push': '$$ROOT' },
+      count: { $sum: 1 },
+      date: { $first: '$dateFrom' }
+    }
+  },
+  {
+    $project: {
+      date: { $dateToString: { format: '%Y-%m', date: '$date' } },
+      travels: '$travels',
+      myArray: '$myArray',
+      count: 1,
+      _id: 0
     }
   }
-},
-{ $sort : { 'dateFirst' : -1} },
-{
-  '$group': {
-    '_id': {
-      'year': {
-        '$year': '$dateFirst'
-      }
-    },
-    'byYear': {
-      '$push': '$$ROOT'
-    },
-    'count': {
-      '$sum': 1
-    },
-    'countTotal': {$sum: "$count"},
-    'dateFirst': {
-      '$first': '$dateFirst'
-    },
-    'dateLast': {
-      '$last': '$dateLast'
-    }
-  }
-},
-{ $sort : { 'dateFirst' : -1} }
-]);
-}
-
-TravelSchema.statics.byMonth = function (user, cb) {
-  return this.aggregate([
-    {
-      $match: {
-          _user: user._id
-        }
-      },
-      {
-        $group: {
-          _id: {
-            month: {$month: "$dateFrom"},
-            year: {$year: "$dateFrom"}
-          },
-          travels: {$addToSet: "$_id"},
-          myArray: {'$push': '$$ROOT'},
-          count: {$sum: 1},
-          date: {$first: "$dateFrom"}
-        }
-      },
-      {
-        $project: {
-          date: {$dateToString: {format: "%Y-%m",date: "$date"}},
-          travels: '$travels',
-          myArray: '$myArray',
-          count: 1,
-          _id: 0
-        }
-      }
-    ]
-  );
-}
+])};
 
 const Travel = mongoose.model('Travel', TravelSchema);
 

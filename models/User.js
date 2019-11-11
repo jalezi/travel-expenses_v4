@@ -6,10 +6,12 @@
  * passwordResetExpires: when passwordResetToken expires
  * google: google id when user signin or link the account
  * tokens: array of tokens
- * profile: object with user's name, gender, location, website, picture, first name (fName), last name (lName)
+ * profile: object with user's -
+ *  name, gender, location, website, picture, first name (fName), last name (lName)
  * team: user's team
  * jobPosition: user's job
- * travels: array of travel' ids - links to travels collection in DB => TravelSchema in ./models/Expense.js
+ * travels: array of travel' ids -
+ *  links to travels collection in DB => TravelSchema in ./models/Expense.js
  * homeCurrency: currency to calculate all amounts to
  * homeDistance: to which linear measure expense will be calculate to: miles(mi) or kilometers(km)
  * perMileAmount: amount to convert distance to expense
@@ -104,9 +106,9 @@ userSchema.methods.gravatar = function gravatar(size) {
 * Helper method for getting user's full name
 */
 userSchema.methods.fullName = function fullName() {
-  const result = this.profile.fName + ' ' + this.profile.lName;
+  const result = `${this.profile.fName} ${this.profile.lName}`;
   return result;
-}
+};
 
 const User = mongoose.model('User', userSchema);
 

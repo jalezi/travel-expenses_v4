@@ -1,19 +1,19 @@
 /* eslint-disable max-classes-per-file */
-class importFileError extends Error {
+class ImportFileError extends Error {
   constructor(...args) {
     super(...args);
-    Error.captureStackTrace(this, importFileError);
-    this.name = 'importFileError';
+    Error.captureStackTrace(this, ImportFileError);
+    this.name = 'ImportFileError';
   }
 }
 
-class saveToDbError extends Error {
+class SaveToDbError extends Error {
   constructor(...args) {
     super(...args);
-    Error.captureStackTrace(this, saveToDbError);
-    this.name = 'saveToDbError';
+    Error.captureStackTrace(this, SaveToDbError);
+    this.name = 'SaveToDbError';
   }
 }
 
-exports.importFileError = importFileError;
-exports.saveToDbError = saveToDbError;
+exports.ImportFileError = ImportFileError;
+exports.SaveToDbError = SaveToDbError;

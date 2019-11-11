@@ -47,7 +47,7 @@ exports.postImport = async function (req, res, next) {
   try {
     const dataArray = await postImport
       .readCheckFileAndGetData(myFile, req.body.option)
-      .catch(err => {
+      .catch((err) => {
         throw err;
       });
     if (dataArray instanceof Error) {
@@ -82,7 +82,7 @@ exports.postImport = async function (req, res, next) {
       // Create new currencies
       const newCurrencies = await postImport
         .expensesImportNewCurrenciesForSave(currenciesArray)
-        .catch(err => {
+        .catch((err) => {
           throw err;
         });
       const insertedCurrencies = await Currency.insertMany(newCurrencies.notExistingCurrenciesDB);
@@ -98,8 +98,9 @@ exports.postImport = async function (req, res, next) {
         // find currency for expense
         const currency = await combinedCurrencies
           .sort((a, b) => a.date - b.date)
-          .find(item => {
+          .find((item) => {
             const dateEqual = value.date === moment(item.date).format('YYYY-MM-DD');
+            // eslint-disable-next-line no-prototype-builtins
             const currencyMatch = item.rate.hasOwnProperty(value.currency);
             const notMileage = value.type !== 'Mileage';
             const result = dateEqual && currencyMatch && notMileage;
@@ -114,7 +115,7 @@ exports.postImport = async function (req, res, next) {
 
       // Check if imported file has no data
       if (dataArray.length === 0) {
-        throw new myErrors.importFileError('Nothing to import! File has wrong data!');
+        throw new myErrors.ImportFileError('Nothing to import! File has wrong data!');
       }
       message = await postImport.expenseImport(dataArray).catch((err) => {
         throw err;
@@ -134,7 +135,7 @@ exports.postImport = async function (req, res, next) {
     res.redirect('/travels');
   } catch (err) {
     postImport.deleteFile(myFilePath, 'File deleted after error!');
-    if (!err instanceof myErrors.importFileError) {
+    if (!err instanceof myErrors.ImportFileError) {
       message = 'Something went wrong. Check console log!';
       next(err);
     } else {

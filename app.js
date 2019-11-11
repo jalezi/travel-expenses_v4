@@ -36,7 +36,7 @@ const Expense = require('./models/Expense');
 const Rate = require('./models/Rate');
 const myErrors = require('./utils/myErrors');
 
-const { importFileError } = myErrors;
+const { ImportFileError } = myErrors;
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
@@ -348,7 +348,7 @@ if (process.env.NODE_ENV === 'development') {
   // only use in development
   app.use(errorHandler({
     log: (err, str, req, res) => {
-      if (err instanceof importFileError || err instanceof mongoose.CastError) {
+      if (err instanceof ImportFileError || err instanceof mongoose.CastError) {
         console.log(str);
       } else {
         console.log(err);
@@ -357,7 +357,7 @@ if (process.env.NODE_ENV === 'development') {
   }));
 } else {
   app.use((err, req, res, next) => {
-    if (err instanceof importFileError) {
+    if (err instanceof ImportFileError) {
       console.log(err.stack);
       res.status(400);
       res.redirect(req.path);

@@ -57,7 +57,7 @@ async function checkFileFor(condition, message) {
   const suffix = 'File should be a CSV with header in first line and not empty!';
   try {
     if (condition) {
-      return new myErrors.importFileError(`${message} - ${suffix}`);
+      return new myErrors.ImportFileError(`${message} - ${suffix}`);
     }
   } catch (err) {
     return err;
@@ -66,7 +66,7 @@ async function checkFileFor(condition, message) {
 
 // check if file is not empty, CSV or it was not selected
 const checkFile = (myFile) => new Promise((resolve) => {
-  const tripleCheck = function () {
+  const tripleCheck = () => {
     let error;
     try {
       error = checkFileFor(myFile.name === '', 'No file selected!');
@@ -140,7 +140,7 @@ async function expensesImportNewCurrenciesForSave(array) {
 }
 
 /* read file, check file and return data or error
- * if file is not validate return custom error importFileError otherwise
+ * if file is not validate return custom error ImportFileError otherwise
  * return array with expenses data
  */
 async function readCheckFileAndGetData(myFile, option) {
@@ -261,14 +261,15 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
   }
 }
 
-const updateTravels = function (uniqueTravelObjectIds, expenses) {
+// eslint-disable-next-line func-names
+const updateTravels = function (uniqueTravelObjectIds) {
   return new Promise(((resolve) => {
     try {
       const updatedTravels = _.forEach(uniqueTravelObjectIds, async (value) => {
-        const travelExpensesObjectIds = expenses.filter((item) => item.travel === value);
+        // const travelExpensesObjectIds = expenses.filter((item) => item.travel === value);
 
 
-        const aggr = Expense.aggregate([
+        Expense.aggregate([
           { $match: { travel: new ObjectId(value) } },
           { $group: { _id: '$travel', total: { $sum: '$amountConverted' } } }
         ]);
@@ -280,19 +281,20 @@ const updateTravels = function (uniqueTravelObjectIds, expenses) {
   }));
 };
 
+// eslint-disable-next-line func-names
 const expenseImport = function (dataArray) {
   return new Promise(((resolve) => {
     try {
       const expenses = Expense.insertMany(dataArray).catch(() => {
-        throw new myErrors.saveToDbError('Something went wrong during saving expenses to DB!');
+        throw new myErrors.SaveToDbError('Something went wrong during saving expenses to DB!');
       });
       if (!expenses) {
-        throw new myErrors.saveToDbError('No expenses saved!');
+        throw new myErrors.SaveToDbError('No expenses saved!');
       }
       const travelObjectIds = expenses.map((expense) => expense.travel);
       const uniqueTravelObjectIds = [...new Set(travelObjectIds)];
       const updatedTravels = updateTravels(uniqueTravelObjectIds, expenses).catch(() => {
-        throw new myErrors.saveToDbError('Something went wrong during updating travels with expenses!');
+        throw new myErrors.SaveToDbError('Something went wrong during updating travels with expenses!');
       });
 
       const message = `${expenses.length} imported. ${updatedTravels.length} travels updated!`;
@@ -315,11 +317,11 @@ async function travelImport(dataArray, userId) {
 
       // insert travels and update user with travel._id
       const travels = Travel.insertMany(dataArray).catch(() => {
-        throw new myErrors.saveToDbError('Something went wrong during saving to DB!');
+        throw new myErrors.SaveToDbError('Something went wrong during saving to DB!');
       });
 
       if (!travels) {
-        throw new myErrors.saveToDbError('No travels saved!');
+        throw new myErrors.SaveToDbError('No travels saved!');
       }
 
       const travelObjectIds = travels.map((travel) => travel._id);
@@ -330,7 +332,7 @@ async function travelImport(dataArray, userId) {
           }
         }
       }).catch(() => {
-        throw new myErrors.saveToDbError('Something went wrong during updating user with travels!');
+        throw new myErrors.SaveToDbError('Something went wrong during updating user with travels!');
       });
 
       message = `${travelObjectIds.length} travels added successfully!`;

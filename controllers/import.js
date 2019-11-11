@@ -142,7 +142,6 @@ exports.postImport = async function (req, res, next) {
         msg: message
       });
       res.redirect('/import');
-
     } else {
       message = 'Something went wrong. Check console log!';
       next(err);

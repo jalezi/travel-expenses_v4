@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-object-injection */
 /* eslint-disable prefer-destructuring */
 // const moment = require('moment');
 
@@ -19,9 +20,8 @@ function checkExpenseDate(expDate, travelDateFrom, travelDateTo) {
 function setNewExpenseDate(expDate, travelDateFrom, travelDateTo) {
   if (expDate < travelDateFrom) {
     return travelDateFrom;
-  } if (expDate > travelDateTo) {
-    return travelDateTo;
   }
+  return travelDateTo;
 }
 
 async function createNewCurrency(expenseDate, homeCurrency, invoiceCurrency) {
@@ -31,6 +31,7 @@ async function createNewCurrency(expenseDate, homeCurrency, invoiceCurrency) {
     const convertedRate = convertRateToHomeCurrencyRate(dateRates.rates,
       homeCurrency,
       invoiceCurrency);
+    // eslint-disable-next-line security/detect-object-injection
     cur[invoiceCurrency] = convertedRate;
     const curRate = new Currency({
       base: homeCurrency,
@@ -78,8 +79,9 @@ module.exports = async (travel) => new Promise((resolve, reject) => {
             date: expense.date
           },
           async (err, curRates) => {
+            // eslint-disable-next-line security/detect-object-injection
             // eslint-disable-next-line max-len
-            const filertedRatesFromDB = curRates.filter((item) => !isNaN(item.rate[invoiceCurrency]));
+            const filertedRatesFromDB = curRates.filter((item) => !isNaN(item.rate[invoiceCurrency])); // eslint-disable-line no-restricted-globals
             if (filertedRatesFromDB.length === 0) {
               // eslint-disable-next-line max-len
               const { curRate, convertedRate } = await createNewCurrency(expense.date, travelHomeCurrency, invoiceCurrency);
@@ -94,6 +96,7 @@ module.exports = async (travel) => new Promise((resolve, reject) => {
                   }
                 });
             } else {
+              // eslint-disable-next-line security/detect-object-injection
               const convertedRate = filertedRatesFromDB[0].rate[invoiceCurrency];
               const rateObjectId = filertedRatesFromDB[0]._id;
               await updateExpense(expense._id,

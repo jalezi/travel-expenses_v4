@@ -114,6 +114,8 @@ async function expensesImportNewCurrenciesForSave(array) {
   const notExistingCurrenciesDB = [];
   const existingCurrenciesDB = [];
   return new Promise((resolve, reject) => {
+    // TODO fix this
+    // eslint-disable-next-line no-restricted-syntax
     for (const value of array) {
       const currency = Currency.findOne({
         base: value.base,
@@ -231,6 +233,8 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
     });
 
     // delete expenses that not belong to any existing travel
+    // TODO fix this
+    // eslint-disable-next-line no-restricted-syntax
     for (const value of noTravelKeys.sort((a, b) => b - a)) {
       dataArray.splice(value, 1);
     }
@@ -244,6 +248,7 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
     }, []);
 
     // get unique currencies
+    // eslint-disable-next-line max-len
     currenciesArray = [...new Map(currenciesArray.map((o) => [JSON.stringify(o), o])).values()].sort((a, b) =>
       // Turn your strings into dates, and then subtract them
       // to get a value that is either negative, positive, or zero.
@@ -305,6 +310,18 @@ const expenseImport = function (dataArray) {
   }));
 };
 
+const hello = async (dataArray) => {
+  await Travel.insertMany(dataArray).catch((err) => {
+    console.dir(Object.keys(err.errors));
+    switch (err.name ) {
+      case 'ValidationError':
+        throw new myErrors.SaveToDbError(`${Object.keys(err.errors).toString()} in wrong format! Check input file`);
+      default:
+        throw new myErrors.SaveToDbError(`${err.message}`);
+    }
+  });
+};
+
 async function travelImport(dataArray, userId) {
   let message = '';
   return new Promise((resolve) => {
@@ -316,27 +333,33 @@ async function travelImport(dataArray, userId) {
       });
 
       // insert travels and update user with travel._id
-      const travels = Travel.insertMany(dataArray).catch(() => {
-        throw new myErrors.SaveToDbError('Something went wrong during saving to DB!');
-      });
-
-      if (!travels) {
-        throw new myErrors.SaveToDbError('No travels saved!');
-      }
-
-      const travelObjectIds = travels.map((travel) => travel._id);
-      User.findByIdAndUpdate(userId, {
-        $addToSet: {
-          travels: {
-            $each: travelObjectIds
-          }
+      hello(dataArray).then((travels) => {
+        console.log('hello', travels);
+        if (travels instanceof Error) {
+          throw travels;
         }
-      }).catch(() => {
-        throw new myErrors.SaveToDbError('Something went wrong during updating user with travels!');
-      });
+        if (!travels) {
+          throw new myErrors.SaveToDbError('No travels saved!');
+        }
+        const travelObjectIds = travels.map((travel) => travel._id);
+        User.findByIdAndUpdate(userId, {
+          $addToSet: {
+            travels: {
+              $each: travelObjectIds
+            }
+          }
+        }).catch(() => {
+          throw new myErrors.SaveToDbError('Something went wrong during updating user with travels!');
+        });
 
-      message = `${travelObjectIds.length} travels added successfully!`;
-      resolve(message);
+        message = `${travelObjectIds.length} travels added successfully!`;
+        resolve(message);
+      }).catch((err) => {
+        resolve({
+          error: err,
+          msg: 'Something went wrong during travel import!'
+        });
+      });
     } catch (err) {
       resolve({ error: err, msg: 'Something went wrong during travel import!' });
     }

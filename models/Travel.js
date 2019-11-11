@@ -80,107 +80,111 @@ TravelSchema.methods.updateTotal = () => {
   return this.save();
 };
 
-TravelSchema.statics.byYear_byMonth = function (user) {return this.aggregate([
-  {
-    '$match': {
-      '_user': user._id
-    }
-  }, {
-    '$sort': {
-      'dateFrom': -1
-    }
-  }, {
-    '$lookup': {
-      from: 'expenses',
-      localField: 'expenses',
-      foreignField: '_id',
-      as: 'expenses'
-    }
-  }, {
-    '$lookup': {
-      from: 'currencies',
-      localField: 'expenses.curRate',
-      foreignField: '_id',
-      as: 'curRates'
-    }
-  }, {
-    '$group': {
-      '_id': {
-        'month': {
-          '$month': '$dateFrom'
+TravelSchema.statics.byYear_byMonth = function (user) {
+  return this.aggregate([
+    {
+      '$match': {
+        '_user': user._id
+      }
+    }, {
+      '$sort': {
+        'dateFrom': -1
+      }
+    }, {
+      '$lookup': {
+        from: 'expenses',
+        localField: 'expenses',
+        foreignField: '_id',
+        as: 'expenses'
+      }
+    }, {
+      '$lookup': {
+        from: 'currencies',
+        localField: 'expenses.curRate',
+        foreignField: '_id',
+        as: 'curRates'
+      }
+    }, {
+      '$group': {
+        '_id': {
+          'month': {
+            '$month': '$dateFrom'
+          },
+          'year': {
+            '$year': '$dateFrom'
+          }
         },
-        'year': {
-          '$year': '$dateFrom'
+        'byMonth': {
+          '$push': '$$ROOT'
+        },
+        'count': {
+          '$sum': 1
+        },
+        'dateFirst': {
+          '$first': '$dateFrom'
+        },
+        'dateLast': {
+          '$last': '$dateFrom'
         }
-      },
-      'byMonth': {
-        '$push': '$$ROOT'
-      },
-      'count': {
-        '$sum': 1
-      },
-      'dateFirst': {
-        '$first': '$dateFrom'
-      },
-      'dateLast': {
-        '$last': '$dateFrom'
       }
-    }
-  },
-  { $sort: { 'dateFirst': -1 } },
-  {
-    '$group': {
-      '_id': {
-        'year': {
-          '$year': '$dateFirst'
+    },
+    { $sort: { 'dateFirst': -1 } },
+    {
+      '$group': {
+        '_id': {
+          'year': {
+            '$year': '$dateFirst'
+          }
+        },
+        'byYear': {
+          '$push': '$$ROOT'
+        },
+        'count': {
+          '$sum': 1
+        },
+        'countTotal': { $sum: '$count' },
+        'dateFirst': {
+          '$first': '$dateFirst'
+        },
+        'dateLast': {
+          '$last': '$dateLast'
         }
-      },
-      'byYear': {
-        '$push': '$$ROOT'
-      },
-      'count': {
-        '$sum': 1
-      },
-      'countTotal': { $sum: '$count' },
-      'dateFirst': {
-        '$first': '$dateFirst'
-      },
-      'dateLast': {
-        '$last': '$dateLast'
       }
-    }
-  },
-  { $sort: { 'dateFirst': -1 } }
-])};
+    },
+    { $sort: { 'dateFirst': -1 } }
+  ]);
+};
 
-TravelSchema.statics.byMonth = function (user) {return this.aggregate([
-  {
-    $match: {
-      _user: user._id
+TravelSchema.statics.byMonth = function (user) {
+  return this.aggregate([
+    {
+      $match: {
+        _user: user._id
+      }
+    },
+    {
+      $group: {
+        _id: {
+          month: { $month: '$dateFrom' },
+          year: { $year: '$dateFrom' }
+        },
+        travels: { $addToSet: '$_id' },
+        myArray: { '$push': '$$ROOT' },
+        count: { $sum: 1 },
+        date: { $first: '$dateFrom' }
+      }
+    },
+    {
+      $project: {
+        date: { $dateToString: { format: '%Y-%m', date: '$date' } },
+        travels: '$travels',
+        myArray: '$myArray',
+        count: 1,
+        _id: 0
+      }
     }
-  },
-  {
-    $group: {
-      _id: {
-        month: { $month: '$dateFrom' },
-        year: { $year: '$dateFrom' }
-      },
-      travels: { $addToSet: '$_id' },
-      myArray: { '$push': '$$ROOT' },
-      count: { $sum: 1 },
-      date: { $first: '$dateFrom' }
-    }
-  },
-  {
-    $project: {
-      date: { $dateToString: { format: '%Y-%m', date: '$date' } },
-      travels: '$travels',
-      myArray: '$myArray',
-      count: 1,
-      _id: 0
-    }
-  }
-])};
+  ]);
+};
 
 const Travel = mongoose.model('Travel', TravelSchema);
 

@@ -135,7 +135,7 @@ exports.postImport = async function (req, res, next) {
     res.redirect('/travels');
   } catch (err) {
     postImport.deleteFile(myFilePath, 'File deleted after error!');
-    if (!err instanceof myErrors.ImportFileError) {
+    if (err instanceof !myErrors.ImportFileError) {
       message = 'Something went wrong. Check console log!';
       next(err);
     } else {

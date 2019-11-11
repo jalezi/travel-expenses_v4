@@ -69,7 +69,8 @@ con.js
 .nyc_output
 MongoDB.txt
 /text_files
-
+.eslintrc
+.eslintrc.json
 
 
 

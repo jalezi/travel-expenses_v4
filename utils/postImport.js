@@ -313,7 +313,7 @@ const expenseImport = function (dataArray) {
 const hello = async (dataArray) => {
   await Travel.insertMany(dataArray).catch((err) => {
     console.dir(Object.keys(err.errors));
-    switch (err.name ) {
+    switch (err.name) {
       case 'ValidationError':
         throw new myErrors.SaveToDbError(`${Object.keys(err.errors).toString()} in wrong format! Check input file`);
       default:

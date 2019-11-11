@@ -85,10 +85,8 @@ expressHbs.registerHelper('setUnit', (homeDistance) => {
 expressHbs.registerHelper('setUnit2', (homeDistance) => {
   if (homeDistance !== 'mi') {
     return 'mile';
-  } if (homeDistance !== 'km') {
-    return 'km';
   }
-  return '';
+  return 'km';
 });
 
 expressHbs.registerHelper('toNumber', (valueAsString) => parseFloat(valueAsString));

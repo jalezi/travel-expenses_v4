@@ -12,7 +12,6 @@ const Currency = require('../models/Currency');
 
 const { ObjectId } = mongoose.Types;
 
-const { expenseTypes } = require('../lib/globals');
 const constants = require('../lib/constants');
 const myErrors = require('../utils/myErrors');
 
@@ -27,12 +26,12 @@ async function readAndParseFile(filePath, enc = 'utf8') {
       dynamicTyping: false,
       preview: 0,
       encoding: 'utf8',
-      complete: (results) => {},
+      complete: () => {},
       skipEmptyLines: true
     });
     return parsedData;
   } catch (err) {
-    throw err;
+    return err;
   }
 }
 
@@ -53,7 +52,7 @@ function deleteFile(filePath, message = '') {
   }
 }
 
-// return Error with message on condtion is true
+// return Error with message on condition is true
 async function checkFileFor(condition, message) {
   const suffix = 'File should be a CSV with header in first line and not empty!';
   try {
@@ -61,13 +60,14 @@ async function checkFileFor(condition, message) {
       return new myErrors.importFileError(`${message} - ${suffix}`);
     }
   } catch (err) {
-    throw err;
+    return err;
   }
 }
 
 // check if file is not empty, CSV or it was not selected
-const checkFile = (myFile) => new Promise(async (resolve, reject) => {
-  const tripleCheck = async (myFIle) => {
+const checkFile = (myFile) => new Promise((resolve) => {
+  const tripleCheck = async function () {
+    let error;
     try {
       error = await checkFileFor(myFile.name === '', 'No file selected!');
       if (error) { return error; }
@@ -99,8 +99,8 @@ function createCurrency(value) {
   return currency;
 }
 
-// return currency if currency does't exist in DB
-const getOnlyNewCurrency = (currency, value) => new Promise((resolve, reject) => {
+// return currency if currency doesn't exist in DB
+const getOnlyNewCurrency = (currency, value) => new Promise((resolve) => {
   if (!currency) {
     return resolve(value);
   }
@@ -114,12 +114,12 @@ async function expensesImportNewCurrenciesForSave(array) {
   const notExistingCurrenciesDB = [];
   const existingCurrenciesDB = [];
   return await new Promise(async (resolve, reject) => {
-    for (value of array) {
+    for (let value of array) {
       const currency = await Currency.findOne({
         base: value.base,
         date: value.date,
         rate: value.rate
-      }, (err, doc) => {
+      }, (err) => {
         if (err) {
           console.log('Error: ', err.message);
           throw err;
@@ -135,7 +135,7 @@ async function expensesImportNewCurrenciesForSave(array) {
         reject(err);
       });
     }
-    return await resolve({ notExistingCurrenciesDB, existingCurrenciesDB });
+    return resolve({ notExistingCurrenciesDB, existingCurrenciesDB });
   });
 }
 
@@ -166,9 +166,8 @@ async function readCheckFileAndGetData(myFile, option) {
     // no error - file is CSV & has some data
     const parsedData = await readAndParseFile(myFilePath);
     const dataArray = parsedData.data;
-    const expensesCountBefore = dataArray.length;
 
-    // check if data has mathcing header
+    // check if data has matching header
     const parsedHeaderArray = parsedData.meta.fields;
     error = await checkFileFor(!_.isEqual(headerToBe, parsedHeaderArray), `Header should be: ${headerToBe}`).catch((err) => {
       throw err;
@@ -187,7 +186,6 @@ async function readCheckFileAndGetData(myFile, option) {
  */
 async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
   let message = '';
-  const error = null;
 
   try {
     const expensesCountBefore = dataArray.length;
@@ -264,9 +262,9 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
 }
 
 const updateTravels = async function (uniqueTravelObjectIds, expenses) {
-  return new Promise((async (resolve, reject) => {
+  return new Promise((async (resolve) => {
     try {
-      const updatedTravels = await _.forEach(uniqueTravelObjectIds, async (value, key, object) => {
+      const updatedTravels = await _.forEach(uniqueTravelObjectIds, async (value) => {
         const travelExpensesObjectIds = expenses.filter((item) => item.travel === value);
 
 
@@ -275,14 +273,6 @@ const updateTravels = async function (uniqueTravelObjectIds, expenses) {
           { $group: { _id: '$travel', total: { $sum: '$amountConverted' } } }
         ]);
 
-        const travel = await Travel.findByIdAndUpdate(value, {
-          $addToSet: {
-            expenses: {
-              $each: travelExpensesObjectIds
-            }
-          },
-          $set: { total: aggr[0].total }
-        }, { new: true });
       });
       resolve(updatedTravels);
     } catch (err) {
@@ -292,9 +282,9 @@ const updateTravels = async function (uniqueTravelObjectIds, expenses) {
 };
 
 const expenseImport = async function (dataArray) {
-  return new Promise((async (resolve, reject) => {
+  return new Promise((async (resolve) => {
     try {
-      const expenses = await Expense.insertMany(dataArray).catch((err) => {
+      const expenses = await Expense.insertMany(dataArray).catch(() => {
         throw new myErrors.saveToDbError('Something went wrong during saving expenses to DB!');
       });
       if (!expenses) {
@@ -302,7 +292,7 @@ const expenseImport = async function (dataArray) {
       }
       const travelObjectIds = expenses.map((expense) => expense.travel);
       const uniqueTravelObjectIds = [...new Set(travelObjectIds)];
-      const updatedTravels = await updateTravels(uniqueTravelObjectIds, expenses).catch((err) => {
+      const updatedTravels = await updateTravels(uniqueTravelObjectIds, expenses).catch(() => {
         throw new myErrors.saveToDbError('Something went wrong during updating travels with expenses!');
       });
 
@@ -316,16 +306,16 @@ const expenseImport = async function (dataArray) {
 
 async function travelImport(dataArray, userId) {
   let message = '';
-  return new Promise(async (resolve, reject) => {
+  return new Promise(async (resolve) => {
     try {
       // add user._id to travel
-      await _.forEach(dataArray, (value, key) => {
+      await _.forEach(dataArray, (value) => {
         value._user = userId;
         value.total = Number(0).toFixed(2);
       });
 
       // insert travels and update user with travel._id
-      const travels = await Travel.insertMany(dataArray).catch((err) => {
+      const travels = await Travel.insertMany(dataArray).catch(() => {
         throw new myErrors.saveToDbError('Something went wrong during saving to DB!');
       });
 
@@ -340,7 +330,7 @@ async function travelImport(dataArray, userId) {
             $each: travelObjectIds
           }
         }
-      }).catch((err) => {
+      }).catch(() => {
         throw new myErrors.saveToDbError('Something went wrong during updating user with travels!');
       });
 

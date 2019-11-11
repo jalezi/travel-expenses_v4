@@ -1,20 +1,19 @@
-class imprortFileError extends Error {
+/* eslint-disable max-classes-per-file */
+class importFileError extends Error {
   constructor(...args) {
-        super(...args);
-        Error.captureStackTrace(this, imprortFileError);
-        this.name = 'imprortFileError';
-
-    }
+    super(...args);
+    Error.captureStackTrace(this, importFileError);
+    this.name = 'importFileError';
+  }
 }
 
 class saveToDbError extends Error {
   constructor(...args) {
-        super(...args);
-        Error.captureStackTrace(this, saveToDbError);
-        this.name = 'saveToDbError';
-
-    }
+    super(...args);
+    Error.captureStackTrace(this, saveToDbError);
+    this.name = 'saveToDbError';
+  }
 }
 
-exports.imprortFileError = imprortFileError;
+exports.importFileError = importFileError;
 exports.saveToDbError = saveToDbError;

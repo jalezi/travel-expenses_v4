@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // jshint esversion: 6
 /**
  * Module dependencies.
@@ -23,29 +24,30 @@ const multer = require('multer');
 
 const formidable = require('express-formidable');
 const expressHbs = require('express-hbs');
-const methodOverride = require('method-override')
+const methodOverride = require('method-override');
 
 require('./utils/hbsHelpers/hbsHelpers');
 require('./utils/hbsHelpers/yearsAccordion');
+require('full-icu');
 const getRates = require('./utils/getRates');
 
 const Travel = require('./models/Travel');
 const Expense = require('./models/Expense');
 const Rate = require('./models/Rate');
 const myErrors = require('./utils/myErrors');
-const imprortFileError = myErrors.imprortFileError;
+
+const { importFileError } = myErrors;
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
-const fullIcu = require('full-icu');
 
 /**
   * Added by me
   * Catch uncaught errors
   */
 process.on('uncaughtException', (err) => {
-    console.error('There was an uncaught error', err)
-    process.exit(1) //mandatory (as per the Node docs)
+  console.error('There was an uncaught error', err);
+  process.exit(1); // mandatory (as per the Node docs)
 });
 
 
@@ -96,9 +98,9 @@ app.set('host', process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0');
 app.set('port', process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080);
 app.set('views', path.join(__dirname, 'views'));
 
-app.engine( 'hbs', expressHbs.express4( {
+app.engine('hbs', expressHbs.express4({
   layoutsDir: path.join(__dirname, './views/layouts'),
-  partialsDir:[path.join(__dirname, './views/partials'), path.join(__dirname, './views/account'), path.join(__dirname, './views/travels')],
+  partialsDir: [path.join(__dirname, './views/partials'), path.join(__dirname, './views/account'), path.join(__dirname, './views/travels')],
   defaultView: 'layout',
   extname: '.hbs'
 }));
@@ -113,7 +115,7 @@ app.use(sass({
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(expressValidator());
+app.use(expressValidator()); // works with express-validator@5.3.1
 app.use(session({
   resave: true,
   saveUninitialized: true,
@@ -132,17 +134,17 @@ app.use(flash());
    * Added by my
    * express-formidable
    */
- app.use('/import', formidable({
-   encoding: 'utf-8',
-   uploadDir: path.join(__dirname,'/uploads'),
-   keepExtensions: true
- }));
- app.use('/import', (req, res, next) => {
-   if (Object.keys(req.body).length == 0 && req.fields) {
-     req.body = req.fields;
-   }
-   next();
- });
+app.use('/import', formidable({
+  encoding: 'utf-8',
+  uploadDir: path.join(__dirname, '/uploads'),
+  keepExtensions: true
+}));
+app.use('/import', (req, res, next) => {
+  if (Object.keys(req.body).length === 0 && req.fields) {
+    req.body = req.fields;
+  }
+  next();
+});
 
 app.use((req, res, next) => {
   if (req.path === '/api/upload') {
@@ -185,11 +187,11 @@ app.use('/webfonts', express.static(path.join(__dirname, 'node_modules/@fortawes
   * Must be placed after: app.use(bodyParser.urlencoded())
   */
 
-app.use(methodOverride(function (req, res) {
+app.use(methodOverride((req, res) => {
   if (req.body && typeof req.body === 'object' && '_method' in req.body) {
     // look in urlencoded POST bodies and delete it
-    const method = req.body._method
-    delete req.body._method
+    const method = req.body._method;
+    delete req.body._method;
     return method;
   }
 }));
@@ -200,11 +202,11 @@ app.use(methodOverride(function (req, res) {
   */
 app.use('/import', async (req, res, next) => {
   try {
-    const travels = await Travel.find({_user: req.user._id, _id:{ $in: req.user.travels}}).populate({
+    const travels = await Travel.find({ _user: req.user._id, _id: { $in: req.user.travels } })
+      .populate({
         path: 'expenses',
-        populate: {
-          path: 'curRate'}
-    }).sort({dateFrom: 1});
+        populate: { path: 'curRate' }
+      }).sort({ dateFrom: 1 });
     res.locals.travels = travels;
     next();
   } catch (err) {
@@ -217,13 +219,13 @@ app.use('/import', async (req, res, next) => {
  * Save to res.locals.expense current expense
  */
 app.use('/travels/:id/expenses/:id', async (req, res, next) => {
-  if ((!res.locals.expense || res.locals.expense._id != req.params.id) && req.params.id != 'new') {
+  if ((!res.locals.expense || res.locals.expense._id !== req.params.id) && req.params.id !== 'new') {
     try {
       const baseUrl = req.baseUrl.split('/');
       const travelId = baseUrl[2];
       const travel = await Travel.findById(travelId).populate({
         path: 'expenses',
-        populate: {path: 'curRate'}
+        populate: { path: 'curRate' }
       });
       const expense = await Expense.findById(req.params.id).populate({
         path: 'curRate'
@@ -239,7 +241,7 @@ app.use('/travels/:id/expenses/:id', async (req, res, next) => {
           if (err) {
             throw new Error(err);
           }
-        })
+        });
       }
       res.locals.expense = expense;
       res.locals.rates = rates;
@@ -250,18 +252,18 @@ app.use('/travels/:id/expenses/:id', async (req, res, next) => {
   } else {
     next();
   }
-})
+});
 
 /**
   * Added by me
   * Save to res.locals.travels current travel
   */
 app.use('/travels/:id', async (req, res, next) => {
-  if ((!res.locals.travel || res.locals.travel._id != req.params.id) && req.params.id != 'new' && req.params.id != 'total_pdf') {
+  if ((!res.locals.travel || res.locals.travel._id !== req.params.id) && req.params.id !== 'new' && req.params.id !== 'total_pdf') {
     try {
       const travel = await Travel.findById(req.params.id).populate({
         path: 'expenses',
-        populate: {path: 'curRate'}
+        populate: { path: 'curRate' }
       });
       let rates = await Rate.findRatesOnDate(travel, (err, result) => {
         if (err) {
@@ -274,7 +276,7 @@ app.use('/travels/:id', async (req, res, next) => {
           if (err) {
             throw new Error(err);
           }
-        })
+        });
       }
       res.locals.travel = travel;
       res.locals.rates = rates;
@@ -344,16 +346,18 @@ app.get('/auth/google/callback', passport.authenticate('google', { failureRedire
  */
 if (process.env.NODE_ENV === 'development') {
   // only use in development
-  app.use(errorHandler({log: (err, str, req, res) => {
-    if (err instanceof imprortFileError || err instanceof mongoose.CastError) {
-      console.log(str);
-    } else {
-      console.log(err);
+  app.use(errorHandler({
+    log: (err, str, req, res) => {
+      if (err instanceof importFileError || err instanceof mongoose.CastError) {
+        console.log(str);
+      } else {
+        console.log(err);
+      }
     }
-  }}));
+  }));
 } else {
   app.use((err, req, res, next) => {
-    if (err instanceof imprortFileError) {
+    if (err instanceof importFileError) {
       console.log(err.stack);
       res.status(400);
       res.redirect(req.path);

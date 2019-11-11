@@ -97,7 +97,7 @@ exports.postImport = async function(req, res, next) {
 
       // Check if imported file has no data
       if (dataArray.length === 0) {
-        throw new myErrors.imprortFileError('Nothing to import! File has wrong data!');
+        throw new myErrors.importFileError('Nothing to import! File has wrong data!');
       }
       message = await postImport.expenseImport(dataArray).catch((err) => {
         throw err;
@@ -117,7 +117,7 @@ exports.postImport = async function(req, res, next) {
     res.redirect('/travels')
   } catch (err) {
     postImport.deleteFile(myFilePath, 'File deleted after error!');
-    if (!err instanceof myErrors.imprortFileError) {
+    if (!err instanceof myErrors.importFileError) {
       message = 'Something went wrong. Check console log!';
       next(err);
     } else {

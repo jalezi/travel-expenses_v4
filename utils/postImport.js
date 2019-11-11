@@ -1,17 +1,18 @@
 const mongoose = require('mongoose');
 const _ = require('lodash');
-const moment = require('moment');
+// const moment = require('moment');
 const fs = require('fs');
 const Papa = require('papaparse');
 
 const User = require('../models/User');
 const Travel = require('../models/Travel');
 const Expense = require('../models/Expense');
-const Rate = require('../models/Rate');
+// const Rate = require('../models/Rate');
 const Currency = require('../models/Currency');
-const ObjectId = mongoose.Types.ObjectId;
 
-const {expenseTypes} = require('../lib/globals');
+const { ObjectId } = mongoose.Types;
+
+const { expenseTypes } = require('../lib/globals');
 const constants = require('../lib/constants');
 const myErrors = require('../utils/myErrors');
 
@@ -25,7 +26,7 @@ async function readAndParseFile(filePath, enc = 'utf8') {
       header: true,
       dynamicTyping: false,
       preview: 0,
-      encoding: "utf8",
+      encoding: 'utf8',
       complete: (results) => {},
       skipEmptyLines: true
     });
@@ -56,8 +57,8 @@ function deleteFile(filePath, message = '') {
 async function checkFileFor(condition, message) {
   const suffix = 'File should be a CSV with header in first line and not empty!';
   try {
-      if (condition) {
-        return new myErrors.imprortFileError(`${message} - ${suffix}`);
+    if (condition) {
+      return new myErrors.importFileError(`${message} - ${suffix}`);
     }
   } catch (err) {
     throw err;
@@ -65,61 +66,56 @@ async function checkFileFor(condition, message) {
 }
 
 // check if file is not empty, CSV or it was not selected
-const checkFile = (myFile) => {
-  return new Promise(async (resolve, reject) => {
-    let tripleCheck = async (myFIle) => {
-      try {
-        error = await checkFileFor(myFile.name === '', 'No file selected!');
-        if (error) {return error}
-        error = await checkFileFor(myFile.size === 0, 'Empty file!');
-        if (error) {return error}
-        error = await checkFileFor(myFile.path.split('.').pop() != 'csv', 'Not a CSV file!');
-        if (error) {return error}
-        return;
-      } catch (err) {
-          resolve(err);
-        }
-    }
+const checkFile = (myFile) => new Promise(async (resolve, reject) => {
+  const tripleCheck = async (myFIle) => {
     try {
-      let result = await tripleCheck();
-      resolve(result);
+      error = await checkFileFor(myFile.name === '', 'No file selected!');
+      if (error) { return error; }
+      error = await checkFileFor(myFile.size === 0, 'Empty file!');
+      if (error) { return error; }
+      error = await checkFileFor(myFile.path.split('.').pop() != 'csv', 'Not a CSV file!');
+      if (error) { return error; }
+      return;
     } catch (err) {
-      resolve(err)
+      resolve(err);
     }
-  });
-}
+  };
+  try {
+    const result = await tripleCheck();
+    resolve(result);
+  } catch (err) {
+    resolve(err);
+  }
+});
 
 // create currency Object
 function createCurrency(value) {
-  let currency = {};
-  let curRate = {};
-  currency['base'] = value.base;
-  currency['date'] = new Date(value.date);
+  const currency = {};
+  const curRate = {};
+  currency.base = value.base;
+  currency.date = new Date(value.date);
   curRate[value.currency] = Number(value.rate);
-  currency['rate'] = curRate;
+  currency.rate = curRate;
   return currency;
 }
 
 // return currency if currency does't exist in DB
-const getOnlyNewCurrency = (currency, value) => {
-  return new Promise((resolve, reject) => {
-    if (!currency) {
-      return resolve(value);
-    } else {
-      return resolve();
-    }
-  });
-};
+const getOnlyNewCurrency = (currency, value) => new Promise((resolve, reject) => {
+  if (!currency) {
+    return resolve(value);
+  }
+  return resolve();
+});
 
 /* Prepare new currencies which will save later.
  * Check if currencies are only in DB and return array with new currencies
  */
 async function expensesImportNewCurrenciesForSave(array) {
-  let notExistingCurrenciesDB = [];
-  let existingCurrenciesDB = []
+  const notExistingCurrenciesDB = [];
+  const existingCurrenciesDB = [];
   return await new Promise(async (resolve, reject) => {
     for (value of array) {
-      let currency = await Currency.findOne({
+      const currency = await Currency.findOne({
         base: value.base,
         date: value.date,
         rate: value.rate
@@ -136,15 +132,15 @@ async function expensesImportNewCurrenciesForSave(array) {
           existingCurrenciesDB.push(currency);
         }
       }).catch((err) => {
-        reject (err);
+        reject(err);
       });
     }
-    return await resolve({notExistingCurrenciesDB, existingCurrenciesDB});
+    return await resolve({ notExistingCurrenciesDB, existingCurrenciesDB });
   });
 }
 
 /* read file, check file and return data or error
- * if file is not validate return custom error imprortFileError otherwise
+ * if file is not validate return custom error importFileError otherwise
  * return array with expenses data
  */
 async function readCheckFileAndGetData(myFile, option) {
@@ -165,11 +161,11 @@ async function readCheckFileAndGetData(myFile, option) {
     error = await checkFile(myFile).catch((err) => {
       throw err;
     });
-    if (error) {throw error}
+    if (error) { throw error; }
 
     // no error - file is CSV & has some data
     const parsedData = await readAndParseFile(myFilePath);
-    let dataArray = parsedData.data;
+    const dataArray = parsedData.data;
     const expensesCountBefore = dataArray.length;
 
     // check if data has mathcing header
@@ -177,11 +173,12 @@ async function readCheckFileAndGetData(myFile, option) {
     error = await checkFileFor(!_.isEqual(headerToBe, parsedHeaderArray), `Header should be: ${headerToBe}`).catch((err) => {
       throw err;
     });
-    if (error) {throw error}
+    if (error) { throw error; }
     return dataArray;
-} catch (err) {
-  return err;
-}}
+  } catch (err) {
+    return err;
+  }
+}
 
 /* Get and prepare currencies from imported file
  * remove rate & base from passed array @param dataArray
@@ -190,13 +187,13 @@ async function readCheckFileAndGetData(myFile, option) {
  */
 async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
   let message = '';
-  let error = null;
+  const error = null;
 
   try {
     const expensesCountBefore = dataArray.length;
 
     // findRates and travel in expenses CSV
-    let noTravelKeys = [];
+    const noTravelKeys = [];
     await _.forEach(dataArray, async (value, key, object) => {
       value._user = userId;
       value.amount = Number(value.amount).toFixed(2);
@@ -219,7 +216,7 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
         const dateRange = item.dateFrom <= date && item.dateTo >= date;
         const sameName = item.description == value.travelName;
 
-        let result = dateRange && sameName;
+        const result = dateRange && sameName;
         if (!result) {
           return false;
         }
@@ -228,15 +225,14 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
 
       // if no travel for expense delete expense
       if (!travel) {
-        noTravelKeys.push(key)
-        return
+        noTravelKeys.push(key);
       } else {
         object[key].travel = travel._id;
       }
     });
 
     // delete expenses that not belong to any existing travel
-    for (value of noTravelKeys.sort(function(a, b){return b-a})) {
+    for (value of noTravelKeys.sort((a, b) => b-a)) {
       dataArray.splice(value, 1);
     }
 
@@ -249,78 +245,74 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
     }, []);
 
     // get unique currencies
-    currenciesArray = [...new Map(currenciesArray.map(o => [JSON.stringify(o), o])).values()].sort(function(a, b) {
+    currenciesArray = [...new Map(currenciesArray.map((o) => [JSON.stringify(o), o])).values()].sort((a, b) => 
       // Turn your strings into dates, and then subtract them
       // to get a value that is either negative, positive, or zero.
-      return a.date - b.date;
-    });
+      a.date - b.date
+    );
 
     const expensesCountAfter = dataArray.length;
     const invalidExpensesCount = expensesCountBefore - expensesCountAfter;
     const validExpensesCount = expensesCountBefore - invalidExpensesCount;
     message = `INVALID EXPENSES: ${invalidExpensesCount}. VALID EXPENSES: ${validExpensesCount}`;
 
-    return ({currenciesArray, message});
+    return ({ currenciesArray, message });
   } catch (err) {
     message = 'Something went wrong during expenses import! Check console log!';
-    return ({err, message});
+    return ({ err, message });
   }
 }
 
 const updateTravels = async function (uniqueTravelObjectIds, expenses) {
-  return new Promise(async function (resolve, reject)  {
-
+  return new Promise((async (resolve, reject) => {
     try {
-      let updatedTravels = await _.forEach(uniqueTravelObjectIds, async (value, key, object) => {
-        let travelExpensesObjectIds = expenses.filter((item) => {
-          return item.travel === value;
-        });
+      const updatedTravels = await _.forEach(uniqueTravelObjectIds, async (value, key, object) => {
+        const travelExpensesObjectIds = expenses.filter((item) => item.travel === value);
 
 
-        let aggr = await Expense.aggregate([
-        {'$match': {'travel': new ObjectId(value)}},
-        {'$group': {'_id': '$travel', 'total': {'$sum': '$amountConverted'}}}
-  ]);
+        const aggr = await Expense.aggregate([
+          { $match: { travel: new ObjectId(value) } },
+          { $group: { _id: '$travel', total: { $sum: '$amountConverted' } } }
+        ]);
 
-        let travel = await Travel.findByIdAndUpdate(value, {
+        const travel = await Travel.findByIdAndUpdate(value, {
           $addToSet: {
-            'expenses': {
+            expenses: {
               $each: travelExpensesObjectIds
             }
           },
-          $set: {total: aggr[0].total}
-        }, {new: true});
+          $set: { total: aggr[0].total }
+        }, { new: true });
       });
       resolve(updatedTravels);
     } catch (err) {
-        resolve (err);
-      }
-  });
-}
+      resolve(err);
+    }
+  }));
+};
 
 const expenseImport = async function (dataArray) {
-  return new Promise(async function (resolve, reject) {
-
+  return new Promise((async (resolve, reject) => {
     try {
-      let expenses = await Expense.insertMany(dataArray).catch((err) => {
+      const expenses = await Expense.insertMany(dataArray).catch((err) => {
         throw new myErrors.saveToDbError('Something went wrong during saving expenses to DB!');
       });
       if (!expenses) {
         throw new myErrors.saveToDbError('No expenses saved!');
       }
-      let travelObjectIds = expenses.map(expense => expense.travel);
-      let uniqueTravelObjectIds = [...new Set(travelObjectIds)];
+      const travelObjectIds = expenses.map((expense) => expense.travel);
+      const uniqueTravelObjectIds = [...new Set(travelObjectIds)];
       const updatedTravels = await updateTravels(uniqueTravelObjectIds, expenses).catch((err) => {
         throw new myErrors.saveToDbError('Something went wrong during updating travels with expenses!');
       });
 
-      let message = `${expenses.length} imported. ${updatedTravels.length} travels updated!`;
+      const message = `${expenses.length} imported. ${updatedTravels.length} travels updated!`;
       resolve(message);
     } catch (err) {
-      resolve ({error: err, msg: 'Something went wrong during expense import!'});
+      resolve({ error: err, msg: 'Something went wrong during expense import!' });
     }
-  });
-}
+  }));
+};
 
 async function travelImport(dataArray, userId) {
   let message = '';
@@ -341,10 +333,10 @@ async function travelImport(dataArray, userId) {
         throw new myErrors.saveToDbError('No travels saved!');
       }
 
-      const travelObjectIds = travels.map(travel => travel._id);
+      const travelObjectIds = travels.map((travel) => travel._id);
       await User.findByIdAndUpdate(userId, {
         $addToSet: {
-          'travels': {
+          travels: {
             $each: travelObjectIds
           }
         }
@@ -352,14 +344,12 @@ async function travelImport(dataArray, userId) {
         throw new myErrors.saveToDbError('Something went wrong during updating user with travels!');
       });
 
-      message = `${travelObjectIds.length} travels added successfully!`
-      resolve (message);
-
+      message = `${travelObjectIds.length} travels added successfully!`;
+      resolve(message);
     } catch (err) {
-      resolve ({error: err, msg: 'Something went wrong during travel import!'});
+      resolve({ error: err, msg: 'Something went wrong during travel import!' });
     }
-  })
-
+  });
 }
 
 module.exports = {
@@ -369,4 +359,4 @@ module.exports = {
   expensesImportNewCurrenciesForSave,
   travelImport,
   expenseImport
-}
+};

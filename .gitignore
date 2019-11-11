@@ -65,8 +65,11 @@ travels.json
 /out
 audit-resolv.json
 con.js
-*.txt
 .eslintrc
 .nyc_output
+MongoDB.txt
+/text_files
+
+
 
 

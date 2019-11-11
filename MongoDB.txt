@@ -1,0 +1,2 @@
+﻿MONGODB_URI=mongodb://localhost:27017/test_travel_expenses
+MONGODB_URI=mongodb://192.168.1.109:32800/test_travel_expenses

@@ -1,0 +1,46 @@
+<div src="/js/lib/newTravel.js" class="collapse" id="updateTravelForm">
+  <form class="" method="POST" action="/travels/{{travel._id}}">
+    <input type="hidden" name="_csrf" value={{_csrf}} />
+    <div class="form-group row">
+      <label class="col-md-3 col-form-label font-weight-bold text-right" for="description">Description</label>
+      <div class="col-md-7"><input class="form-control" id="description" type="description" value="{{travel.description}}" name="description" placeholder="Description" autofocus="autofocus" autocomplete="description" required="required" /></div>
+    </div>
+    <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="dateFrom">Date from</label>
+      <div class="col-md-4"><input class="form-control" id="dateFrom" type="date" min="2015-01-01" max={{formatDate}} value={{formatDate travel.dateFrom}} name="dateFrom" placeholder="" autocomplete="dateFrom" required="required" /></div>
+    </div>
+    <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="dateTo">Date to</label>
+      <div class="col-md-4"><input class="form-control" id="dateTo" type="date"  min={{formatDate travel.dateFrom}} max={{formatDate}} value={{formatDate travel.dateTo}} name="dateTo" placeholder="" autocomplete="dateTo" required="required" /></div>
+    </div>
+    <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="homeCurrency">Home currency</label>
+      <div class="col-md-2"><input class="form-control" id="homeCurrency" type="homeCurrency" value="{{travel.homeCurrency}}" name="homeCurrency" placeholder="USD" autocomplete="homeCurrency" required="required" readonly/></div>
+    </div>
+    <div class="form-group row"><label class="col-md-3 col-form-label font-weight-bold text-right" for="perMileAmount">Per mile amount</label>
+      <div class="col-md-2"><input class="form-control" id="perMileAmount" type="number" step="0.01" value="{{travel.perMileAmount}}" name="perMileAmount" placeholder="0.54" autocomplete="perMileAmount" required="required" /></div>
+    </div>
+    <div class="form-group row">
+      <div class="offset-md-3 col-md-7">
+        <input type="hidden" name="_method" value="PATCH">
+        <button class="col-md-4 btn btn-primary mb-1" type="submit"><i class="fas fa-pen"></i>Update</button>
+        <button class="col-md-4 btn btn-outline-primary mb-1" id="updateTravelCancelButton" type="button" data-toggle="collapse" data-target="#updateTravelForm" aria-expanded="false" aria-controls="updateTravelForm">
+          <i class="fas fa-b<n"></i>Cancel
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <div class="offset-md-3 col-md-7">
+        <hr />
+      </div>
+    </div>
+  </form>
+
+  <form class="" method="POST" action="/travels/{{travel._id}}" enctype="application/x-www-form-urlencoded">
+    <div class="form-group row">
+      <div class="offset-md-3 col-md-7">
+        <input type="hidden" name="_method" value="DELETE">
+        <input type="hidden" name="_csrf" value={{_csrf}} />
+        <button class="col-md-3 btn btn-danger" type="submit"><i class="fas fa-trash-alt fa-sm"></i>Delete</button>
+      </div>
+    </div>
+  </form>
+</div>

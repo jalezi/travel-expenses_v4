@@ -1,0 +1,54 @@
+{{!< layout}}
+
+<h6>File Upload Form
+  <div class="row">
+    <div class="col-md-6">
+      <p>All files will be uploaded to "/uploads" directory.</p>
+      <form role="form" enctype="multipart/form-data" method="POST">
+        <input type="hidden" name="_csrf" value={{_csrf}} />
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="option" id="travels" value="travels" checked>
+          <label class="form-check-label" for="travels">
+            Travels
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="option" id="expenses" value="expenses">
+          <label class="form-check-label" for="expenses">
+            Expenses
+          </label>
+        </div>
+
+        <div class="form-group d-none" id="travelSelect">
+          <label for="travel">Travel select</label>
+          <select class="form-control" id="travel" name="travel">
+            {{#each travels}}
+              <option value='{{this._id}}'>{{formatDate this.dateFrom}} {{this.description}}</option>
+            {{/each}}
+          </select>
+        </div>
+
+        <div class="form-group"><label class="col-form-label font-weight-bold">File Input</label>
+          <div class="col-md-6"><input type="file" name="myFile" /></div>
+        </div><button class="btn btn-primary" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+</h6>
+
+
+<script type="text/javascript">
+  $(document).ready(() => {
+    // $('#expenses').prop('disabled', true);
+
+    document.getElementById("travels").onclick = () => {
+      // $('#travelSelect').hide();
+      $('#travelSelect').addClass('d-none');
+    }
+
+    document.getElementById("expenses").onclick = () => {
+      // $('#travelSelect').show();
+        $('#travelSelect').removeClass('d-none');
+    }
+  })
+</script>

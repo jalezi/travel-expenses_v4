@@ -1,0 +1,41 @@
+﻿// configuration to run node server on synology on startup:
+login as admin
+
+// where configuration files are stored on synology
+cd /etc/init 
+
+/ in test.conf file (the filename is just for example)
+
+description "test application for Node.js"
+author "Jaka Daneu"
+
+start on syno.share.ready
+stop on runlevel [06]
+
+# run scripts as the 'http' user. The default is running as root which is not recommended
+setuid http
+
+# execute the application
+exec node /volume1/web/ExpensesAppTest/app.js
+
+// start 
+sudo start test
+
+// stop
+sudo stop test
+
+
+option2
+# only start this service after the httpd user process has started
+start on started httpd-user
+
+# stop the service gracefully if the runlevel changes to 'reboot'
+stop on runlevel [06]
+
+# run the scripts as the 'http' user. Running as root (the default) is a bad idea.
+setuid http
+
+# exec the process. Use fully formed path names so that there is no reliance on $PATH
+# the 'www' file is a node.js script which starts the foobar application.
+exec /usr/bin/node /volume2/code/foobar/bin/www
+

@@ -1,0 +1,237 @@
+{{!< layout}}
+
+<div class="pb-2 mt-2 mb-4 border-bottom">
+  <h3> {{{travel.description}}}
+
+  </h3>
+</div>
+
+{{> travelUpdateForm }}
+
+<div class="pb-2 mt-2 mb-4">
+  <h6>
+    <button class="btn btn-primary " id="updateTravelChangeButton" type="button" data-toggle="collapse" data-target="#updateTravelForm" aria-expanded="false" aria-controls="updateTravelForm">
+      <i class="fas fa-pen"></i>Change travel data
+    </button>
+    <button class="btn btn-danger " type="button" onclick="travelExpensesToPDF()">
+      <i class="far fa-file-pdf"></i>Create PDF
+    </button>
+    <button class="btn btn-success float-right" type="button" data-toggle="collapse" data-target="#newExpenseForm" aria-expanded="false" aria-controls="newExpenseForm">
+      <i class="fas fa-plus"></i>New expense
+    </button>
+  </h6>
+
+</div>
+
+<div class="collapse pb-2 mt-2 mb-4 border-bottom" id="newExpenseForm">
+  <form class="" action="/travels/{{travel._id}}/expenses/new" method="POST">
+    <input type="hidden" name="_csrf" value={{_csrf}} />
+    <div class="form-group row">
+      <div class="col-md-3">
+        <label class="col-form-label font-weight-bold" for="expenseType">Type</label>
+        <select class="form-control" id="expenseType" name="expenseType" autofocus="autofocus" autocomplete="expenseType" required="required">
+          {{#each expenseTypes}}
+            <option value="{{this}}">{{this}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="col-md-5">
+        <label class="col-form-label font-weight-bold" for="expenseDescription">Description</label>
+        <input class="form-control" id="expenseDescription" type="expenseDescription" value="" name="expenseDescription" placeholder="Description" autofocus="autofocus" autocomplete="expenseDescription" required="required" />
+      </div>
+      <div class="col-md-4">
+        <label class="col-form-label font-weight-bold" for="invoiceDate">Invoice date</label>
+        <input class="form-control" id="invoiceDate" type="date" min={{formatDate travel.dateFrom}} max={{formatDate travel.dateTo}} value={{formatDate travel.dateFrom}} name="invoiceDate" autocomplete="invoiceDate" required="required" />
+      </div>
+    </div>
+
+    {{> newExpenseFormRow2NotMileage}}
+    {{> newExpenseFormRow2Mileage}}
+
+    <div class="form-group row ">
+      <div class="col-md-7">
+        <button class="btn btn-success col-md-4 mb-1" type="submit"><i class="fas fa-plus"></i>Add</button>
+        <button class="btn btn-outline-primary col-md-4 mb-1" type="button" data-toggle="collapse" data-target="#newExpenseForm" aria-expanded="false" aria-controls="newExpenseForm"><i class="fas fa-ban"></i>Cancel</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+
+<table class="table table-hover table-bordered table-responsive-md">
+  <tbody>
+    <tr class="bg-success">
+      <th scope="row" class="text-right">TOTAL</th>
+      <td class="text-left col-md-9"><strong>{{toCurrency travel.total}} {{travel.homeCurrency}}</strong></td>
+    </tr>
+
+  </tbody>
+</table>
+
+<table class="table table-hover table-bordered table-responsive-md">
+  <thead>
+    <tr class="text-center">
+      <th scope="col">#</th>
+      <th scope="col">Type</th>
+      <th scope="col">Description</th>
+      <th scope="col">Date</th>
+
+      <th scope="col">Amount</th>
+      <th scope="col">Cur/Unit</th>
+      <th scope="col">Rate</th>
+      <th scope="col">{{travel.homeCurrency}}</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {{#each expenses}}
+      <tr>
+        <th scope="row" class="text-center">{{countList @index}}</th>
+        <td class="text-center">{{this.type}}</td>
+        <td><a href="/travels/{{travel._id}}/expenses/{{this._id}}">{{this.description}}</a></td>
+        <td class="text-center">{{formatDate this.date}}</td>
+
+        <td class="text-right">{{toCurrency this.amount}}</td>
+        <td class="text-center">{{this.currency}} {{this.unit}}</td>
+        <td class="text-right">{{toCurrency this.rate}}</td>
+        <td class="text-right">{{toCurrency this.amountConverted}}</td>
+      </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+<script type="text/javascript">
+  function travelExpensesToPDF() {
+    let team = '{{user.team}}';
+    let jobPosition = '{{user.jobPosition}}'
+    if (team === '' || jobPosition ==='') {
+      window.location.replace(`/account?team=${team}&jobPosition=${jobPosition}`);
+    } else {
+      const dt = dateTo.value;
+      const df = dateFrom.value;
+      let routepath = '/travels/' + '{{travel._id}}' + '/pdf';
+      window.open(routepath);
+    }
+  }
+</script>
+
+<script>
+
+  function calcAmount(rate, amount, currency = true) {
+    let result = 0;
+    if (currency) {
+      result = (amount / rate).toFixed(2);
+      return result;
+    } else {
+      result = (amount * rate).toFixed(2);
+      return result;
+    }
+  }
+
+  function resetDates () {
+    let df = moment(new Date("{{travel.dateFrom}}")).format('YYYY-MM-DD');
+    let dt = moment(new Date("{{travel.dateTo}}")).format('YYYY-MM-DD');
+    return {df, dt};
+  }
+
+  $(document).ready(() => {
+    invoiceUnit.onchange = () => {
+      document.getElementById('amountDistance2').readOnly = !document.getElementById('amountDistance2').readOnly;
+      document.getElementById('amountDistance').readOnly = !document.getElementById('amountDistance').readOnly;
+      if (!document.getElementById('amountDistance2').readOnly) {
+        amountDistance2.value = amountDistance.value * {{constants.MILES_TO_KILOMETERS}};
+        amountDistance2.value = parseFloat($('#amountDistance2').val()).toFixed(2);
+        $('#row3Mileage').show();
+      } else {
+        amountDistance.value = amountDistance2.value * {{constants.KILOMETERS_TO_MILES}};
+        amountDistance.value = parseFloat($('#amountDistance').val()).toFixed(2)
+        $('#row3Mileage').hide();
+      }
+    }
+
+    updateTravelCancelButton.onclick = (event) => {
+      const {df, dt} = resetDates();
+      dateFrom.value = df;
+      dateTo.value = dt;
+    }
+
+    updateTravelChangeButton.onclick = (event) => {
+      const {df, dt} = resetDates();
+      dateFrom.value = df;
+      dateTo.value = dt;
+    }
+
+    amountDistance2.onchange = (event) => {
+      if (invoiceUnit.value === 'km') {
+        const kmToMiles = parseFloat({{constants.KILOMETERS_TO_MILES}});
+        const miles = (amountDistance2.value * kmToMiles).toFixed(2);
+        amountDistance.value = miles;
+        const convertedAmount = (travelPerMileAmount.value * amountDistance.value).toFixed(2);
+        amountConverted2.value = convertedAmount;
+      }
+    }
+
+    invoiceCurrency.onfocusout = () => {
+      if (rate.value != 0) {
+        amountConverted.value = (amount.value / rate.value).toFixed(2);
+      }
+    }
+
+    // to be moved somewhere else because of api key
+    invoiceCurrency.onchange = async function() {
+      invoiceCurrency.value = invoiceCurrency.value.toUpperCase();
+      if (invoiceCurrency.value.length === 3) {
+        try {
+          const date = new Date(invoiceDate.value).toISOString();
+          const rates = JSON.parse(`{{{rates}}}`);
+          let rts = rates.find((r) => {
+            return r.date === date;
+          });
+
+          if (!rts) {
+            rts = rates[0];
+          }
+
+          const homeCur = rts.rates['{{travel.homeCurrency}}'];
+          const converted = 1 / homeCur;
+
+          const invCur = invoiceCurrency.value.toUpperCase();
+          // const toEuro = rts.rates[invoiceCurrency.value];
+
+          if (isNaN(rts.rates[invCur])) {
+            throw new Error('No such currency exist!')
+          } else {
+            rate.value = rts.rates[invCur] * converted;
+            rate.value = parseFloat($('#rate').val()).toFixed(2);
+            rate.readOnly = true;
+
+          }
+
+
+        } catch (err) {
+          rate.value = 0;
+          amountConverted.value = 0.00;
+          rate.value = parseFloat($('#rate').val()).toFixed(2);
+          amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
+          rate.readOnly = false;
+          invoiceCurrency.value = '';
+          window.alert(err.message);
+          throw new Error(err);
+        }
+      } else {
+        rate.value = 0;
+        amountConverted.value = 0.00;
+        rate.value = parseFloat($('#rate').val()).toFixed(2);
+        amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
+        rate.readOnly = false;
+      }
+    }
+
+    invoiceDate.onchange = () => {
+      if (expenseType.value != "Mileage") {
+        invoiceCurrency.onchange();
+        invoiceCurrency.onfocusout();
+      }
+    }
+  });
+</script>

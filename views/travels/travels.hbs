@@ -1,0 +1,320 @@
+{{!< layout}}
+
+{{> travelsHeader}}
+
+<div class="input-group input-group-sm md-6 w-100 mb-1" id="dateRangePicker">
+  <select class="form-control" name="dateRangePickerSelect" id="dateRangePickerSelect" value={{filter}}>
+    <option>All</option>
+    <option>This Month</option>
+    <option>Last Month</option>
+    <option>Year</option>
+    <option>Custom</option>
+  </select>
+
+  <select class="form-control" name="choosenYear" id="choosenYear" disabled>
+    {{#each years}}
+      <option>{{this}}</option>
+    {{/each}}
+  </select>
+
+  <div class="input-group-prepend " id="divLabelDateFrom">
+    <label class="input-group-text" for="dateFrom" id="lableDateFrom">From</label>
+  </div>
+  <input type="date" class="form-control " name="dateFrom" id="dateFrom" placeholder="" value={{searchMinDate}} disabled />
+
+  <div class="input-group-prepend " id="divLableDateTo">
+    <label class="input-group-text" for="dateTo" id="lableDateTo">To</label>
+  </div>
+  <input type="date" class="form-control " name="dateTo" id="dateTo" placeholder="" value={{searchMaxDate}} disabled />
+
+  <div class="input-group-append " id="divShowCustomRange">
+    <button class="btn btn-outline-secondary" id="showCustomRange" type="button" disabled>Show</button>
+  </div>
+  <div class="input-group-append ml-2">
+    <button class="btn btn-danger" type="button" onclick="travelsTotalToPDF()">
+      <i class="far fa-file-pdf"></i>Create PDF
+    </button>
+  </div>
+</div>
+
+<table class="table table-hover table-bordered" id="travelTotalTable">
+  <tbody>
+    <tr class="bg-success">
+      <th scope="row" class="text-right ">TOTAL</th>
+      <td class="text-left" id="travelsFilteredTotal"><strong>{{toCurrency travel.total}} {{user.homeCurrency}}</strong></td>
+      <td class="" id="travelsCount"><strong>{{travels.length}} travels</strong></td>
+    </tr>
+
+  </tbody>
+</table>
+
+<table class="table table-hover table-bordered" id="travelsTable">
+  <thead>
+    <tr class="text-center">
+      <th scope="col">#</th>
+      <th scope="col">Description<i onclick="sortData()" class="mx-1 float-right fas fa-arrow-up"></i><i onclick="sortData()" class="mx-1 float-right fas fa-arrow-down"></i></th>
+      <th scope="col">From<i onclick="sortData()" class="px-1 float-right fas fa-arrow-up"></i><i onclick="sortData()" class="px-1 float-right fas fa-arrow-down"></i></th>
+      <th scope="col">To<i onclick="sortData()" class="px-1 float-right fas fa-arrow-up"></i><i onclick="sortData()" class="px-1 float-right fas fa-arrow-down"></i></th>
+      <th scope="col">Total</th>
+    </tr>
+  </thead>
+
+  <tbody id="tableBody">
+    {{#each travels}}
+      <tr>
+        <th scope="row" class="text-center">{{countList @index}}</th>
+        <td><a href="/travels/{{this._id}}">{{this.description}}</a></td>
+        <td class="text-center">{{formatDate this.dateFrom}}</td>
+        <td class="text-center">{{formatDate this.dateTo}}</td>
+        <td class="text-right totalTravel">{{toCurrency this.total}} {{this.homeCurrency}}</td>
+    {{/each}}
+    </tr>
+  </tbody>
+</table>
+
+<script type="text/javascript">
+
+  function travelsTotalToPDF() {
+    let team = '{{user.team}}';
+    let jobPosition = '{{user.jobPosition}}'
+    if (team === '' || jobPosition ==='') {
+      window.location.replace(`/account?team=${team}&jobPosition=${jobPosition}`);
+    } else {
+      const dt = dateTo.value;
+      const df = dateFrom.value;
+      let routepath = `/travels/total_pdf/?df=${df}&dt=${dt}`;
+      window.open(routepath);
+    }
+  }
+</script>
+
+<script type="text/javascript">
+  function sortData() {
+    let search = {}
+    let target = event.target;
+    let targetClassName = target.className.split(" ");
+    let setSearch = new Promise(function(resolve, reject) {
+      switch (target.parentNode.innerText.toLowerCase()) {
+        case 'description':
+          resolve('description');
+          break;
+        case 'from':
+          resolve('dateFrom');
+          break;
+        case 'to':
+          resolve('dateTo');
+          break;
+        default:
+          resolve('error');
+      }
+    });
+    setSearch.then( sortBy => {
+      if (targetClassName.indexOf("fa-arrow-down") != -1) {
+        sortBy = "-" + sortBy;
+      };
+
+      searchText = `filter=${dateRangePickerSelect.value}&sortBy=${sortBy}&minDate=${dateFrom.value}&maxDate=${dateTo.value}`
+      location.search = searchText;
+    });
+
+  }
+
+  function showTravels(df, dt) {
+    $("#tableBody tr").filter(function(index, row) {
+
+      const rowDateFrom = new Date($(this)[0].cells[2].innerText);
+      const rowDateTo = new Date($(this)[0].cells[3].innerText);
+      const cond1 = rowDateFrom >= new Date(df);
+      const cond2 = rowDateFrom <= new Date(dt);
+      const cond = cond1 && cond2;
+      $(this).toggle(cond);
+    });
+    let el = $("#travelsCount")[0];
+    let count = countRows();
+    el.innerHTML =`<strong>${count} travels</strong>`
+  }
+
+  function calculateTotal() {
+    let sum = 0;
+    $("#tableBody .totalTravel").not(":hidden").each((index, item) => {
+      let amount = 0;
+      try {
+        amount = Number(item.innerText.split(" ")[0].replace(/,/g, ''));
+      } catch (e) {
+        console.log(e);
+      } finally {
+        sum += amount;
+      }
+
+    })
+    return sum.toFixed(2);
+  }
+
+  function countRows() {
+    return $("#tableBody tr").not(":hidden").length;
+  }
+
+  function displayFilteredTravelsTotal() {
+    let total = calculateTotal();
+    let el = $("#travelsFilteredTotal")[0];
+
+    let splitText = el.innerText.split(" ");
+    const formatter = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    let totalString = formatter.format(total);
+    el.innerHTML = `<strong>${totalString} ${splitText[1]}</strong>`
+  }
+
+  function setDateRange(option) {
+    let df;
+    let dt;
+    let dayArray;
+    const today = moment();
+    let year = today.format("YYYY");
+    switch (option) {
+      case "Year":
+        year = choosenYear.value;
+        dayArray = [year, "01", "01"];
+        df = dayArray.join("-");
+        if (year != today.format("YYYY")) {
+          dayArray = [year, "12", "31"];
+          dt = dayArray.join("-");
+        } else {
+          dt = today.format("YYYY-MM-DD");
+        }
+        break;
+      default:
+        return new Error(`${option} is not a valid option!`);
+    }
+    return [df, dt];
+  }
+
+  function toggleFilterInputs (arr=[], disabled=true, hide=true) {
+    arr.forEach((item, index) => {
+      item.prop("disabled", disabled);
+      if (hide) {
+        item.hide();
+      } else {
+        item.show();
+      }
+    });
+  }
+
+  $(document).ready(() => {
+    dateRangePickerSelect.value = "{{filter}}";
+    choosenYear.value= dateTo.value.substring(0, 4);
+    let arr = [$("#choosenYear"), $("#divShowCustomRange"), $("#dateFrom"), $("#dateTo"), $("#showCustomRange")];
+    if (dateRangePickerSelect.value === 'Custom') {
+      toggleFilterInputs(arr, false, false);
+    } else {
+      toggleFilterInputs(arr, true, true);
+    }
+    // toggleFilterInputs(arr, true, true);
+    $("#divLabelDateFrom").hide();
+    $("#divLableDateTo").hide();
+    if (dateRangePickerSelect.value === "Year") {
+      $("#choosenYear").prop('disabled', false).show();
+    } else {
+      $("#choosenYear").prop('disabled', true).hide();
+    }
+
+    showCustomRange.onclick = (event) => {
+      const df = $("#dateFrom").val();
+      const dt = $("#dateTo").val();
+      showTravels(df, dt);
+      searchText = `filter=${dateRangePickerSelect.value}&sortBy=-dateFrom&minDate=${dateFrom.value}&maxDate=${dateTo.value}`
+      location.search = searchText;
+    }
+
+    choosenYear.onchange = (event) => {
+      dateRange = setDateRange(dateRangePickerSelect.value);
+      df = dateRange[0];
+      dt = dateRange[1];
+      dateFrom.value = df;
+      dateTo.value = dt;
+      showTravels(df, dt);
+      displayFilteredTravelsTotal();
+      searchText = `filter=${dateRangePickerSelect.value}&sortBy=-dateFrom&minDate=${dateFrom.value}&maxDate=${dateTo.value}`
+      location.search = searchText;
+    }
+
+    dateRangePickerSelect.onchange = (event) => {
+      let df, dt, dayArray, searchText, dateRange = [];
+      const today = moment();
+      const year = today.format("YYYY");
+      const month = today.format("MM");
+
+      switch (dateRangePickerSelect.value) {
+        case "Custom":
+          dayArray = [year, month, "01"];
+          df = dayArray.join("-")
+          dt = today.format("YYYY-MM-DD");
+
+          break;
+        case "All":
+          df = "2015-01-01";
+          dt = moment().format("YYYY-MM-DD");
+
+          break;
+        case "This Month":
+          dayArray = [year, month, "01"];
+          df = dayArray.join("-")
+          dt = today.format("YYYY-MM-DD");
+
+          break;
+        case "Last Month":
+          let previous = today.subtract(1, "months");
+          let prevYear = previous.format("YYYY");
+          let prevMonth = previous.format("MM");
+          let daysInMonth = previous.daysInMonth();
+          dayArray = [prevYear, prevMonth, "01"];
+          df = dayArray.join("-");
+          dayArray = [prevYear, prevMonth, daysInMonth.toString()];
+          dt = dayArray.join("-");
+
+          break;
+        case "Year":
+          dateRange = setDateRange(dateRangePickerSelect.value);
+          df = dateRange[0];
+          dt = dateRange[1];
+
+          break;
+        default:
+          df = "2000-01-01";
+          dt = "2000-01-31";
+
+      }
+      
+      dateFrom.value = df;
+      dateTo.value = dt;
+      if (dateRangePickerSelect.value === "Custom") {
+        arr = [$("#divShowCustomRange"), $("#dateFrom"), $("#dateTo"), $("#showCustomRange")];
+        $("#divLabelDateFrom").show();
+        $("#divLableDateTo").show();
+        toggleFilterInputs(arr, false, false);
+        $("#choosenYear").prop('disabled', true).hide();
+        // searchText = `filter=${dateRangePickerSelect.value}&sortBy=-dateFrom&minDate=${dateFrom.value}&maxDate=${dateTo.value}`
+        // location.search = searchText;
+
+      } else {
+        if (dateRangePickerSelect.value === "Year") {
+          $("#choosenYear").prop('disabled', false).show();
+        } else {
+          $("#choosenYear").prop('disabled', true).hide();
+        }
+        arr = [$("#divShowCustomRange"), $("#dateFrom"), $("#dateTo"), $("#showCustomRange")];
+        $("#divLabelDateFrom").hide();
+        $("#divLableDateTo").hide();
+        toggleFilterInputs(arr, true, true);
+        showTravels(df, dt);
+        searchText = `filter=${dateRangePickerSelect.value}&sortBy=-dateFrom&minDate=${dateFrom.value}&maxDate=${dateTo.value}`
+        location.search = searchText;
+      }
+      displayFilteredTravelsTotal();
+    }
+
+    displayFilteredTravelsTotal();
+  });
+</script>

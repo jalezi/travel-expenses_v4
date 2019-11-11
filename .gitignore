@@ -66,3 +66,7 @@ travels.json
 audit-resolv.json
 con.js
 *.txt
+.eslintrc
+.nyc_output
+
+

@@ -123,7 +123,7 @@ exports.getTravelExpensesPDF = async function(req, res, next) {
   const idx = invoiceNumberArray[0].index + 1;
   console.log(idx);
   const stream = travelExpensesToPDF(res.locals.travel, req.user, idx);
-  let filename = `TReport_${req.user._id}_${res.locals.travel._id}.pdf`;  // Be careful of special characters
+  let filename = `TReport_${req.user._id}_${res.locals.travel._id}_${idx}.pdf`;  // Be careful of special characters
   filename = encodeURIComponent(filename);  // Ideally this should strip them
   res.setHeader('Content-disposition', 'inline; filename="' + filename + '"');
   res.setHeader('Content-type', 'application/pdf');

@@ -1,6 +1,7 @@
 const moment = require('moment');
 const Travel = require('../models/Travel');
-const constants = require('../lib/constants')
+const constants = require('../lib/constants');
+
 /**
  * GET /
  * Home page.

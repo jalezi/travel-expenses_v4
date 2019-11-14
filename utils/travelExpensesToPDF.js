@@ -247,7 +247,7 @@ module.exports = (travel, user, idx) => {
 
   const pdfDoc = printer.createPdfKitDocument(docDefinition);
 
-  const pdfDocPath = `./pdf/TReport_${user._id}_${travel._id}.pdf`;
+  const pdfDocPath = `./pdf/TReport_${user._id}_${travel._id}-${idx}.pdf`;
   pdfDoc.pipe(fs.createWriteStream(pdfDocPath));
   pdfDoc.end();
   return pdfDoc;

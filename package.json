@@ -6,7 +6,8 @@
   "license": "",
   "scripts": {
     "postinstall": "npm rebuild node-sass",
-    "start": "node --icu-data-dir=node_modules\\full-icu app.js",
+    "start": "node app.js",
+    "start:nodemon": "nodemon app.js",
     "test": "nyc mocha --timeout=10000 --exit",
     "lint": "eslint \"**/*.js\""
   },

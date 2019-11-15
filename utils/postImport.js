@@ -12,7 +12,7 @@ const Currency = require('../models/Currency');
 
 const { ObjectId } = mongoose.Types;
 
-const { expenseTypes } = require('../lib/globals');
+// const { expenseTypes } = require('../lib/globals');
 const constants = require('../lib/constants');
 const myErrors = require('../utils/myErrors');
 
@@ -27,7 +27,7 @@ async function readAndParseFile(filePath, enc = 'utf8') {
       dynamicTyping: false,
       preview: 0,
       encoding: 'utf8',
-      complete: (results) => {},
+      complete: () => {},
       skipEmptyLines: true
     });
     return parsedData;
@@ -58,7 +58,7 @@ async function checkFileFor(condition, message) {
   const suffix = 'File should be a CSV with header in first line and not empty!';
   try {
     if (condition) {
-      return new myErrors.importFileError(`${message} - ${suffix}`);
+      return new myErrors.ImportFileError(`${message} - ${suffix}`);
     }
   } catch (err) {
     throw err;
@@ -66,8 +66,9 @@ async function checkFileFor(condition, message) {
 }
 
 // check if file is not empty, CSV or it was not selected
-const checkFile = (myFile) => new Promise(async (resolve, reject) => {
-  const tripleCheck = async (myFIle) => {
+const checkFile = (myFile) => new Promise((resolve) => {
+  let error;
+  const tripleCheck = async () => {
     try {
       error = await checkFileFor(myFile.name === '', 'No file selected!');
       if (error) { return error; }
@@ -80,12 +81,12 @@ const checkFile = (myFile) => new Promise(async (resolve, reject) => {
       resolve(err);
     }
   };
-  try {
-    const result = await tripleCheck();
+
+  tripleCheck().then((result) => {
     resolve(result);
-  } catch (err) {
+  }).catch((err) => {
     resolve(err);
-  }
+  });
 });
 
 // create currency Object
@@ -140,7 +141,7 @@ async function expensesImportNewCurrenciesForSave(array) {
 }
 
 /* read file, check file and return data or error
- * if file is not validate return custom error importFileError otherwise
+ * if file is not validate return custom error ImportFileError otherwise
  * return array with expenses data
  */
 async function readCheckFileAndGetData(myFile, option) {
@@ -295,15 +296,15 @@ const expenseImport = async function (dataArray) {
   return new Promise((async (resolve, reject) => {
     try {
       const expenses = await Expense.insertMany(dataArray).catch((err) => {
-        throw new myErrors.saveToDbError('Something went wrong during saving expenses to DB!');
+        throw new myErrors.SaveToDbError('Something went wrong during saving expenses to DB!');
       });
       if (!expenses) {
-        throw new myErrors.saveToDbError('No expenses saved!');
+        throw new myErrors.SaveToDbError('No expenses saved!');
       }
       const travelObjectIds = expenses.map((expense) => expense.travel);
       const uniqueTravelObjectIds = [...new Set(travelObjectIds)];
       const updatedTravels = await updateTravels(uniqueTravelObjectIds, expenses).catch((err) => {
-        throw new myErrors.saveToDbError('Something went wrong during updating travels with expenses!');
+        throw new myErrors.SaveToDbError('Something went wrong during updating travels with expenses!');
       });
 
       const message = `${expenses.length} imported. ${updatedTravels.length} travels updated!`;
@@ -326,11 +327,11 @@ async function travelImport(dataArray, userId) {
 
       // insert travels and update user with travel._id
       const travels = await Travel.insertMany(dataArray).catch((err) => {
-        throw new myErrors.saveToDbError('Something went wrong during saving to DB!');
+        throw new myErrors.SaveToDbError('Something went wrong during saving to DB!');
       });
 
       if (!travels) {
-        throw new myErrors.saveToDbError('No travels saved!');
+        throw new myErrors.SaveToDbError('No travels saved!');
       }
 
       const travelObjectIds = travels.map((travel) => travel._id);
@@ -341,7 +342,7 @@ async function travelImport(dataArray, userId) {
           }
         }
       }).catch((err) => {
-        throw new myErrors.saveToDbError('Something went wrong during updating user with travels!');
+        throw new myErrors.SaveToDbError('Something went wrong during updating user with travels!');
       });
 
       message = `${travelObjectIds.length} travels added successfully!`;

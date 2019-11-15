@@ -67,3 +67,4 @@ audit-resolv.json
 con.js
 *.txt
 snapshots.js
+/build/*

@@ -68,3 +68,7 @@ con.js
 *.txt
 snapshots.js
 /build/*
+
+app-new.js
+/loaders/*
+/api/*

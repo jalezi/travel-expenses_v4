@@ -104,7 +104,7 @@ userSchema.methods.gravatar = function gravatar(size) {
 * Helper method for getting user's full name
 */
 userSchema.methods.fullName = function fullName() {
-  const result = this.profile.fName + ' ' + this.profile.lName;
+  const result = `${this.profile.fName} ${this.profile.lName}`;
   return result;
 }
 

@@ -1,18 +1,19 @@
 // jshint esversion: 6
 
-const {promisify} = require('util');
+const { promisify } = require('util');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+// const nodemailer = require('nodemailer');
 const passport = require('passport');
-const User = require('../models/User');
-const Travel = require('../models/Travel');
-const Expense = require('../models/Expense');
-const toTitleCase = require('../utils/utils').toTitleCase;
-
 const mailjet = require('node-mailjet').connect(
   process.env.MJ_APIKEY_PUBLIC,
   process.env.MJ_APIKEY_PRIVATE
 );
+
+const User = require('../models/User');
+const Travel = require('../models/Travel');
+const Expense = require('../models/Expense');
+const { toTitleCase } = require('../utils/utils');
+
 
 const randomBytesAsync = promisify(crypto.randomBytes);
 

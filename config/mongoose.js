@@ -18,10 +18,10 @@ module.exports = async () => {
    * Mongoose connection events
    */
   mongoose.connection.on('connecting', () => {
-    Logger.info(`Mongoose connecting to: ${dbURL}`);
+    Logger.debug(`Mongoose connecting to: ${dbURL}`);
   });
   mongoose.connection.on('connected', () => {
-    Logger.info(`Mongoose connected to: ${dbURL}`);
+    Logger.debug(`Mongoose connected to: ${dbURL}`);
   });
 
   mongoose.connection.on('disconnecting', () => {

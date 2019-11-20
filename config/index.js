@@ -1,18 +1,6 @@
-const dotenv = require('dotenv');
-const dotenvExpand = require('dotenv-expand');
 const appRoot = require('app-root-path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
-
-// Set the NODE_ENV to 'development' by default
-const config = dotenv.config({ debug: process.env.DEBUG });
-
-dotenvExpand(config);
-if (config.error) {
-  throw config.error;
-}
-
-process.env.NODE_ENV = process.env.NODE_ENV || config.NODE_ENV || 'development';
 
 module.exports = {
   //  * Environment mode

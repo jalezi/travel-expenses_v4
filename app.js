@@ -7,12 +7,14 @@ const express = require('express');
 const compression = require('compression');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const logger = require('morgan');
+const morgan = require('morgan');
+const winston = require('winston');
 const chalk = require('chalk');
 const errorHandler = require('errorhandler');
 const lusca = require('lusca');
+const cors = require('cors');
 const dotenv = require('dotenv');
-const MongoStore = require('connect-mongo')(session);
+// const MongoStore = require('connect-mongo')(session);
 const flash = require('express-flash');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -31,12 +33,20 @@ require('./utils/hbsHelpers/yearsAccordion');
 require('full-icu');
 const getRates = require('./utils/getRates');
 
-const Travel = require('./models/Travel');
-const Expense = require('./models/Expense');
-const Rate = require('./models/Rate');
 const myErrors = require('./utils/myErrors');
 
 const { ImportFileError } = myErrors;
+
+const { addLogger } = require('./config/logger');
+const mongoConnection = require('./config/mongoose');
+const methodOverride = require('./utils/middleware/methodOverride');
+const redirectAfterLogin = require('./utils/middleware/redirectAfterLogin');
+const importMiddleware = require('./utils/middleware/importMiddleware');
+const expenseIdMiddleware = require('./utils/middleware/expenseIdMiddleware');
+const travelIdMiddleware = require('./utils/middleware/travelIdMiddleware');
+
+const pathDepth = module.paths.length - 6;
+const Logger = addLogger(__filename, pathDepth);
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
@@ -67,6 +77,7 @@ const importController = require('./controllers/import');
 /**
  * API keys and Passport configuration.
  */
+const config = require('./config');
 const passportConfig = require('./config/passport');
 
 /**
@@ -74,111 +85,114 @@ const passportConfig = require('./config/passport');
  */
 const app = express();
 
-/**
- * Connect to MongoDB.
- * added useUnifiedTopology: true 12 sep '19'
- */
-mongoose.set('useFindAndModify', false);
-mongoose.set('useCreateIndex', true);
-mongoose.set('useNewUrlParser', true);
-mongoose.set('useUnifiedTopology', true);
-mongoose.connect(process.env.MONGODB_URI);
-mongoose.connection.on('error', err => {
-  console.error(err);
-  console.log(
-    '%s MongoDB connection error. Please make sure MongoDB is running.',
-    chalk.red('✗')
-  );
-  process.exit();
-});
+// Set MORGAN logger to use WINSTON stream write
+const morganOption = config.envNode === 'development' ? 'dev' : 'combined';
+app.use(
+  morgan(morganOption, {
+    stream: winston.stream.write
+  })
+);
+Logger.silly(`Use morgan with ${morganOption} and winston logger`);
+
+// Connect to MongoDB
+mongoConnection();
+Logger.silly('Connect to MongoDB');
 
 /**
  * Express configuration.
  */
-app.set('host', process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0');
-app.set('port', process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080);
-app.set('views', path.join(__dirname, './views'));
+Logger.debug('Express Configuration');
+// Set host, port and views
+app.set('host', config.envHost);
+app.set('port', config.port);
+app.set('views', config.views);
+Logger.silly(`Express host: ${app.get('host')}, port: ${app.get('port')}`);
+Logger.silly(`Express views: ${app.get('views')}`);
 
-app.engine(
-  'hbs',
-  expressHbs.express4({
-    layoutsDir: path.join(__dirname, './views/layouts'),
-    partialsDir: [
-      path.join(__dirname, './views/partials'),
-      path.join(__dirname, './views/account'),
-      path.join(__dirname, './views/travels')
-    ],
-    defaultView: 'layout',
-    extname: '.hbs'
-  })
-);
-
+// Set Engine - HBS
+app.engine('hbs', expressHbs.express4(config.hbs));
 app.set('view engine', '.hbs');
+Logger.silly('Express engine set as HBS!');
 
 app.use(compression());
-app.use(
-  sass({
-    src: path.join(__dirname, 'public'),
-    dest: path.join(__dirname, 'public')
-  })
-);
-app.use(logger('dev'));
+
+// Set SASS
+app.use(sass(config.sass));
+const msg = `\n   src: ${config.sass.src},\n   dest: ${config.sass.dest}`;
+Logger.silly(`Sass configuration folders:${msg}`);
+
+// Middleware that transforms the raw string of req.body into json or urlencoded
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(expressValidator()); // works with express-validator@5.3.1
-app.use(
-  session({
-    resave: true,
-    saveUninitialized: true,
-    secret: process.env.SESSION_SECRET,
-    cookie: { maxAge: 1209600000 }, // two weeks in milliseconds
-    store: new MongoStore({
-      url: process.env.MONGODB_URI,
-      autoReconnect: true
-    })
-  })
-);
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(flash());
+
+// Set middleware expess-validator
+// works with express-validator@5.3.1 and below
+// TODO migrate to express-validator@6.2, don't forget controllers folder
+app.use(expressValidator());
+Logger.silly('Use express-validator middleware');
 
 /**
- * Added by me
- * express-formidable
+ * Session data is not saved in the cookie itself,
+ * just the session ID. Session data is stored server-side.
+ * Since version 1.5.0, the cookie-parser middleware no longer needs
+ * to be used for this module to work.
+ * This module now directly reads and writes cookies on req/res.
+ * Using cookie-parser may result in issues if the secret
+ * is not the same between this module and cookie-parser.
  */
-app.use(
-  '/import',
-  formidable({
-    encoding: 'utf-8',
-    uploadDir: path.join(__dirname, '/uploads'),
-    keepExtensions: true
-  })
-);
+app.use(session(config.session));
+Logger.silly('Use session middleware');
+
+/**
+ * Passport uses the concept of strategies to authenticate requests.
+ * Strategies can range from verifying username and password credentials,
+ * delegated authentication using OAuth (for example, via Facebook or Twitter),
+ * or federated authentication using OpenID.
+ * Before authenticating requests,
+ * the strategy (or strategies) used by an application must be configured
+ */
+app.use(passport.initialize());
+app.use(passport.session());
+Logger.silly('Use passport initialize and session middleware');
+
+// Flash is an extension of connect-flash with the ability to define
+//  a flash message and render it without redirecting the request.
+app.use(flash());
+Logger.silly('Use flash middleware');
+
+// Formidable - A Node.js module for parsing form data, especially file uploads.
+app.use('/import', formidable(config.formidable));
 app.use('/import', (req, res, next) => {
   if (Object.keys(req.body).length === 0 && req.fields) {
     req.body = req.fields;
   }
   next();
 });
+Logger.silly(
+  'Use formidable middleware & set req.body for route "/import" & set req.body'
+);
 
+// Lusca - Web application security middleware.
 app.use((req, res, next) => {
-  if (req.path === '/api/upload') {
-    next();
-  } else {
-    lusca.csrf()(req, res, next);
-  }
+  lusca.csrf()(req, res, next);
 });
-app.use(lusca.xframe('SAMEORIGIN'));
-app.use(lusca.xssProtection(true));
+app.use(lusca(config.lusca));
+Logger.silly('Use lusca middleware for every response/request');
+
+// At a minimum, disable X-Powered-By header
 app.disable('x-powered-by');
+Logger.silly('Disable "x-powered-by"');
+
+// Attach user to response from request
 app.use((req, res, next) => {
   res.locals.user = req.user;
   next();
 });
+Logger.silly('Set res.locals.user for every response/request');
 
-const redirect = require('./utils/middleware/redirect');
-
-app.use(redirect);
+// After successful login, redirect back to the intended page
+app.use(redirectAfterLogin);
+Logger.silly('Set redirection to intended page after successful login');
 
 app.use(
   '/',
@@ -210,125 +224,38 @@ app.use(
   )
 );
 
-/**
- * Added by me
- * To overide form methodOverride
- * Must be placed after: app.use(bodyParser.urlencoded())
- */
-const methodOverride = require('./utils/middleware/methodOverride');
+// Useful if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
+// It shows the real origin IP in the heroku or Cloudwatch logs
+app.enable('trust proxy');
+Logger.silly('Enable trust-proxy');
 
+// The magic package that prevents frontend developers going nuts
+// Alternate description:
+// Enable Cross Origin Resource Sharing to all origins by default
+app.use(cors());
+Logger.silly('Use cors middleware');
+
+// Some sauce that always add since 2014
+// "Lets you use HTTP verbs such as PUT or DELETE in places where the client doesn't support it."
+// Maybe not needed anymore ?
 app.use(methodOverride);
+Logger.silly('Use methodOverride');
 
-/**
- * Added by me
- * Save to res.locals.travels all user travel, sorted by dateFrom ascending
- */
-app.use('/import', async (req, res, next) => {
-  try {
-    const travels = await Travel.find({
-      _user: req.user._id,
-      _id: { $in: req.user.travels }
-    })
-      .populate({
-        path: 'expenses',
-        populate: { path: 'curRate' }
-      })
-      .sort({ dateFrom: 1 });
-    res.locals.travels = travels;
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
+// Middleware for route import
+app.use('/import', importMiddleware);
+Logger.silly('Use importMiddleware at route "/import"');
 
-/**
- * Add by me
- * Save to res.locals.expense current expense
- */
-app.use('/travels/:id/expenses/:id', async (req, res, next) => {
-  if (
-    (!res.locals.expense || res.locals.expense._id !== req.params.id) &&
-    req.params.id !== 'new'
-  ) {
-    try {
-      const baseUrl = req.baseUrl.split('/');
-      const travelId = baseUrl[2];
-      const travel = await Travel.findById(travelId).populate({
-        path: 'expenses',
-        populate: { path: 'curRate' }
-      });
-      const expense = await Expense.findById(req.params.id).populate({
-        path: 'curRate'
-      });
-      let rates = await Rate.findRatesOnDate(travel, (err, result) => {
-        if (err) {
-          throw err;
-        }
-      });
+// Save to res.locals.expense current expense
+app.use('/travels/:id/expenses/:id', expenseIdMiddleware);
+Logger.silly('Use expenseIdMiddleware at route "/travels:id/expenses:id"');
 
-      if (rates.length === 0) {
-        rates = await Rate.findRateBeforeOrAfterDate(travel, (err, result) => {
-          if (err) {
-            throw new Error(err);
-          }
-        });
-      }
-      res.locals.expense = expense;
-      res.locals.rates = rates;
-      next();
-    } catch (err) {
-      next(err);
-    }
-  } else {
-    next();
-  }
-});
+// Save to res.locals.travels current travel
+app.use('/travels/:id', travelIdMiddleware);
+Logger.silly('Use travelIdMiddleware at route "/travels:id"');
 
-/**
- * Added by me
- * Save to res.locals.travels current travel
- */
-app.use('/travels/:id', async (req, res, next) => {
-  if (
-    (!res.locals.travel || res.locals.travel._id !== req.params.id) &&
-    req.params.id !== 'new' &&
-    req.params.id !== 'total_pdf'
-  ) {
-    try {
-      const travel = await Travel.findById(req.params.id).populate({
-        path: 'expenses',
-        populate: { path: 'curRate' }
-      });
-      let rates = await Rate.findRatesOnDate(travel, (err, result) => {
-        if (err) {
-          throw err;
-        }
-      });
-
-      if (rates.length === 0) {
-        rates = await Rate.findRateBeforeOrAfterDate(travel, (err, result) => {
-          if (err) {
-            throw new Error(err);
-          }
-        });
-      }
-      res.locals.travel = travel;
-      res.locals.rates = rates;
-      next();
-    } catch (err) {
-      next(err);
-    }
-  } else {
-    next();
-  }
-});
-
-/**
- * Added by me
- * Create job to get rates - every day, every 1 minute of the hour
- * Get rates from fixer.io api with base: EUR and save to database.
- */
+// Function to check for rates at data.fixer.io and save them to DB
 getRates();
+Logger.silly('Function getRates initialized');
 
 /**
  * Primary app routes.
@@ -488,17 +415,27 @@ if (process.env.NODE_ENV === 'development') {
   });
 }
 
-/**
- * Start Express server.
- */
-app.listen(app.get('port'), () => {
-  console.log(
-    '%s App is running at http://localhost:%d in %s mode',
-    chalk.green('✓'),
-    app.get('port'),
-    app.get('env')
-  );
-  console.log('  Press CTRL-C to stop\n');
-});
+async function startServer() {
+  Logger.debug('Initalizing App');
 
-module.exports = app;
+  const app = express();
+
+  /**
+   * A little hack here
+   * Import/Export can only be used in 'top-level code'
+   * Well, at least in node 10 without babel and at the time of writing
+   * So we are using good old require.
+   */
+  // await require('./loaders')({ expressApp: app });
+
+  app.listen(config.port, err => {
+    if (err) {
+      Logger.error(err);
+      process.exit(1);
+      return;
+    }
+    Logger.info(`Server listening on port: ${config.port}`);
+  });
+}
+
+startServer();

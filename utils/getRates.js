@@ -20,7 +20,7 @@ const dataFixier = async () => {
     const response = await axios.get(`http://data.fixer.io/api/latest?access_key=${process.env.DATA_FIXER_IO}`);
     if (response.data.success && moment(response.data.date).format('YYYY-MM-DD') === moment().format('YYYY-MM-DD')) {
       const data = new Rate(response.data);
-      await data.save().then((rates) => {
+      await data.save().then(rates => {
         console.log(`Rates for ${moment(rates.date)},\ncollected on ${new Date(rates.timestamp * 1000)},\ncreated on ${moment(rates.createdAt)}`);
       });
     } else if (moment(response.data.date).format('YYYY-MM-DD') !== moment().format('YYYY-MM-DD')) {
@@ -60,7 +60,8 @@ const checkDbForTodayRates = new Promise((resolve, reject) => {
   }
 });
 
-/*
+/**
+ * GET RATES FROM DATA.FIXER.IO/API.
  * getRates module
  * const getRates = require(./getRates)
  * Use it once after connect to DB - getRates()
@@ -69,18 +70,16 @@ const checkDbForTodayRates = new Promise((resolve, reject) => {
  * module: utils/getRates
  * @param {string} today Now YYYY-MM-DD format
  */
-
-/** GET RATES FROM DATA.FIXER.IO/API. */
 module.exports = async () => {
   const today = moment().format('YYYY-MM-DD');
-  checkDbForTodayRates.then((rates) => {
+  checkDbForTodayRates.then(rates => {
     if (rates.length === 0) {
       console.log(`${moment(new Date())} - Rates for ${today} not yet in DB. Retrieving rates...`);
       dataFixier();
     } else {
       console.log(`${moment(new Date())} - Rates for ${today} already in DB`);
     }
-  }).catch((err) => {
+  }).catch(err => {
     console.log(err);
   });
 
@@ -101,4 +100,5 @@ module.exports = async () => {
       console.log(err);
     }
   });
+  return job;
 };

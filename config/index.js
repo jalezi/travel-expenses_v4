@@ -27,6 +27,14 @@ module.exports = {
   //  * That long string from mlab
   databaseURL: process.env.MONGODB_URI,
 
+  // * Mongoose options
+  mongooseOptions: {
+    useFindAndModify: false,
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true
+  },
+
   //  * Your secret sauce
   jwtSecret: process.env.JWT_SECRET,
 
@@ -45,11 +53,11 @@ module.exports = {
 
   //  * HBS configuration
   hbs: {
-    layoutsDir: appRoot.resolve('views', 'layouts'),
+    layoutsDir: appRoot.resolve('views/layouts'),
     partialsDir: [
-      appRoot.resolve('views', 'partials'),
-      appRoot.resolve('views', 'account'),
-      appRoot.resolve('views', 'travels')
+      appRoot.resolve('views/partials'),
+      appRoot.resolve('views/account'),
+      appRoot.resolve('views/travels')
     ],
     defaultView: 'layout',
     extname: '.hbs'

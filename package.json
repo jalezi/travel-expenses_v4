@@ -10,8 +10,7 @@
     "build:dev": "webpack --config webpack.config.js",
     "start": "node --icu-data-dir=node_modules\\full-icu app.js",
     "start:nodemon": "nodemon --icu-data-dir=node_modules\\full-icu app.js",
-    "start:appNew": "nodemon app-new.js",
-    "test": "nyc --reporter=html mocha  --timeout=10000 --exit",
+    "test": "nyc --reporter=html mocha --timeout=10000 --exit",
     "lint": "eslint \"**/*.js\""
   },
   "dependencies": {

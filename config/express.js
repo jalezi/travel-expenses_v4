@@ -31,10 +31,23 @@ const routes = require('./routes');
 const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
 
+// Morgan option
+let morganOption;
+switch (config.envNode) {
+  case 'development':
+    morganOption = 'dev';
+    break;
+  case 'production':
+    morganOption = 'combined';
+    break;
+  default:
+    morganOption = 'tiny';
+}
+
 module.exports = async app => {
   Logger.debug('Express configuration initialize');
   // Set MORGAN logger to use WINSTON stream write
-  const morganOption = config.envNode === 'development' ? 'dev' : 'combined';
+  // const morganOption = config.envNode === 'development' ? 'dev' : 'combined';
   app.use(
     morgan(morganOption, {
       stream: winston.stream.write

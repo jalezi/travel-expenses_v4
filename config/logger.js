@@ -1,32 +1,56 @@
 const winston = require('winston');
 const config = require('../config');
 
-const logFormat = winston.format.printf(
-  info => {
-    const { pathDepth } = info;
-    const label = info.label.padStart(27);
-    const level = info.level.padStart(15);
-    return `${info.timestamp} ${level} [${pathDepth}] [${label}]: ${info.message}`;
-  }
-);
+// Format output when running tests
+const logTestFormat = winston.format.printf(info => {
+  console.log(info.service);
+
+  return `${info.level} [${info.label}]: ${info.message}`;
+});
+
+// Format output when in dev mode
+const logDevFormat = winston.format.printf(info => {
+  const { pathDepth } = info;
+  const label = info.label.padStart(27);
+  const level = info.level.padStart(15);
+  return `${info.timestamp} ${level} [${pathDepth}] [${label}]: ${info.message}`;
+});
 // TODO Add error handler and files transports
 const transports = [];
-if (process.env.NODE_ENV !== 'development') {
-  transports.push(new winston.transports.Console());
-} else {
-  transports.push(
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.align(),
-        winston.format.timestamp({
-          format: 'HH:mm:ss'
-        }),
-        logFormat
-      ),
-      exitOnError: false
-    })
-  );
+
+switch (process.env.NODE_ENV) {
+  case 'test':
+    transports.push(
+      new winston.transports.Console({
+        format: winston.format.combine(
+          winston.format.colorize({ all: true }),
+          winston.format.align(),
+          winston.format.padLevels(),
+          winston.format.ms(),
+          logTestFormat
+        ),
+        exitOnError: false
+      })
+    );
+    break;
+  case 'development':
+    transports.push(
+      new winston.transports.Console({
+        format: winston.format.combine(
+          winston.format.colorize(),
+          winston.format.align(),
+          winston.format.timestamp({
+            format: 'HH:mm:ss'
+          }),
+          logDevFormat
+        ),
+        exitOnError: false
+      })
+    );
+    break;
+  default:
+    transports.push(new winston.transports.Console());
+    break;
 }
 
 const addLogger = (filename, pathDepth) => {
@@ -43,7 +67,7 @@ const addLogger = (filename, pathDepth) => {
   if (winston.loggers.has(label)) {
     return winston.loggers.get(label);
   }
-  // Set metadata
+  // Add logger
   winston.loggers.add(label, {
     level: config.logs.level,
     levels: winston.config.npm.levels,
@@ -56,9 +80,15 @@ const addLogger = (filename, pathDepth) => {
       winston.format.errors({ stack: true }),
       winston.format.splat(),
       winston.format.json(),
-      winston.format.prettyPrint(),
+      // winston.format.prettyPrint(),
       winston.format.metadata({
-        fillExcept: ['message', 'level', 'timestamp', 'label', 'pathDepth', 'trace']
+        fillExcept: [
+          'message',
+          'level',
+          'timestamp',
+          'label',
+          'pathDepth'
+        ]
       })
     ),
     defaultMeta: { pathDepth },

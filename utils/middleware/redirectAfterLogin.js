@@ -1,4 +1,4 @@
-const { addLogger } = require('../../loaders/logger');
+const { addLogger } = require('../../config/logger');
 
 const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);

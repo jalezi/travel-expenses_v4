@@ -1,4 +1,4 @@
-const { addLogger } = require('../../loaders/logger');
+const { addLogger } = require('../../config/logger');
 const Travel = require('../../models/Travel');
 const Expense = require('../../models/Expense');
 const Rate = require('../../models/Rate');

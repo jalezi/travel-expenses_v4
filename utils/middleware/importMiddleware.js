@@ -1,4 +1,4 @@
-const { addLogger } = require('../../loaders/logger');
+const { addLogger } = require('../../config/logger');
 const Travel = require('../../models/Travel');
 
 const pathDepth = module.paths.length - 6;

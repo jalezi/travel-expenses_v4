@@ -35,6 +35,7 @@
         "argsIgnorePattern": "next"
       }
     ],
+    "prefer-const": "off",
     "operator-linebreak": 0,
     "space-before-function-paren": "off",
     "chai-friendly/no-unused-expressions": 2,

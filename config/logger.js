@@ -2,18 +2,17 @@ const winston = require('winston');
 const config = require('../config');
 
 // Format output when running tests
-const logTestFormat = winston.format.printf(info => {
-  console.log(info.service);
-
-  return `${info.level} [${info.label}]: ${info.message}`;
-});
+const logTestFormat = winston.format.printf(info => `${info.level} [${info.label}]: ${info.message}`);
 
 // Format output when in dev mode
 const logDevFormat = winston.format.printf(info => {
-  const { pathDepth } = info;
-  const label = info.label.padStart(27);
-  const level = info.level.padStart(15);
-  return `${info.timestamp} ${level} [${pathDepth}] [${label}]: ${info.message}`;
+  let { level, label } = info;
+  const {
+    pathDepth, message, timestamp, ms
+  } = info;
+  label = info.label.padStart(27);
+  level = info.level.padStart(15);
+  return `${timestamp} ${level} [${pathDepth}] [${label}]: ${message} [${ms}]`;
 });
 // TODO Add error handler and files transports
 const transports = [];
@@ -37,11 +36,14 @@ switch (process.env.NODE_ENV) {
     transports.push(
       new winston.transports.Console({
         format: winston.format.combine(
-          winston.format.colorize(),
+          // winston.format.metadata({ test: 'Hello' }),
+          winston.format.colorize({ all: true }),
+          // winston.format.padLevels(),
           winston.format.align(),
           winston.format.timestamp({
             format: 'HH:mm:ss'
           }),
+          winston.format.ms(),
           logDevFormat
         ),
         exitOnError: false

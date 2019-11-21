@@ -10,7 +10,7 @@
     "build:dev": "webpack --config webpack.config.js",
     "start": "node --icu-data-dir=node_modules\\full-icu app.js",
     "start:nodemon": "nodemon --icu-data-dir=node_modules\\full-icu app.js",
-    "test": "nyc --reporter=html mocha --timeout=10000 --exit",
+    "test": "set NODE_ENV=test && nyc --reporter=html mocha --timeout=10000 --exit",
     "lint": "eslint \"**/*.js\""
   },
   "dependencies": {
@@ -89,6 +89,7 @@
     "mocha": "^6.2.2",
     "nodemon-webpack-plugin": "^4.2.0",
     "nyc": "^15.0.0-beta.1",
+    "prettier": "^1.19.1",
     "regenerator-runtime": "^0.13.3",
     "restyle-loader": "0.0.3",
     "sinon": "^7.5.0",

@@ -72,3 +72,4 @@ snapshots.js
 app-new.js
 /loaders/*
 /api/*
+/coverage

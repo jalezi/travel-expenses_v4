@@ -65,6 +65,19 @@ async function startServer() {
     getRates();
     Logger.silly('Function getRates initialized');
   });
+  return app;
 }
 
 startServer();
+
+module.exports = () => {
+  const env = dotenv.config();
+  dotenvExpand(env);
+  if (env.error) {
+    throw env.error;
+  }
+  process.env.LOG_LEVEL = 'error';
+  const app = express();
+  expressConfiguration(app);
+  return app;
+};

@@ -37,7 +37,7 @@ process.on('uncaughtException', err => {
 });
 
 async function startServer() {
-  Logger.debug('Initalizing App');
+  Logger.info('Initalizing App');
 
   // Create express server
   const app = express();

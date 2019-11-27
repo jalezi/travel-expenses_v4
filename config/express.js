@@ -1,5 +1,5 @@
 const morgan = require('morgan');
-const winston = require('winston');
+// const winston = require('winston');
 const expressHbs = require('express-hbs');
 const compression = require('compression');
 const sass = require('node-sass-middleware');
@@ -30,6 +30,7 @@ const routes = require('./routes');
 // Logger
 const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
+const httpLogger = addLogger('http');
 
 // Morgan option
 let morganOption;
@@ -50,7 +51,7 @@ module.exports = async app => {
   // const morganOption = config.envNode === 'development' ? 'dev' : 'combined';
   app.use(
     morgan(morganOption, {
-      stream: winston.stream.write
+      stream: httpLogger.stream
     })
   );
   Logger.silly(`Use morgan with ${morganOption} and winston logger`);

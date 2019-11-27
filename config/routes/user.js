@@ -9,6 +9,7 @@ const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
 
 module.exports = (app: Router) => {
+    Logger.debug('Routes initialize');
     app.get('/login', userController.getLogin);
     app.post('/login', userController.postLogin);
     app.get('/logout', userController.logout);

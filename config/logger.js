@@ -57,11 +57,18 @@ switch (process.env.NODE_ENV) {
 
 const addLogger = (filename, pathDepth) => {
   // Create label
+  let label;
   const filenameArray = filename.split('\\');
-  const filenameLength = filenameArray.length;
-  let label = `${filenameArray[filenameLength - 2]}/${
-    filenameArray[filenameLength - 1]
-  }`;
+  const filenameArrayLength = filenameArray.length;
+
+  if (filenameArrayLength > 1) {
+    label = `${filenameArray[filenameArrayLength - 2]}/${
+      filenameArray[filenameArrayLength - 1]
+    }`;
+  } else {
+    label = `${filenameArray[filenameArrayLength - 1]}`;
+  }
+
   // eslint-disable-next-line prefer-destructuring
   label = label.split('.')[0];
 

@@ -42,7 +42,7 @@
       {
         "ObjectExpression": {
           "multiline": true,
-          "minProperties": 3,
+          "minProperties": 6,
           "consistent": true
         },
         "ObjectPattern": {

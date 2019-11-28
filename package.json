@@ -11,7 +11,7 @@
     "start": "node --icu-data-dir=node_modules\\full-icu app.js",
     "start:nodemon": "nodemon --icu-data-dir=node_modules\\full-icu app.js",
     "start:playground": "node playground\\winston-logger\\loggerApp.js",
-    "test": "set NODE_ENV=test&& nyc --reporter=html mocha --timeout=10000 --exit",
+    "test": "set NODE_ENV=test && nyc --reporter=html mocha --timeout=10000 --exit",
     "lint": "eslint \"**/*.js\""
   },
   "dependencies": {

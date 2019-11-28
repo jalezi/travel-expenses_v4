@@ -29,9 +29,13 @@ const logDevFormat = winston.format.printf(info => {
 // Create logger transports based on NODE_ENV
 // TODO Add error handler and files transports
 const transports = [];
-
+const str = process.env.NODE_ENV;
 switch (process.env.NODE_ENV) {
-  case 'test':
+  // When calling test and setting env variable in package.json as script
+  // NODEjs or  whatever adds whatever it is before &&
+  // set NODE_ENV=test && nyc --reporter=html mocha --timeout=10000 --exit
+  // NODE_ENV = "test "
+  case str.match(/^test/).input:
     transports.push(
       new winston.transports.Console({
         format: winston.format.combine(

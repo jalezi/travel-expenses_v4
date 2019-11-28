@@ -1,16 +1,17 @@
 const passport = require('passport');
-const request = require('request');
+// const request = require('request');
 
 const { Strategy: LocalStrategy } = require('passport-local');
 const { OAuth2Strategy: GoogleStrategy } = require('passport-google-oauth');
-const { OAuthStrategy } = require('passport-oauth');
-const { OAuth2Strategy } = require('passport-oauth');
+// const { OAuthStrategy } = require('passport-oauth');
+// const { OAuth2Strategy } = require('passport-oauth');
 
 const User = require('../models/User');
 
 /**
  * Determines which data of the user object should be stored in the session.
- * The result of the serializeUser method is attached to the session as req.session.passport.user = {}.
+ * The result of the serializeUser method is attached to the session
+ * as req.session.passport.user = {}.
  * In this case req.session.passport.user = {id: user.id)
  */
 passport.serializeUser((user, done) => {
@@ -18,7 +19,8 @@ passport.serializeUser((user, done) => {
 });
 
 /**
- * The first argument of deserializeUser corresponds to the key of the user object that was given to the done function (see 1.).
+ * The first argument of deserializeUser corresponds to the key of the user object
+ * that was given to the done function (see 1.).
  * So your whole object is retrieved with help of that key.
  * That key here is the user id (key can be any key of the user object i.e. name,email etc).
  * In deserializeUser that key is matched with the in memory array / database or any data resource.
@@ -74,6 +76,7 @@ passport.use(new GoogleStrategy({
   callbackURL: '/auth/google/callback',
   passReqToCallback: true
 }, (req, accessToken, refreshToken, profile, done) => {
+  console.log(profile);
   if (req.user) {
     User.findOne({ google: profile.id }, (err, existingUser) => {
       if (err) { return done(err); }
@@ -89,9 +92,8 @@ passport.use(new GoogleStrategy({
           user.profile.fName = user.profile.fName || profile.name.givenName;
           user.profile.lName = user.profile.lName || profile.name.familyName;
           user.profile.gender = user.profile.gender || profile._json.gender;
-          // FIXME getting picture from google account
-          // user.profile.picture = user.profile.picture || profile._json.image.url;
-          user.save((err) => {
+          user.profile.picture = user.profile.picture || profile._json.picture;
+          user.save(err => {
             req.flash('info', { msg: 'Google account has been linked.' });
             done(err, user);
           });
@@ -119,7 +121,7 @@ passport.use(new GoogleStrategy({
           user.profile.lName = profile.name.familyName;
           user.profile.gender = profile._json.gender;
           user.profile.picture = profile._json.image.url;
-          user.save((err) => {
+          user.save(err => {
             done(err, user);
           });
         }

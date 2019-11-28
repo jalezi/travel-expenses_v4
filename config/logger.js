@@ -1,19 +1,32 @@
+/* eslint-disable object-curly-newline */
 const winston = require('winston');
 const config = require('../config');
 
+const deleteNewLine = (label, message) => {
+  if (label === 'http') {
+    message = message.replace(/\n/g, '');
+  }
+  return message;
+};
+
 // Format output when running tests
-const logTestFormat = winston.format.printf(
-  info => `${info.level} [${info.label}]: ${info.message}`
-);
+const logTestFormat = winston.format.printf(info => {
+  let { level, label, message, ms } = info;
+  message = deleteNewLine(label, message);
+  return `${level} ${label} ${message} ${ms}`;
+});
 
 // Format output when in dev mode
 const logDevFormat = winston.format.printf(info => {
-  let { level, label } = info;
-  const { pathDepth, message, timestamp, ms } = info;
+  let { level, label, message } = info;
+  const { pathDepth, timestamp, ms } = info;
+  message = deleteNewLine(label, message);
   label = info.label.padStart(27);
   level = info.level.padStart(15);
   return `${timestamp} ${level} [${pathDepth}] [${label}]: ${message} [${ms}]`;
 });
+
+// Create logger transports based on NODE_ENV
 // TODO Add error handler and files transports
 const transports = [];
 
@@ -36,9 +49,7 @@ switch (process.env.NODE_ENV) {
     transports.push(
       new winston.transports.Console({
         format: winston.format.combine(
-          // winston.format.metadata({ test: 'Hello' }),
           winston.format.colorize({ all: true }),
-          // winston.format.padLevels(),
           winston.format.align(),
           winston.format.timestamp({ format: 'HH:mm:ss' }),
           winston.format.ms(),
@@ -50,14 +61,17 @@ switch (process.env.NODE_ENV) {
     break;
   default:
     transports.push(
-      new winston.transports.Console({ format: winston.format.simple() })
+      new winston.transports.Console({
+        format: winston.format.simple()
+      })
     );
     break;
 }
 
 const addLogger = (filename, pathDepth) => {
-  // Create label
   let label;
+
+  // Extract label from filename
   const filenameArray = filename.split('\\');
   const filenameArrayLength = filenameArray.length;
 
@@ -76,10 +90,12 @@ const addLogger = (filename, pathDepth) => {
   if (!pathDepth) {
     pathDepth = 0;
   }
+
   // Check if logger with label is already in winston.Container
   if (winston.loggers.has(label)) {
     return winston.loggers.get(label);
   }
+
   // Add logger
   winston.loggers.add(label, {
     level: config.logs.level,
@@ -91,7 +107,6 @@ const addLogger = (filename, pathDepth) => {
       winston.format.errors({ stack: true }),
       winston.format.splat(),
       winston.format.json(),
-      // winston.format.prettyPrint(),
       winston.format.metadata({
         fillExcept: ['message', 'level', 'timestamp', 'label', 'pathDepth']
       })

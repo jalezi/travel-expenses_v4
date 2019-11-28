@@ -11,32 +11,24 @@ const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
 
 const dataFixier = async () => {
+  const today = moment().format('YYYY-MM-DD');
   try {
     const response = await axios.get(
       `http://data.fixer.io/api/latest?access_key=${process.env.DATA_FIXER_IO}`
     );
-    if (
-      response.data.success &&
-      moment(response.data.date).format('YYYY-MM-DD') ===
-        moment().format('YYYY-MM-DD')
-    ) {
-      /** @type {rates} */
+    const responseDate = moment(response.data.date).format('YYYY-MM-DD');
+
+    if (response.data.success && responseDate === today) {
+      /** @type {Rate} */
       const data = new Rate(response.data);
       await data.save().then(rates => {
-        Logger.info(
-          `Rates for ${moment(rates.date)},\ncollected on ${new Date(
-            rates.timestamp * 1000
-          )},\ncreated on ${moment(rates.createdAt)}`
-        );
+        Logger.info(`Rates for ${moment(rates.date)}.`);
+        Logger.info(`Collected on ${new Date(rates.timestamp * 1000)}.`);
+        Logger.info(`Created on ${moment(rates.createdAt)}.`);
       });
-    } else if (
-      moment(response.data.date).format('YYYY-MM-DD') !==
-      moment().format('YYYY-MM-DD')
-    ) {
-      Logger.info(
-        `Wrong response data date: ${moment(response.data.date).format(
-          'YYYY-MM-DD'
-        )} - Should be ${moment().format('YYYY-MM-DD')}`
+    } else if (responseDate !== today) {
+      Logger.warn(
+        `Wrong response data date: ${responseDate} - Should be ${today}`
       );
     } else {
       Logger.warn("Couldn't get rates from data.fixer.io");
@@ -75,15 +67,15 @@ const checkDbForTodayRates = new Promise((resolve, reject) => {
  */
 module.exports = async () => {
   const today = moment().format('YYYY-MM-DD');
-  checkDbForTodayRates
-    .then(rates => {
+  await checkDbForTodayRates
+    .then(async rates => {
       if (rates.length === 0) {
         Logger.info(
           `${moment(
             new Date()
           )} - Rates for ${today} not yet in DB. Retrieving rates...`
         );
-        dataFixier();
+        await dataFixier();
       } else {
         Logger.info(`${moment(new Date())} - Rates for ${today} already in DB`);
       }

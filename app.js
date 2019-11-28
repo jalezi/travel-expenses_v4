@@ -50,6 +50,10 @@ async function startServer() {
   await expressConfiguration(app);
   Logger.info('Express loaded');
 
+  // Function to check for rates at data.fixer.io and save them to DB
+  await getRates();
+  Logger.silly('Function getRates intialized!');
+
   // Error Handler.
   errorHandler(app);
   Logger.info('Error handler loaded');
@@ -61,31 +65,14 @@ async function startServer() {
       return;
     }
     Logger.info(`Server listening on port: ${config.port}`);
+
     // Setup the event emitter to assume that app is running.
+    // It's for tests.
     app.emit('appStarted');
-    // Function to check for rates at data.fixer.io and save them to DB
-    getRates();
-    Logger.silly('Function getRates initialized');
   });
   return app;
 }
 
 const app = startServer();
 
-// startServer();
-
 exports.app = app;
-
-// module.exports = async () => {
-//   const env = dotenv.config();
-//   dotenvExpand(env);
-//   if (env.error) {
-//     throw env.error;
-//   }
-//   process.env.LOG_LEVEL = 'error';
-//   const app = express();
-//   // Setup the event emitter to assume that app is running.
-//   await expressConfiguration(app);
-//   app.emit('appStarted');
-//   return app;
-// };

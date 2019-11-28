@@ -35,7 +35,7 @@ switch (process.env.NODE_ENV) {
   // NODEjs or  whatever adds whatever it is before &&
   // set NODE_ENV=test && nyc --reporter=html mocha --timeout=10000 --exit
   // NODE_ENV = "test "
-  case str.match(/^test/).input:
+  case (str.match(/^test/) || {}).input:
     transports.push(
       new winston.transports.Console({
         format: winston.format.combine(

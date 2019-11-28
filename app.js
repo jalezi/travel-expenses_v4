@@ -37,14 +37,14 @@ process.on('uncaughtException', err => {
 });
 
 async function startServer() {
-  Logger.info('Initalizing App');
+  Logger.info('App initializing');
 
   // Create express server
   const app = express();
 
   // Connect to MongoDB
   await mongoConnection();
-  Logger.info('DB loaded and connected!');
+  Logger.info('DB loaded and connected');
 
   // Express Configuration
   await expressConfiguration(app);

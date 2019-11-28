@@ -89,7 +89,8 @@ passport.use(new GoogleStrategy({
           user.profile.fName = user.profile.fName || profile.name.givenName;
           user.profile.lName = user.profile.lName || profile.name.familyName;
           user.profile.gender = user.profile.gender || profile._json.gender;
-          user.profile.picture = user.profile.picture || profile._json.image.url;
+          // FIXME getting picture from google account
+          // user.profile.picture = user.profile.picture || profile._json.image.url;
           user.save((err) => {
             req.flash('info', { msg: 'Google account has been linked.' });
             done(err, user);

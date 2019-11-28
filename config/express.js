@@ -46,7 +46,7 @@ switch (config.envNode) {
 }
 
 module.exports = async app => {
-  Logger.debug('Express configuration initialize');
+  Logger.debug('Express configuration initializing');
   // Set MORGAN logger to use WINSTON stream write
   // const morganOption = config.envNode === 'development' ? 'dev' : 'combined';
   app.use(

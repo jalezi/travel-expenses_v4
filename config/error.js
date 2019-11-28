@@ -11,7 +11,7 @@ const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
 
 module.exports = app => {
-  Logger.debug('errorHandler initialize');
+  Logger.debug('Error handler initializing');
   if (process.env.NODE_ENV === 'development') {
     // only use in development
     app.use(

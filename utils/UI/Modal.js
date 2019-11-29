@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/prefer-default-export
 export class Modal {
   constructor(contentId, fallbackText) {
     this.fallbackText = fallbackText;
@@ -24,6 +25,7 @@ export class Modal {
       document.body.insertAdjacentElement('afterbegin', this.backdropElement);
     } else {
       // fallback code
+      // eslint-disable-next-line no-alert
       alert(this.fallbackText);
     }
   }

@@ -57,6 +57,16 @@ module.exports = {
     dest: appRoot.resolve('public')
   },
 
+  static: {
+    pub: appRoot.resolve('public'),
+    popper: appRoot.resolve('node_modules/popper.js/dist/umd'),
+    bootstrap: appRoot.resolve('node_modules/bootstrap/dist/js'),
+    jquery: appRoot.resolve('node_modules/jquery/dist'),
+    webfonts: appRoot.resolve(
+      'node_modules/@fortawesome/fontawesome-free/webfonts'
+    )
+  },
+
   // * SESSION configuration
   session: {
     resave: true,

@@ -148,38 +148,16 @@ module.exports = async app => {
   app.use(redirectAfterLogin);
   Logger.silly('Set redirection to intended page after successful login');
 
-  app.use(
-    '/',
-    express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 })
-  );
-  app.use(
-    '/js/lib',
-    express.static(path.join(__dirname, 'node_modules/popper.js/dist/umd'), {
-      maxAge: 31557600000
-    })
-  );
-  app.use(
-    '/js/lib',
-    express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js'), {
-      maxAge: 31557600000
-    })
-  );
-  app.use(
-    '/js/lib',
-    express.static(path.join(__dirname, 'node_modules/jquery/dist'), {
-      maxAge: 31557600000
-    })
-  );
-  app.use(
-    '/webfonts',
-    express.static(
-      path.join(
-        __dirname,
-        'node_modules/@fortawesome/fontawesome-free/webfonts'
-      ),
-      { maxAge: 31557600000 }
-    )
-  );
+  const {
+    pub, popper, bootstrap, jquery, webfonts
+  } = config.static;
+  const maxAge = 31557600000;
+  const staticOptions = { maxAge };
+  app.use('/', express.static(pub, staticOptions));
+  app.use('/js/lib', express.static(popper, staticOptions));
+  app.use('/js/lib', express.static(bootstrap, staticOptions));
+  app.use('/js/lib', express.static(jquery, staticOptions));
+  app.use('/webfonts', express.static(webfonts, staticOptions));
   Logger.silly('Use static: public, popper, bootstrap & jquery libraries');
 
   // Useful if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)

@@ -1,9 +1,12 @@
-// jshint esversion: 8
-const nodemailer = require('nodemailer');
 const mailjet = require('node-mailjet').connect(
   process.env.MJ_APIKEY_PUBLIC,
   process.env.MJ_APIKEY_PRIVATE
 );
+
+const { addLogger } = require('../config/logger');
+
+const pathDepth = module.paths.length - 6;
+const Logger = addLogger(__filename, pathDepth);
 
 // TODO implement contact form
 
@@ -12,10 +15,10 @@ const mailjet = require('node-mailjet').connect(
  * Contact form page.
  */
 exports.getContact = (req, res) => {
-  const unknownUser = !(req.user);
+  const unknownUser = !req.user;
   res.render('contact', {
     title: 'Contact',
-    unknownUser,
+    unknownUser
   });
 };
 
@@ -24,6 +27,7 @@ exports.getContact = (req, res) => {
  * Send a contact form via Nodemailer.
  */
 exports.postContact = (req, res, next) => {
+  Logger.debug('Posting contact');
   let fromName;
   let fromEmail;
   if (!req.user) {
@@ -48,31 +52,33 @@ exports.postContact = (req, res, next) => {
   }
 
   const sendContactForm = async () => {
-    const sendEmail = mailjet.post('send', {version: 'v3.1'});
+    const sendEmail = mailjet.post('send', { version: 'v3.1' });
     const emailData = {
-      "Messages": [{
-        "From": {
-          "Email": "jaka.daneu@siol.net",
-          "Name": `${fromName} - ${fromEmail}`
-        },
-        "To": [{
-          "Email": "jakad@me.com",
-          "Name": 'TExpenses App'
-        }],
-        'Subject': 'Contact TExpenses App',
-        'TextPart': req.body.message
-      }]
+      Messages: [
+        {
+          From: {
+            Email: 'jaka.daneu@siol.net',
+            Name: `${fromName} - ${fromEmail}`
+          },
+          To: [
+            {
+              Email: 'jakad@me.com',
+              Name: 'TExpenses App'
+            }
+          ],
+          Subject: 'Contact TExpenses App',
+          TextPart: req.body.message
+        }
+      ]
     };
 
     try {
       await sendEmail.request(emailData);
       return req.flash('info', {
-        msg: `An e-mail has been sent to TExpenses App.`
+        msg: 'An e-mail has been sent to TExpenses App.'
       });
-    }
-    catch (err) {
-      console.log(err);
-
+    } catch (err) {
+      Logger.error(err);
       req.flash('errors', {
         msg: 'Error sending the contact message. Please try again shortly.'
       });
@@ -85,5 +91,4 @@ exports.postContact = (req, res, next) => {
       res.redirect('/');
     })
     .catch(next);
-
 };

@@ -57,6 +57,7 @@ module.exports = {
     dest: appRoot.resolve('public')
   },
 
+  // Static folders
   static: {
     pub: appRoot.resolve('public'),
     popper: appRoot.resolve('node_modules/popper.js/dist/umd'),

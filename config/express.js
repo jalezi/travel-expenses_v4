@@ -11,7 +11,6 @@ const flash = require('express-flash');
 const formidable = require('express-formidable');
 const lusca = require('lusca');
 const express = require('express');
-const path = require('path');
 const cors = require('cors');
 
 const { addLogger } = require('./logger');

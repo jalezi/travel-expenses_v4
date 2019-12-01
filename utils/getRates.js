@@ -1,3 +1,22 @@
+/**
+ *
+ * @description Get rates from data.fixer.io/api, save them to DB and
+ * creates job to check every hour if we have rates in DB.
+ *
+ * This module requires:
+ * {@link module:models/Rate}
+ * {@link config/logger.addLogger}
+ *
+ * @module utils/getRates
+ * @requires node_modules/axios
+ * @requires node_modules/node-schedule
+ * @requires node_modules/moment
+ * @requires module:models/Rate
+ * @requires config/logger.addLogger
+ *
+ */
+
+
 const axios = require('axios');
 const schedule = require('node-schedule');
 const moment = require('moment');
@@ -10,6 +29,13 @@ const { addLogger } = require('../config/logger');
 const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
 
+/**
+ * Get rates from data.fixer.io
+ *
+ * @async
+ * @function
+ *
+ */
 const dataFixier = async () => {
   const today = moment().format('YYYY-MM-DD');
   try {
@@ -42,11 +68,10 @@ const dataFixier = async () => {
 /**
  * Check if today rates already exists in DB,
  *  resolve as array of rates documents(objects), reject as error
+ *
  * @type {Promise}
- * @var {string} today  Now YYYY-MM-DD format
- * @var {object} rates  Info about rates or error
- * @resolve             Promise<Rate> Array of MongoDB documents
- * @reject              Error
+ *
+ * @returns {Promise<Rates[]>}             Promise<Rate> Array of MongoDB documents
  */
 const checkDbForTodayRates = new Promise((resolve, reject) => {
   const today = moment(new Date()).format('YYYY-MM-DD');
@@ -58,12 +83,13 @@ const checkDbForTodayRates = new Promise((resolve, reject) => {
   }
 });
 
+
 /**
  * Get rates from data.fixer.io/api, save them to DB and
  * creates job to check every hour if we have rates in DB.
  *
- * @description Get Rates
- * @var {string} today Now YYYY-MM-DD format
+ * @async
+ * @function
  */
 module.exports = async () => {
   const today = moment().format('YYYY-MM-DD');

@@ -13,6 +13,18 @@ const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
 
 /**
+ * Converts to currency format
+ *
+ * @param {(Number | string)} amount
+ * @returns {string}
+ */
+function toCurrencyFormat (amount) {
+  const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const result = formatter.format(amount);
+  return result;
+}
+
+/**
  * Returns converted rate based on user default currency
  * @param {Rate} rates
  * @param {string} homeCurrency User default currency
@@ -187,6 +199,8 @@ const createOptions = (options, selected, elemAttrs = {}, valueToLowerCase = fal
 };
 
 module.exports = {
+  /** Converts to international number currency format */
+  toCurrencyFormat,
   /** Converts rate to user defined default currency base */
   convertRateToHomeCurrencyRate,
   /** Finds rates on exact date or closest date */

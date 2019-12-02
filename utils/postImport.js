@@ -489,7 +489,8 @@ async function expensesImportNewCurrenciesForSave(array) {
   });
 }
 
-
+// TODO Check if expense is already in DB
+// https://stackoverflow.com/questions/8389811/how-to-query-mongodb-to-test-if-an-item-exists
 /**
  * @member {function} expenseImport
  * @async
@@ -534,7 +535,7 @@ const expenseImport = async dataArray =>
     }
   });
 
-
+// TODO Check if travel is already in DB
 /**
  * @member {function} travelImport
  * @async

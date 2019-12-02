@@ -20,6 +20,7 @@ const Logger = addLogger(__filename, pathDepth);
  * Travel Object has new array with unique curRate objects.
  */
 const findCurRate = (travel, expense) => {
+  Logger.debug('findCurRate');
   let curRate;
   if (expense.type !== 'Mileage') {
     curRate = travel.curRates.find(cr => cr._id.toString() === expense.curRate.toString());
@@ -38,6 +39,7 @@ const findCurRate = (travel, expense) => {
  *
  */
 const createSelectOptions = (options, selected, elemAttrs = {}, valueToLowerCase = false) => {
+  Logger.debug('createSelectOptions');
   let result = '';
   selected = (!selected) ? '' : selected;
   options.forEach(val => {
@@ -64,6 +66,7 @@ const createSelectOptions = (options, selected, elemAttrs = {}, valueToLowerCase
 
 // eslint-disable-next-line no-unused-vars
 const createExpenseForm = (method = 'POST', hiddenMethod = method, csrf = '', expenseTypes = {}, travel, expense, formatter) => {
+  Logger.debug('createExpenseForm');
   if (!travel || !expense) {
     return;
   }
@@ -502,6 +505,7 @@ const createExpenseForm = (method = 'POST', hiddenMethod = method, csrf = '', ex
  * more in Travel Schema /models/Travel.js Travel.byYear_byMonth
  */
 expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
+  Logger.debug('yearsAccordionWithForm');
   const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   // HTML Accordion - RESULT
   const yearObjectsArray = [];
@@ -678,6 +682,7 @@ expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
  * more in Travel Schema /models/Travel.js Travel.byYear_byMonth
  */
 expressHbs.registerHelper('yearsAccordion', (value, csrf) => {
+  Logger.debug('yearsAccordion');
   const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   // HTML Accordion - RESULT
   const yearObjectsArray = [];

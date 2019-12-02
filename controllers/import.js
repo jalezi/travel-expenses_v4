@@ -1,93 +1,103 @@
-const mongoose = require('mongoose');
 const _ = require('lodash');
 const moment = require('moment');
-const fs = require('fs');
-const Papa = require('papaparse');
 
-const User = require('../models/User');
-const Travel = require('../models/Travel');
-const Expense = require('../models/Expense');
-const Rate = require('../models/Rate');
 const Currency = require('../models/Currency');
-const ObjectId = mongoose.Types.ObjectId;
 
-const {expenseTypes} = require('../lib/globals');
-const constants = require('../lib/constants');
 const postImport = require('../utils/postImport');
 const myErrors = require('../utils/myErrors');
 
-/*
+const { addLogger } = require('../config/logger');
+
+// Logger
+const pathDepth = module.paths.length - 6;
+const Logger = addLogger(__filename, pathDepth);
+
+
+// TODO Change form. At the moment expenses import is only for multiple expenses.
+/**
  * GET /import
  * Page with import form.
  * You can chooses between travels or expenses import.
- * TODO Change form. At the moment expenses import is only for multiple expenses.
  */
-exports.getImport = async function(req, res, next) {
-  const travels = res.locals.travels;
+exports.getImport = async (req, res, next) => {
+  const { travels } = res.locals;
 
   res.render('travels/import', {
     title: 'Import',
     travels
-  })
-}
+  });
+};
 
-/*
+/**
  * POST /import
  * Import travels or expenses from CSV files.
  */
-exports.postImport = async function(req, res, next) {
+exports.postImport = async (req, res, next) => {
+  Logger.debug('Middleware postImport');
   let message = '';
-  const myFile = req.files.myFile;
+  const { myFile } = req.files;
   const myFilePath = req.files.myFile.path;
   let combinedCurrencies = [];
 
   try {
-    const dataArray = await postImport.readCheckFileAndGetData(myFile, req.body.option).catch((err) => {
-      throw err;
-    });
+    const dataArray = await postImport.readCheckFileAndGetData(myFile, req.body.option)
+      .catch(err => {
+        Logger.error(`Catching error: ${err.message}`);
+        throw err;
+      });
     if (dataArray instanceof Error) {
-      throw dataArray
+      Logger.error(`dataArray is error: ${dataArray.message}`);
+      throw dataArray;
     }
 
-// What is user importing?
+    // What is user importing?
     // import travels
     if (req.body.option === 'travels') {
+      Logger.debug('Importing travels');
       message = await postImport.travelImport(dataArray, req.user._id);
       if (message.error) {
-        error = message.error;
+        let { error } = message;
         message = message.msg;
+        Logger.error(`Importing travels error: ${message}`);
         throw error;
       }
     } else {
     // import expenses
-      let getCurrenciesArray = await postImport.expensesImportSetCurrencyArray(dataArray, req.user._id, res.locals.travels);
-      const currenciesArray = getCurrenciesArray.currenciesArray;
+      Logger.debug('Importing expenses');
+      let getCurrenciesArray = await postImport.expensesImportSetCurrencyArray(
+        dataArray, req.user._id, res.locals.travels
+      );
+      const { currenciesArray } = getCurrenciesArray;
       message = getCurrenciesArray.message;
       let error = getCurrenciesArray.err;
-      if (error) {throw error;}
+      if (error) {
+        Logger.error(`getCurrenciesArray error: ${error.message}`);
+        throw error;
+      }
 
       // Create new currencies
-      const newCurrencies = await postImport.expensesImportNewCurrenciesForSave(currenciesArray).catch((err) => {
-        throw err;
-      });
+      const newCurrencies = await postImport.expensesImportNewCurrenciesForSave(currenciesArray)
+        .catch(err => {
+          Logger.error(`newCurrencies error: ${err.message}`);
+          throw err;
+        });
       let insertedCurrencies = await Currency.insertMany(newCurrencies.notExistingCurrenciesDB);
       combinedCurrencies = insertedCurrencies.concat(newCurrencies.existingCurrenciesDB);
 
       // loop trough imported data
-      await _.forEach(dataArray, async (value, key, object) => {
+      await _.forEach(dataArray, async value => {
         delete value.travelName;
         // find currency for expense
         const currency = await combinedCurrencies
-          .sort((a, b) => {
-            return a.date - b.date;
-          })
-          .find((item) => {
-            let dateEqual = value.date ===  moment(item.date).format('YYYY-MM-DD');
+          .sort((a, b) => a.date - b.date)
+          .find(item => {
+            let dateEqual = value.date === moment(item.date).format('YYYY-MM-DD');
+            // eslint-disable-next-line no-prototype-builtins
             let currencyMatch = item.rate.hasOwnProperty(value.currency);
-            let notMileage = value.type != 'Mileage';
+            let notMileage = value.type !== 'Mileage';
             let result = dateEqual && currencyMatch && notMileage;
             return result;
-        });
+          });
 
         // set currency id for expense if currency exist in DB
         if (currency) {
@@ -99,13 +109,15 @@ exports.postImport = async function(req, res, next) {
       if (dataArray.length === 0) {
         throw new myErrors.ImportFileError('Nothing to import! File has wrong data!');
       }
-      message = await postImport.expenseImport(dataArray).catch((err) => {
+      message = await postImport.expenseImport(dataArray).catch(err => {
         throw err;
       });
     }
 
+    // TODO this might be unnecessary
     if (message.error) {
-      error = message.error;
+      Logger.warn('This is usefull');
+      let { error } = message;
       message = message.msg;
       throw error;
     }
@@ -114,19 +126,22 @@ exports.postImport = async function(req, res, next) {
     req.flash('success', {
       msg: message
     });
-    res.redirect('/travels')
+    res.redirect('/travels');
   } catch (err) {
     postImport.deleteFile(myFilePath, 'File deleted after error!');
-    if (!err instanceof myErrors.ImportFileError) {
-      message = 'Something went wrong. Check console log!';
+    Logger.error(`Catching error: ${err.message}`);
+    if (!(err instanceof myErrors.ImportFileError)) {
+      message = err.message;
+      Logger.warn('Error is not instance of ImportFileError');
       next(err);
     } else {
-      res.status(400);
+      res.status(500);
       message = err.message;
+      Logger.warn('Error is instance of ImportFIleError');
       req.flash('errors', {
         msg: message
       });
       res.redirect('/import');
     }
   }
-}
+};

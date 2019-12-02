@@ -1,32 +1,35 @@
 const expressHbs = require('express-hbs');
 const moment = require('moment');
-const createElement = require('../utils').createElement;
-const createTwoCardElements = require('../utils').createTwoCardElements;
-const {expenseTypes} = require('../../lib/globals');
-const constants = require('../../lib/constants');
+const { createElement } = require('../utils');
+const { createTwoCardElements } = require('../utils');
+const { expenseTypes } = require('../../lib/globals');
 
-/*
+const { addLogger } = require('../../config/logger');
+
+// Logger
+const pathDepth = module.paths.length - 6;
+const Logger = addLogger(__filename, pathDepth);
+
+
+/**
  * Returns expense curRate object-
  * @param {object} travel
  * @param {object} expense
  *
- * Could't populate on travel aggregate expense curRate.
+ * Couldn't populate on travel aggregate expense curRate.
  * Travel Object has new array with unique curRate objects.
  */
 const findCurRate = (travel, expense) => {
-  let currency_unit, curRate
-  if (expense.type != 'Mileage') {
-    currency_unit = expense.currency;
-    curRate = travel.curRates.find((cr) => {
-      return cr._id.toString() === expense.curRate.toString();
-    });
+  let curRate;
+  if (expense.type !== 'Mileage') {
+    curRate = travel.curRates.find(cr => cr._id.toString() === expense.curRate.toString());
   } else {
     curRate = false;
   }
   return curRate;
-}
+};
 
-/*
+/**
  * Creates HTML 'option' elements
  * @param {array} options            Select or datalist options
  * @param {string} selected           Option to be selected
@@ -34,58 +37,59 @@ const findCurRate = (travel, expense) => {
  * @param {boolean} valueToLowerCase  whether to set option's value to lower case
  *
  */
-const createSelectOptions = (options, selected, elemAttrs={}, valueToLowerCase = false) => {
+const createSelectOptions = (options, selected, elemAttrs = {}, valueToLowerCase = false) => {
   let result = '';
   selected = (!selected) ? '' : selected;
-  options.forEach((val) => {
+  options.forEach(val => {
     // console.log(val);
     const optionVal = (valueToLowerCase) ? val.toLowerCase() : val;
     // console.log(optionVal, val, selected);
     elemAttrs.value = optionVal;
     if (optionVal.toLowerCase() === selected.toLowerCase()) {
       elemAttrs.selected = 'selected';
-    };
+    }
     const htmlElem = createElement('option', elemAttrs, val);
     if (elemAttrs.selected) {
       delete elemAttrs.selected;
     }
-    result = result + htmlElem;
+    result += htmlElem;
   });
   delete elemAttrs.value;
   return result;
-}
+};
 
-const createFormRow = () => {
+// const createFormRow = () => {
 
-}
+// }
 
-const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseTypes={}, travel, expense, formatter) => {
+// eslint-disable-next-line no-unused-vars
+const createExpenseForm = (method = 'POST', hiddenMethod = method, csrf = '', expenseTypes = {}, travel, expense, formatter) => {
   if (!travel || !expense) {
     return;
   }
 
   const curRate = findCurRate(travel, expense);
-  const mileage = (expense.type === 'Mileage') ? true : false;
+  const mileage = (expense.type === 'Mileage');
 
   method = method.toUpperCase();
   hiddenMethod = hiddenMethod.toUpperCase();
 
 
   // hidden INPUT OPTIONS
-    const hiddenInputOptions = {
-      type: 'hidden',
-      name: '_csrf',
-      value: csrf
-    };
+  const hiddenInputOptions = {
+    type: 'hidden',
+    name: '_csrf',
+    value: csrf
+  };
 
   // div row OPTIONS
-  const divRowOptions = {class: 'form-group my-1', style: ''};
+  const divRowOptions = { class: 'form-group my-1', style: '' };
   const divElemOptions = {};
 
   // label TAGS & OPTIONS, form elements OPTIONS
   const htmlLabelTagsArr = ['small', 'label'];
-  const labelTextOptions = {class:'form-label'};
-  const labelOptions = {class: ['text-warning', 'mb-0']};
+  const labelTextOptions = { class: 'form-label' };
+  const labelOptions = { class: ['text-warning', 'mb-0'] };
   const htmlLabelOptionsArr = [labelTextOptions, labelOptions];
   const elemOptions = {
     class: ['form-control', 'mb-1', 'bg-secondary', 'text-white', 'text-right'],
@@ -98,7 +102,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   // ALWAYS SHOW
   // EXPENSE.TYPE - HTML SELECT
   // expense type INPUT OPTIONS
-  labelOptions.for =  `expenseType${expense._id}`;
+  labelOptions.for = `expenseType${expense._id}`;
   elemOptions.id = `expenseType${expense._id}`;
   elemOptions.name = 'expenseType';
   elemOptions.autocomplete = 'expenseType';
@@ -117,7 +121,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
 
   // EXPENSE.DESCRIPTION - HTML INPUT text
   // expense description INPUT OPTIONS
-  labelOptions.for =  `expenseDescription${expense._id}`;
+  labelOptions.for = `expenseDescription${expense._id}`;
   elemOptions.type = 'text';
   elemOptions.id = `expenseDescription${expense._id}`;
   elemOptions.name = 'expenseDescription';
@@ -139,7 +143,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
 
   // EXPENSE.DATE - HTML INPUT date
   // expense date INPUT OPTIONS
-  labelOptions.for =  `invoiceDate${expense._id}`;
+  labelOptions.for = `invoiceDate${expense._id}`;
   elemOptions.type = 'date';
   elemOptions.id = `invoiceDate${expense._id}`;
   elemOptions.name = 'invoiceDate';
@@ -157,7 +161,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
 
   // expense date INPUT ELEMENT
   const dateElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Date', ''], dateClosingTags);
-  const dateElemDiv = createElement('div', divElemOptions, dateElem)
+  const dateElemDiv = createElement('div', divElemOptions, dateElem);
   const dateElemRow = createElement('div', divRowOptions, dateElemDiv);
   delete elemOptions.value;
   delete elemOptions.type;
@@ -168,7 +172,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   // NOT MILEAGE
   // EXPENSE.CURRENCY - HTML INPUT text
   // expense currency INPUT OPTIONS
-  labelOptions.for =  `invoiceCurrency${expense._id}`;
+  labelOptions.for = `invoiceCurrency${expense._id}`;
   elemOptions.class.push('text-to-upper');
   elemOptions.type = 'text';
   elemOptions.id = `invoiceCurrency${expense._id}`;
@@ -187,8 +191,8 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   htmlOptionsArr[2] = elemOptions;
   const currencyClosingTags = [true, true, false];
 
-  const currencyOptionElem = createSelectOptions(['USD', 'EUR', 'RSD', 'HRK', 'BAM'], elemOptions.value, {class: 'currency'});
-  const currencyDatalistElem = createElement('datalist', {class: 'currencies', id: `currencies${expense._id}`}, currencyOptionElem);
+  const currencyOptionElem = createSelectOptions(['USD', 'EUR', 'RSD', 'HRK', 'BAM'], elemOptions.value, { class: 'currency' });
+  const currencyDatalistElem = createElement('datalist', { class: 'currencies', id: `currencies${expense._id}` }, currencyOptionElem);
   const currencyElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Currency', currencyDatalistElem], currencyClosingTags);
   const currencyElemDiv = createElement('div', divElemOptions, currencyElem);
   const currencyElemRow = createElement('div', divRowOptions, currencyElemDiv);
@@ -201,7 +205,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
 
   // EXPENSE.RATE - HTML INPUT number
   // expense rate INPUT OPTIONS
-  labelOptions.for =  `rate${expense._id}`;
+  labelOptions.for = `rate${expense._id}`;
   elemOptions.type = 'number';
   elemOptions.id = `rate${expense._id}`;
   elemOptions.name = 'rate';
@@ -229,7 +233,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
 
   // EXPENSE.AMOUNT - HTML INPUT number
   // expense amount INPUT OPTIONS
-  labelOptions.for =  `amount${expense._id}`;
+  labelOptions.for = `amount${expense._id}`;
   elemOptions.type = 'number';
   elemOptions.id = `amount${expense._id}`;
   elemOptions.name = 'amount';
@@ -255,7 +259,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
 
   // EXPENSE.AMOUNTCONVERTED - HTML INPUT number
   // expense amountConverted INPUT OPTIONS
-  labelOptions.for =  `amountConverted${expense._id}`;
+  labelOptions.for = `amountConverted${expense._id}`;
   labelOptions.class.push('input-group');
   elemOptions.type = 'number';
   elemOptions.id = `amountConverted${expense._id}`;
@@ -273,8 +277,8 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   htmlLabelOptionsArr[1] = labelOptions;
   htmlOptionsArr[2] = elemOptions;
   const amountConvertedClosingTags = [true, true, false];
-  const prependElemSpan = createElement('span', {class: 'input-group-text mb-1 text-white bg-secondary', id: `currency-addon${expense._id}`}, travel.homeCurrency);
-  const prependElemDiv = createElement('div', {class: 'input-group-prepend'}, prependElemSpan);
+  const prependElemSpan = createElement('span', { class: 'input-group-text mb-1 text-white bg-secondary', id: `currency-addon${expense._id}` }, travel.homeCurrency);
+  const prependElemDiv = createElement('div', { class: 'input-group-prepend' }, prependElemSpan);
 
   const amountConvertedElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Amount Converted', ''], amountConvertedClosingTags, prependElemDiv);
   const amountConvertedElemDiv = createElement('div', divElemOptions, amountConvertedElem);
@@ -287,18 +291,21 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   delete divElemOptions.class;
 
   const notMileageDivOptions = {
-    class: '', id: `notMileage${expense._id}`,
+    class: '',
+    id: `notMileage${expense._id}`,
     style: `display: ${(mileage) ? 'none' : 'initial'}`
-  }
+  };
 
   // MILEAGE
+  // eslint-disable-next-line no-unused-vars
   const aDistanceId = `amountDistance${expense._id}`;
+  // eslint-disable-next-line no-unused-vars
   const aDistance2Id = `amountDistance2${expense._id}`;
-  const aDistanceRowId =  `amountDistanceRow${expense._id}`;
-  const aDistanceRow2Id =  `amountDistance2Row${expense._id}`;
+  const aDistanceRowId = `amountDistanceRow${expense._id}`;
+  const aDistanceRow2Id = `amountDistance2Row${expense._id}`;
 
   // EXPENSE.UNIT - HTML SELECT
-  labelOptions.for =  `invoiceUnit${expense._id}`;
+  labelOptions.for = `invoiceUnit${expense._id}`;
   elemOptions.id = `invoiceUnit${expense._id}`;
   elemOptions.name = 'invoiceUnit';
   elemOptions.autocomplete = 'invoiceUnit';
@@ -320,7 +327,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
 
 
   // EXPENSE.PERMILEAMOUNT - HTML INPUT number
-  labelOptions.for =  `travelPerMileAmount${expense._id}`;
+  labelOptions.for = `travelPerMileAmount${expense._id}`;
   elemOptions.id = `travelPerMileAmount${expense._id}`;
   elemOptions.name = 'travelPerMileAmount';
   elemOptions.autocomplete = 'travelPerMileAmount';
@@ -340,7 +347,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   // expense type INPUT ELEMENT
   // TODO link userHomeDistance to user model
   const userHomeDistance = 'mi';
-  const labelPerMileAmountText = `${travel.homeCurrency}/${userHomeDistance}`
+  const labelPerMileAmountText = `${travel.homeCurrency}/${userHomeDistance}`;
   const perMileAmountElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, [labelPerMileAmountText, '']);
   const perMileAmountElemDiv = createElement('div', divElemOptions, perMileAmountElem);
   const perMileAmountElemRow = createElement('div', divRowOptions, perMileAmountElemDiv);
@@ -353,7 +360,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   delete elemOptions.readonly;
 
   // EXPENSE.AMOUNTDISTANCE - HTML INPUT number
-  labelOptions.for =  `amountDistance${expense._id}`;
+  labelOptions.for = `amountDistance${expense._id}`;
   elemOptions.id = `amountDistance${expense._id}`;
   elemOptions.name = 'amountDistance';
   elemOptions.autocomplete = 'amountDistance';
@@ -370,7 +377,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   htmlOptionsArr[2] = elemOptions;
 
   // expense type INPUT ELEMENT
-  const labelAmountDistanceText = `Distance[${userHomeDistance}]`
+  const labelAmountDistanceText = `Distance[${userHomeDistance}]`;
   const amountDistanceElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, [labelAmountDistanceText, '']);
   const amountDistanceElemDiv = createElement('div', divElemOptions, amountDistanceElem);
   const amountDistanceElemRow = createElement('div', divRowOptions, amountDistanceElemDiv);
@@ -384,7 +391,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
 
   // EXPENSE.AMOUNTCONVERTED2 - HTML INPUT number
   // expense amountConverted2 INPUT OPTIONS
-  labelOptions.for =  `amountConverted2${expense._id}`;
+  labelOptions.for = `amountConverted2${expense._id}`;
   labelOptions.class.push('input-group');
   elemOptions.type = 'number';
   elemOptions.id = `amountConverted2${expense._id}`;
@@ -402,8 +409,8 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   htmlLabelOptionsArr[1] = labelOptions;
   htmlOptionsArr[2] = elemOptions;
   const amountConverted2ClosingTags = [true, true, false];
-  const prependElemSpan2 = createElement('span', {class: 'input-group-text mb-1 text-white bg-secondary', id: `currency-addon2${expense._id}`}, travel.homeCurrency);
-  const prependElemDiv2 = createElement('div', {class: 'input-group-prepend'}, prependElemSpan2);
+  const prependElemSpan2 = createElement('span', { class: 'input-group-text mb-1 text-white bg-secondary', id: `currency-addon2${expense._id}` }, travel.homeCurrency);
+  const prependElemDiv2 = createElement('div', { class: 'input-group-prepend' }, prependElemSpan2);
 
   const amountConverted2Elem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Amount Converted', ''], amountConverted2ClosingTags, prependElemDiv2);
   const amountConverted2ElemDiv = createElement('div', divElemOptions, amountConverted2Elem);
@@ -417,7 +424,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
 
   // EXPENSE.AMOUNTDISTANCE2 - HTML INPUT number
   const userHomeDistance2 = (userHomeDistance === 'mi') ? 'km' : 'mi';
-  labelOptions.for =  `amountDistance2${expense._id}`;
+  labelOptions.for = `amountDistance2${expense._id}`;
   elemOptions.id = `amountDistance2${expense._id}`;
   elemOptions.name = 'amountDistance2';
   elemOptions.autocomplete = 'amountDistance2';
@@ -427,7 +434,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   elemOptions.min = 0;
   elemOptions.placeholder = '0.00';
   elemOptions.readonly = 'readonly';
-  divRowOptions.style = divRowOptions.style + 'display: none;'
+  divRowOptions.style += 'display: none;';
   divRowOptions.id = aDistanceRow2Id;
 
 
@@ -437,7 +444,7 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   htmlOptionsArr[2] = elemOptions;
 
   // expense type INPUT ELEMENT
-  const labelAmountDistance2Text = `Distance[${userHomeDistance2}]`
+  const labelAmountDistance2Text = `Distance[${userHomeDistance2}]`;
   const amountDistance2Elem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, [labelAmountDistance2Text, '']);
   const amountDistance2ElemDiv = createElement('div', divElemOptions, amountDistance2Elem);
   const amountDistance2ElemRow = createElement('div', divRowOptions, amountDistance2ElemDiv);
@@ -454,22 +461,18 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
   const expenseButtonEditOptions = {
     class: ['badge', 'badge-secondary', 'text-white'],
     type: 'button',
-    onclick: `editExpense(event)`
-  }
-  const expenseButtonElemOptions = {class: 'mb-0 d-inline mx-1'};
+    onclick: 'editExpense(event)'
+  };
+  const expenseButtonElemOptions = { class: 'mb-0 d-inline mx-1' };
   const expenseButtonEditText = createElement('button', expenseButtonEditOptions, 'edit');
   const expenseButtonEditElem = createElement('h6', expenseButtonElemOptions, expenseButtonEditText);
 
 
-
-
   const mileageDivOptions = {
-    class: '', id: `mileage${expense._id}`,
+    class: '',
+    id: `mileage${expense._id}`,
     style: `display: ${(mileage) ? 'initial' : 'none'}`
-  }
-
-
-
+  };
 
 
   const formOptions = {
@@ -480,61 +483,65 @@ const createExpenseForm = (method='POST', hiddenMethod=method, csrf='', expenseT
 
   const hiddenInput = createElement('input', hiddenInputOptions, '', false);
   const alwaysShowElem = typeElemRow + descriptionElemRow + dateElemRow;
-  const formAlwaysShowDiv = createElement('div', {class: '', id: `alwaysShow${expense._id}`}, alwaysShowElem);
+  const formAlwaysShowDiv = createElement('div', { class: '', id: `alwaysShow${expense._id}` }, alwaysShowElem);
   const formNotMIleageElem = currencyElemRow + rateElemRow + amountElemRow + amountConvertedElemRow;
   const formNotMileageDiv = createElement('div', notMileageDivOptions, formNotMIleageElem);
-  const formMileageElem = unitElemRow + perMileAmountElemRow + amountDistanceElemRow + amountDistance2ElemRow + amountConverted2ElemRow;
+  const formMileageElem = unitElemRow + perMileAmountElemRow + amountDistanceElemRow +
+  amountDistance2ElemRow + amountConverted2ElemRow;
   const formMileageDiv = createElement('div', mileageDivOptions, formMileageElem);
-  const formElements = hiddenInput + formAlwaysShowDiv + formNotMileageDiv + formMileageDiv + expenseButtonEditElem;
+  const formElements = hiddenInput + formAlwaysShowDiv + formNotMileageDiv +
+  formMileageDiv + expenseButtonEditElem;
   const form = createElement('form', formOptions, formElements);
   return form;
-}
-/*
+};
+
+/**
  * Returns HTML elements
- * @param {object} value Array with travels mongo aggregate group by year and each year group by month
+ * @param {object} value Array with travels mongo aggregate group
+ * by year and each year group by month
  * more in Travel Schema /models/Travel.js Travel.byYear_byMonth
  */
 expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
-
-  const formatter = new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   // HTML Accordion - RESULT
   const yearObjectsArray = [];
-  value.forEach((yearObject) => {
+  value.forEach(yearObject => {
     const yearString = yearObject._id.year.toString();
     // HTML Year Card COLLAPSE - BODY
     const monthObjectsArray = [];
-    yearObject.byYear.forEach((monthObject) => {
-      const monthValue = monthObject._id.month-1;
+    yearObject.byYear.forEach(monthObject => {
+      const monthValue = monthObject._id.month - 1;
       const monthString = moment().month(monthValue).format('MMMM');
       const travelObjectsArray = [];
       // HTML Month Card COLLAPSE - BODY
-      monthObject.byMonth.forEach((travelObject) => {
+      monthObject.byMonth.forEach(travelObject => {
         const dateFromString = moment(travelObject.dateFrom).format('YYYY-MM-DD');
         const travelId = travelObject._id;
         const expensesCount = travelObject.expenses.length;
         const hrefTravel = `/travels/${travelId}`;
-        const homeCurrency = travelObject.homeCurrency;
+        const { homeCurrency } = travelObject;
         const totalString = `${formatter.format(travelObject.total)} ${homeCurrency}`;
-        const travelHeaderTextString =  `${dateFromString} ${travelObject.description} ${totalString}`;
+        const travelHeaderTextString = `${dateFromString} ${travelObject.description} ${totalString}`;
         // HTML Travel Card COLLAPSE - BODY
         const expenseObjectsArray = [];
-        travelObject.expenses.forEach((expenseObject) => {
+        travelObject.expenses.forEach(expenseObject => {
           const expenseId = expenseObject._id;
 
-          const expenseCardBodyOptions = {class:'card-body', id:`heading${expenseId}_CardBody`};
-          const expenseCardOptions = {class:['card', 'text-white', 'bg-secondary', 'mx-2', 'my-2', 'border-warning'], id:`expense_${expenseId}_Card`};
+          const expenseCardBodyOptions = { class: 'card-body', id: `heading${expenseId}_CardBody` };
+          const expenseCardOptions = { class: ['card', 'text-white', 'bg-secondary', 'mx-2', 'my-2', 'border-warning'], id: `expense_${expenseId}_Card` };
 
 
           const form = createExpenseForm('post', 'patch', csrf, expenseTypes, travelObject, expenseObject, formatter);
-          const expenseCardBody = createElement('div', expenseCardBodyOptions,  form);
-          const expenseCard = createElement('div', expenseCardOptions,  expenseCardBody);
+          const expenseCardBody = createElement('div', expenseCardBodyOptions, form);
+          const expenseCard = createElement('div', expenseCardOptions, expenseCardBody);
           expenseObjectsArray.push(expenseCard);
         });
-        const expenses = expenseObjectsArray.join('')
+        const expenses = expenseObjectsArray.join('');
         // HTML Travel Card ELEMENTS OPTIONS
-        const travelButtonBadgeOptions = {class: 'badge badge-warning mx-1'};
-        /*
-         * travelButtonShowOptions's class badge-secondary is related to toggleTravelButtonText() in home.hbs
+        const travelButtonBadgeOptions = { class: 'badge badge-warning mx-1' };
+        /**
+         * travelButtonShowOptions's class badge-secondary is related
+         * to toggleTravelButtonText() in home.hbs
          * if else statement where checks class.indexOf(class)
          */
         const travelButtonShowOptions = {
@@ -550,44 +557,45 @@ expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
           data_text_badge_sr: 'expenses count in travel',
           onclick: 'toggleTravelButtonText(event)',
           style: 'width: 70px'
-        }
+        };
         const travelButtonEditOptions = {
           class: ['badge', 'badge-secondary', 'text-white'],
           type: 'button',
           onclick: `location.href='${hrefTravel}'`
-        }
-        const travelButtonElemOptions = {class: 'mb-0 d-inline mx-1'};
-        const travelHeaderTextOptions = {class: 'mb-1'};
+        };
+        const travelButtonElemOptions = { class: 'mb-0 d-inline mx-1' };
+        const travelHeaderTextOptions = { class: 'mb-1' };
         const travelCollapseOptions = {
           id: `collapse${travelId}`,
           class: 'collapse',
           aria_labelledby: `heading${travelId}_CardHeader`,
           // data_parent: `#travel_${travelId}Accordion`
-        }
+        };
         const travelCardOptions = {
           class: 'card  bg-secondary text-white',
           id: `travel_${travelId}_Card`
-        }
+        };
         // HTML Travel ELEMENTS
-        const travelButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
+        const travelButtonBadgeSr = createElement('span', { class: 'sr-only' }, 'expenses count');
         const travelButtonBadge = createElement('span', travelButtonBadgeOptions, expensesCount);
-        const travelButtonShowText = createElement('button', travelButtonShowOptions, 'show' + travelButtonBadge + travelButtonBadgeSr);
+        const travelButtonShowText = createElement('button', travelButtonShowOptions, `show${travelButtonBadge}${travelButtonBadgeSr}`);
         const travelButtonShowElem = createElement('h6', travelButtonElemOptions, travelButtonShowText);
         const travelButtonEditText = createElement('button', travelButtonEditOptions, 'edit');
         const travelButtonEditElem = createElement('h6', travelButtonElemOptions, travelButtonEditText);
         const travelHeaderText = createElement('h6', travelHeaderTextOptions, travelHeaderTextString);
-        const travelHeaderElem = createElement('div', {class: ''}, travelHeaderText + travelButtonShowElem + travelButtonEditElem);
-        const travelCardHeader = createElement('div', {class: 'card-header py-2'}, travelHeaderElem);
-        const travelCardBody = createElement('div', {class: 'card-body'}, expenses);
+        const travelHeaderElem = createElement('div', { class: '' }, travelHeaderText + travelButtonShowElem + travelButtonEditElem);
+        const travelCardHeader = createElement('div', { class: 'card-header py-2' }, travelHeaderElem);
+        const travelCardBody = createElement('div', { class: 'card-body' }, expenses);
         const travelCollapse = createElement('div', travelCollapseOptions, travelCardBody);
         const travelCard = createElement('div', travelCardOptions, travelCardHeader + travelCollapse);
         travelObjectsArray.push(travelCard);
       });
-      const travels = travelObjectsArray.join("");
+      const travels = travelObjectsArray.join('');
       // HTML Month ELEMENTS OPTIONS
-      const monthButtonBadgeOptions = {class: 'badge badge-dark mx-1'};
-      /*
-       * monthButtonShowOptions's class badge-secondary is related to toggleTravelButtonText() in home.hbs
+      const monthButtonBadgeOptions = { class: 'badge badge-dark mx-1' };
+      /**
+       * monthButtonShowOptions's class badge-secondary is related
+       * to toggleTravelButtonText() in home.hbs
        * if else statement where checks class.indexOf(class)
        */
       const monthButtonShowOptions = {
@@ -610,21 +618,22 @@ expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
         aria_labelledby: `heading${yearString}_${monthValue}_CardHeader`
       };
       // HTML Month ELEMENTS
-      const monthButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
+      const monthButtonBadgeSr = createElement('span', { class: 'sr-only' }, 'expenses count');
       const monthButtonBadge = createElement('span', monthButtonBadgeOptions, monthObject.count);
-      const monthButtonShowText = createElement('button', monthButtonShowOptions, 'show' + monthButtonBadge + monthButtonBadgeSr);
-      const monthButtonShowElem = createElement('h6', {class: 'mb-0 mx-1 d-inline float-right'}, monthButtonShowText);
-      const monthCardHeader = createElement('div', {class: 'card-header py-2'}, monthString + monthButtonShowElem);
-      const monthCardBody = createElement('div', {class: 'card-body'}, travels);
+      const monthButtonShowText = createElement('button', monthButtonShowOptions, `show${monthButtonBadge}${monthButtonBadgeSr}`);
+      const monthButtonShowElem = createElement('h6', { class: 'mb-0 mx-1 d-inline float-right' }, monthButtonShowText);
+      const monthCardHeader = createElement('div', { class: 'card-header py-2' }, monthString + monthButtonShowElem);
+      const monthCardBody = createElement('div', { class: 'card-body' }, travels);
       const monthCollapse = createElement('div', monthCollapseOptions, monthCardBody);
-      const monthCard = createElement('div', {class: 'card', style: 'border: none'}, monthCardHeader + monthCollapse);
+      const monthCard = createElement('div', { class: 'card', style: 'border: none' }, monthCardHeader + monthCollapse);
       monthObjectsArray.push(monthCard);
     });
     const months = monthObjectsArray.join('');
     // HTML Year ELEMENTS OPTIONS
-    const yearButtonBadgeOptions = {class: 'badge badge-light mx-1'};
-    /*
-     * yearlButtonShowOptions's class badge-secondary is related to toggleTravelButtonText() in home.hbs
+    const yearButtonBadgeOptions = { class: 'badge badge-light mx-1' };
+    /**
+     * yearButtonShowOptions's class badge-secondary is related
+     * to toggleTravelButtonText() in home.hbs
      * if else statement where checks class.indexOf(class)
      */
     const yearButtonShowOptions = {
@@ -647,115 +656,124 @@ expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
       aria_labelledby: `heading${yearString}_CardHeader`
     };
     // HTML Year ELEMENTS
-    const yearButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
+    const yearButtonBadgeSr = createElement('span', { class: 'sr-only' }, 'expenses count');
     const yearButtonBadge = createElement('span', yearButtonBadgeOptions, yearObject.countTotal);
-    const yearButtonShowText = createElement('button', yearButtonShowOptions, 'show' + yearButtonBadge + yearButtonBadgeSr);
-    const yearButtonShowElem = createElement('h6', {class: 'mb-0 mx-1 d-inline float-right'}, yearButtonShowText);
-    const yearCardHeader = createElement('div', {class: 'card-header py-2', id: `heading${yearString}_CardHeader`}, yearString + yearButtonShowElem);
-    const yearCardBody = createElement('div', {class: 'card-body p-0'}, months);
+    const yearButtonShowText = createElement('button', yearButtonShowOptions, `show${yearButtonBadge}${yearButtonBadgeSr}`);
+    const yearButtonShowElem = createElement('h6', { class: 'mb-0 mx-1 d-inline float-right' }, yearButtonShowText);
+    const yearCardHeader = createElement('div', { class: 'card-header py-2', id: `heading${yearString}_CardHeader` }, yearString + yearButtonShowElem);
+    const yearCardBody = createElement('div', { class: 'card-body p-0' }, months);
     const yearCollapse = createElement('div', monthsCollapseOptions, yearCardBody);
-    const yearCard = createElement('div', {class: 'card'}, yearCardHeader + yearCollapse );
+    const yearCard = createElement('div', { class: 'card' }, yearCardHeader + yearCollapse);
     yearObjectsArray.push(yearCard);
   });
-  const result = createElement('div', {id: 'yearsAccordion'}, yearObjectsArray.join('\n'));
+  const result = createElement('div', { id: 'yearsAccordion' }, yearObjectsArray.join('\n'));
   return result;
 });
 
 
-/*
+/**
  * Returns HTML elements
- * @param {object} value Array with travels mongo aggregate group by year and each year group by month
+ * @param {object} value Array with travels mongo aggregate
+ * group by year and each year group by month
  * more in Travel Schema /models/Travel.js Travel.byYear_byMonth
  */
 expressHbs.registerHelper('yearsAccordion', (value, csrf) => {
-
-  const formatter = new Intl.NumberFormat('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   // HTML Accordion - RESULT
   const yearObjectsArray = [];
-  value.forEach((yearObject) => {
+  value.forEach(yearObject => {
     const yearString = yearObject._id.year.toString();
     // HTML Year Card COLLAPSE - BODY
     const monthObjectsArray = [];
-    yearObject.byYear.forEach((monthObject) => {
-      const monthValue = monthObject._id.month-1;
+    yearObject.byYear.forEach(monthObject => {
+      const monthValue = monthObject._id.month - 1;
       const monthString = moment().month(monthValue).format('MMMM');
       const travelObjectsArray = [];
       // HTML Month Card COLLAPSE - BODY
-      monthObject.byMonth.forEach((travelObject) => {
+      monthObject.byMonth.forEach(travelObject => {
         const dateFromString = moment(travelObject.dateFrom).format('YYYY-MM-DD');
         const travelId = travelObject._id;
         const expensesCount = travelObject.expenses.length;
         const hrefTravel = `/travels/${travelId}`;
-        const homeCurrency = travelObject.homeCurrency;
+        const { homeCurrency } = travelObject;
         const totalString = `${formatter.format(travelObject.total)} ${homeCurrency}`;
-        const travelHeaderTextString =  `${dateFromString} ${travelObject.description} ${totalString}`;
+        const travelHeaderTextString = `${dateFromString} ${travelObject.description} ${totalString}`;
         // HTML Travel Card COLLAPSE - BODY
         const expenseObjectsArray = [];
-        travelObject.expenses.forEach((expenseObject) => {
+        travelObject.expenses.forEach(expenseObject => {
           const expenseId = expenseObject._id;
           const expenseDate = expenseObject.date;
           const expenseDateString = moment(expenseDate).format('YYYY-MM-DD');
           const amountString = formatter.format(expenseObject.amount);
           const amountConvertedString = formatter.format(expenseObject.amountConverted);
           // Different data if expenseObject.type = Mileage
-          let currency_unit, rate, rateText, amountLabelText;
-          if (expenseObject.type != 'Mileage') {
-            currency_unit = expenseObject.currency;
-            let curRate = travelObject.curRates.find((exp) => {
-              return exp._id.toString() === expenseObject.curRate.toString();
-            });
+          let currencyUnit;
+          let rate;
+          let rateText;
+          let amountLabelText;
+          if (expenseObject.type !== 'Mileage') {
+            currencyUnit = expenseObject.currency;
+            let curRate = travelObject
+              .curRates.find(exp => exp._id.toString() === expenseObject.curRate.toString());
             if (curRate) {
               rate = formatter.format(curRate.rate[expenseObject.currency]);
             } else {
               rate = formatter.format(0);
             }
-            rateText = `1 ${travelObject.homeCurrency} = ${rate} ${currency_unit}`;
-            amountLabelText = 'Amount in local currency'
+            rateText = `1 ${travelObject.homeCurrency} = ${rate} ${currencyUnit}`;
+            amountLabelText = 'Amount in local currency';
           } else {
-            currency_unit = expenseObject.unit;
+            currencyUnit = expenseObject.unit;
             rate = formatter.format(Number(travelObject.perMileAmount));
-            rateText = `1 ${currency_unit} = ${rate} ${travelObject.homeCurrency}`;
-            amountLabelText = 'Distance'
+            rateText = `1 ${currencyUnit} = ${rate} ${travelObject.homeCurrency}`;
+            amountLabelText = 'Distance';
           }
           // HTML Expense Card ELEMENTS OPTIONS
-          const labelTextOptions = {class:'card-text'};
-          const labelOptions = {class: 'card-text text-warning mb-0'};
-          const expenseOptions = {class:'card-text mb-1'};
+          const labelTextOptions = { class: 'card-text' };
+          const labelOptions = { class: 'card-text text-warning mb-0' };
+          const expenseOptions = { class: 'card-text mb-1' };
           // TODO titleOptions, expenseCardBodyOptions & expenseCard id not needed?
-          const titleOptions = {class:'card-title', id:`heading${expenseId}_CardTitle`};
-          const expenseCardBodyOptions = {class:'card-body', id:`heading${expenseId}_CardBody`};
-          const expenseCardOptions = {class:['card', 'text-white', 'bg-secondary', 'mx-2', 'my-2', 'border-warning'], id:`expense_${expenseId}_Card`};
+          const titleOptions = { class: 'card-title', id: `heading${expenseId}_CardTitle` };
+          const expenseCardBodyOptions = { class: 'card-body', id: `heading${expenseId}_CardBody` };
+          const expenseCardOptions = { class: ['card', 'text-white', 'bg-secondary', 'mx-2', 'my-2', 'border-warning'], id: `expense_${expenseId}_Card` };
           // Card Body tags and attributes for expenseObject values
           const htmlLabelTagsArr = ['small', 'p'];
           const htmlTagsArr = htmlLabelTagsArr.concat(['p']);
           const htmlOptionsArr = [labelTextOptions, labelOptions, expenseOptions];
+          // eslint-disable-next-line no-unused-vars
           const htmlTagsArrTitle = htmlLabelTagsArr.concat(['h6']);
+          // eslint-disable-next-line no-unused-vars
           const htmlOptionsArrTitle = [labelTextOptions, labelOptions, titleOptions];
 
           // HTML Expense Card ELEMENTS
           const expenseDescriptionElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Description', expenseObject.description]);
           const expenseDateElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Date', expenseDateString]);
           const expenseRateElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Rate', rateText]);
-          const aText = amountString + ' ' + currency_unit;
-          const expenseAmountElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, [amountLabelText, aText]);
-          const acText = amountConvertedString + ' ' + travelObject.homeCurrency;
+          const aText = `${amountString} ${currencyUnit}`;
+          const expenseAmountElem = createTwoCardElements(
+            htmlTagsArr, htmlOptionsArr, [amountLabelText, aText]
+          );
+          const acText = `${amountConvertedString} ${travelObject.homeCurrency}`;
           const expenseAmountConvertedElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Amount', acText]);
           const expenseTypeElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Type', expenseObject.type]);
           const expenseCardBodyTitle = expenseTypeElem;
           // const expenseCardBodyTitle = createElement('h6', titleOptions, expenseObject.type);
-          const expenseBodyElements = expenseCardBodyTitle + expenseDateElem + expenseDescriptionElem + expenseAmountElem + expenseRateElem + expenseAmountConvertedElem;
+          const expenseBodyElements = expenseCardBodyTitle + expenseDateElem +
+          expenseDescriptionElem + expenseAmountElem + expenseRateElem + expenseAmountConvertedElem;
           // test
           const form = createExpenseForm('post', 'patch', csrf, expenseTypes, travelObject, expenseObject, formatter);
-          const expenseCardBody = createElement('div', expenseCardBodyOptions,  form + expenseBodyElements);
+          const expenseCardBody = createElement('div', expenseCardBodyOptions, form + expenseBodyElements);
+          // eslint-disable-next-line max-len
           // const expenseCardBody = createElement('div', expenseCardBodyOptions, expenseBodyElements);
-          const expenseCard = createElement('div', expenseCardOptions,  expenseCardBody);
+          const expenseCard = createElement('div', expenseCardOptions, expenseCardBody);
           expenseObjectsArray.push(expenseCard);
         });
-        const expenses = expenseObjectsArray.join('')
+        const expenses = expenseObjectsArray.join('');
         // HTML Travel Card ELEMENTS OPTIONS
-        const travelButtonBadgeOptions = {class: 'badge badge-warning mx-1'};
-        /*
-         * travelButtonShowOptions's class badge-secondary is related to toggleTravelButtonText() in home.hbs
+        const travelButtonBadgeOptions = { class: 'badge badge-warning mx-1' };
+        /**
+         * travelButtonShowOptions's class badge-secondary is related
+         * to toggleTravelButtonText() in home.hbs
          * if else statement where checks class.indexOf(class)
          */
         const travelButtonShowOptions = {
@@ -771,44 +789,45 @@ expressHbs.registerHelper('yearsAccordion', (value, csrf) => {
           data_text_badge_sr: 'expenses count in travel',
           onclick: 'toggleTravelButtonText(event)',
           style: 'width: 70px'
-        }
+        };
         const travelButtonEditOptions = {
           class: ['badge', 'badge-secondary', 'text-white'],
           type: 'button',
           onclick: `location.href='${hrefTravel}'`
-        }
-        const travelButtonElemOptions = {class: 'mb-0 d-inline mx-1'};
-        const travelHeaderTextOptions = {class: 'mb-1'};
+        };
+        const travelButtonElemOptions = { class: 'mb-0 d-inline mx-1' };
+        const travelHeaderTextOptions = { class: 'mb-1' };
         const travelCollapseOptions = {
           id: `collapse${travelId}`,
           class: 'collapse',
           aria_labelledby: `heading${travelId}_CardHeader`,
           // data_parent: `#travel_${travelId}Accordion`
-        }
+        };
         const travelCardOptions = {
           class: 'card  bg-secondary text-white',
           id: `travel_${travelId}_Card`
-        }
+        };
         // HTML Travel ELEMENTS
-        const travelButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
+        const travelButtonBadgeSr = createElement('span', { class: 'sr-only' }, 'expenses count');
         const travelButtonBadge = createElement('span', travelButtonBadgeOptions, expensesCount);
-        const travelButtonShowText = createElement('button', travelButtonShowOptions, 'show' + travelButtonBadge + travelButtonBadgeSr);
+        const travelButtonShowText = createElement('button', travelButtonShowOptions, `show${travelButtonBadge}${travelButtonBadgeSr}`);
         const travelButtonShowElem = createElement('h6', travelButtonElemOptions, travelButtonShowText);
         const travelButtonEditText = createElement('button', travelButtonEditOptions, 'edit');
         const travelButtonEditElem = createElement('h6', travelButtonElemOptions, travelButtonEditText);
         const travelHeaderText = createElement('h6', travelHeaderTextOptions, travelHeaderTextString);
-        const travelHeaderElem = createElement('div', {class: ''}, travelHeaderText + travelButtonShowElem + travelButtonEditElem);
-        const travelCardHeader = createElement('div', {class: 'card-header py-2'}, travelHeaderElem);
-        const travelCardBody = createElement('div', {class: 'card-body'}, expenses);
+        const travelHeaderElem = createElement('div', { class: '' }, travelHeaderText + travelButtonShowElem + travelButtonEditElem);
+        const travelCardHeader = createElement('div', { class: 'card-header py-2' }, travelHeaderElem);
+        const travelCardBody = createElement('div', { class: 'card-body' }, expenses);
         const travelCollapse = createElement('div', travelCollapseOptions, travelCardBody);
         const travelCard = createElement('div', travelCardOptions, travelCardHeader + travelCollapse);
         travelObjectsArray.push(travelCard);
       });
-      const travels = travelObjectsArray.join("");
+      const travels = travelObjectsArray.join('');
       // HTML Month ELEMENTS OPTIONS
-      const monthButtonBadgeOptions = {class: 'badge badge-dark mx-1'};
-      /*
-       * monthButtonShowOptions's class badge-secondary is related to toggleTravelButtonText() in home.hbs
+      const monthButtonBadgeOptions = { class: 'badge badge-dark mx-1' };
+      /**
+       * monthButtonShowOptions's class badge-secondary is related to
+       * toggleTravelButtonText() in home.hbs
        * if else statement where checks class.indexOf(class)
        */
       const monthButtonShowOptions = {
@@ -831,21 +850,22 @@ expressHbs.registerHelper('yearsAccordion', (value, csrf) => {
         aria_labelledby: `heading${yearString}_${monthValue}_CardHeader`
       };
       // HTML Month ELEMENTS
-      const monthButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
+      const monthButtonBadgeSr = createElement('span', { class: 'sr-only' }, 'expenses count');
       const monthButtonBadge = createElement('span', monthButtonBadgeOptions, monthObject.count);
-      const monthButtonShowText = createElement('button', monthButtonShowOptions, 'show' + monthButtonBadge + monthButtonBadgeSr);
-      const monthButtonShowElem = createElement('h6', {class: 'mb-0 mx-1 d-inline float-right'}, monthButtonShowText);
-      const monthCardHeader = createElement('div', {class: 'card-header py-2'}, monthString + monthButtonShowElem);
-      const monthCardBody = createElement('div', {class: 'card-body'}, travels);
+      const monthButtonShowText = createElement('button', monthButtonShowOptions, `show${monthButtonBadge}${monthButtonBadgeSr}`);
+      const monthButtonShowElem = createElement('h6', { class: 'mb-0 mx-1 d-inline float-right' }, monthButtonShowText);
+      const monthCardHeader = createElement('div', { class: 'card-header py-2' }, monthString + monthButtonShowElem);
+      const monthCardBody = createElement('div', { class: 'card-body' }, travels);
       const monthCollapse = createElement('div', monthCollapseOptions, monthCardBody);
-      const monthCard = createElement('div', {class: 'card', style: 'border: none'}, monthCardHeader + monthCollapse);
+      const monthCard = createElement('div', { class: 'card', style: 'border: none' }, monthCardHeader + monthCollapse);
       monthObjectsArray.push(monthCard);
     });
     const months = monthObjectsArray.join('');
     // HTML Year ELEMENTS OPTIONS
-    const yearButtonBadgeOptions = {class: 'badge badge-light mx-1'};
-    /*
-     * yearlButtonShowOptions's class badge-secondary is related to toggleTravelButtonText() in home.hbs
+    const yearButtonBadgeOptions = { class: 'badge badge-light mx-1' };
+    /**
+     * yearButtonShowOptions's class badge-secondary is related
+     * to toggleTravelButtonText() in home.hbs
      * if else statement where checks class.indexOf(class)
      */
     const yearButtonShowOptions = {
@@ -868,16 +888,16 @@ expressHbs.registerHelper('yearsAccordion', (value, csrf) => {
       aria_labelledby: `heading${yearString}_CardHeader`
     };
     // HTML Year ELEMENTS
-    const yearButtonBadgeSr = createElement('span', {class: 'sr-only'}, 'expenses count');
+    const yearButtonBadgeSr = createElement('span', { class: 'sr-only' }, 'expenses count');
     const yearButtonBadge = createElement('span', yearButtonBadgeOptions, yearObject.countTotal);
-    const yearButtonShowText = createElement('button', yearButtonShowOptions, 'show' + yearButtonBadge + yearButtonBadgeSr);
-    const yearButtonShowElem = createElement('h6', {class: 'mb-0 mx-1 d-inline float-right'}, yearButtonShowText);
-    const yearCardHeader = createElement('div', {class: 'card-header py-2', id: `heading${yearString}_CardHeader`}, yearString + yearButtonShowElem);
-    const yearCardBody = createElement('div', {class: 'card-body p-0'}, months);
+    const yearButtonShowText = createElement('button', yearButtonShowOptions, `show${yearButtonBadge}${yearButtonBadgeSr}`);
+    const yearButtonShowElem = createElement('h6', { class: 'mb-0 mx-1 d-inline float-right' }, yearButtonShowText);
+    const yearCardHeader = createElement('div', { class: 'card-header py-2', id: `heading${yearString}_CardHeader` }, yearString + yearButtonShowElem);
+    const yearCardBody = createElement('div', { class: 'card-body p-0' }, months);
     const yearCollapse = createElement('div', monthsCollapseOptions, yearCardBody);
-    const yearCard = createElement('div', {class: 'card'}, yearCardHeader + yearCollapse );
+    const yearCard = createElement('div', { class: 'card' }, yearCardHeader + yearCollapse);
     yearObjectsArray.push(yearCard);
   });
-  const result = createElement('div', {id: 'yearsAccordion'}, yearObjectsArray.join('\n'));
+  const result = createElement('div', { id: 'yearsAccordion' }, yearObjectsArray.join('\n'));
   return result;
 });

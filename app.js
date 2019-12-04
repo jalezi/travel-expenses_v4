@@ -1,4 +1,23 @@
 // Module dependencies
+// test change gitflow again
+/**
+ * @fileOverview This is application
+ *
+ * @requires NPM:express
+ * @requires NPM:dotenv
+ * @requires NPM:dotenv-expand
+ *
+ * @requires config
+ * @requires utils/hbsHelpers/hbsHelpers
+ * @requires utils/hbsHelpers/yearsAccordion
+ * @requires NPM:fullicu
+ *
+ * @requires config/logger
+ * @requires config/mongoose
+ * @requires config/express
+ * @requires config/error
+ * @requires utils/getRates
+ */
 const express = require('express');
 const dotenv = require('dotenv');
 const dotenvExpand = require('dotenv-expand');

@@ -1,60 +1,65 @@
 /**
- * @fileoverview Defines mongoose {@link module:models/Currency~Currency Currency Model} based on
- * {@link module:models/Currency~CurrencySchema Currency Schema}.
- * <p>{@link module:models/Currency Currency} module exports {@link module:models/Currency~Currency Currency Model}.</p>
- * 
- * @example <caption> Example usage of Currency Model</caption>
- * const currencyObject = {
- * base: 'USA',
- * date: new Date('2019-11-07'),
- * rate['EUR']: 0.89 // rate: {EUR: 0.89}
- * };
- * const currency = new Currency(currencyObject);
- * 
- * @see {@link module:models/Currency Currency Module}
- * @see {@link module:models/Currency~Currency Currency Model}
- * @see {@link module:models/Currency~CurrencySchema Currency Schema}
+ * @author Jaka Daneu
+ * @fileoverview Defines mongoose {@link module:models/Currency~Currency Currency model} based on
+ * {@link module:models/Currency~Currency.CurrencySchema Currency schema}.
+ * <p>{@link module:models/Currency Currency} module exports
+ * {@link module:models/Currency~Currency Currency model}.</p>
+ * @requires {@link https://www.npmjs.com/package/mongoose module:NPM mongoose}
+ * @requires {@link module:config/logger module:config/logger.addLogger}
+ *
+ * @see {@link module:models/Currency Currency module}
+ * @see {@link module:models/Currency~Currency Currency model}
+ * @see {@link module:models/Currency~Currency.CurrencySchema Currency schema}
  * <p></p>
  * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
  * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
  */
 
 /**
- * Defines mongoose {@link module:models/Currency~Currency Currency Model} based on
- * {@link module:models/Currency~CurrencySchema Currency Schema}.
- * <p>{@link module:models/Currency Currency} module exports {@link module:models/Currency~Currency Currency Model}.</p>
- * 
+ * Defines mongoose {@link module:models/Currency~Currency Currency model} based on
+ * {@link module:models/Currency~Currency.CurrencySchema Currency schema}.
+ * <p>{@link module:models/Currency Currency} module exports
+ * {@link module:models/Currency~Currency Currency model}.</p>
+ * <p></p>
+ * <p>It's mongoose {@link https://mongoosejs.com/docs/models.html model} and
+ * the instance is called {@link https://mongoosejs.com/docs/documents.html document}.
+ * </p>
+ *
  * @module
- * @example <caption> Example usage of Currency Model</caption>
+ * @example <caption> Example usage of Currency model</caption>
  * const currencyObject = {
- * base: 'USA',
- * date: new Date('2019-11-07'),
- * rate['EUR']: 0.89
+ *   base: 'USA',
+ *   date: new Date('2019-11-07'),
+ *   rate['EUR']: 0.89
  * };
  * const currency = new Currency(currencyObject);
- * @see {@link module:models/Currency~Currency Currency Model}
- * @see {@link module:models/Currency~CurrencySchema Currency Schema}
+ * currency.save();
+ * @see {@link module:models/Currency~Currency Currency model}
+ * @see {@link module:models/Currency~Currency.CurrencySchema Currency schema}
  * <p></p>
  * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
  * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
  */
+
 const mongoose = require('mongoose');
 
+// const { addLogger } = require('../config/logger');
+
+// const pathDepth = module.paths.length - 6;
+// const Logger = addLogger(__filename, pathDepth);
+
 /**
- * Currency Schema
- * @type {mongoose.Schema}
- * @property {String} base Base currency
- * @property {Date} date Conversion date
- * @property {Object} key: from currency, value: conversion rate
- * @property {Date} createdAt created with Mongoose Schema option {timestamps: true}
- * @property {Date} updatedAt reated with Mongoose Schema option {timestamps: true}
- * 
- * @see {@link module:models/Currency~Currency Currency Model}
- * <p></p>
- * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
- * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
+ * @description Represents Currency mongoose document.
+ * <p>Actual object for creating new mongoose Schema has more complex definition. See source!</p>
+ * Mongoose {@link https://mongoosejs.com/docs/validation.html#validation Validation} is based on this object.
+ * @type {Object}
+ * @memberof module:models/Currency~Currency
+ * @property {String} base <b>required</b>, base currency code
+ * @property {Date} date <b>required</b>, date of rate
+ * @property {Object} rate <b>required</b>, rate object with currency code
+ * as key and rate value as value
  */
-const CurrencySchema = new mongoose.Schema({
+const currencySchemaObject = {
   base: {
     type: String,
     required: true
@@ -67,26 +72,70 @@ const CurrencySchema = new mongoose.Schema({
     type: Object,
     required: true
   }
-}, {
-  timestamps: true
-});
+};
 
 /**
- * This is Constructor Currency Model description
- * @constructor Currency
- * @classdesc This is Class Currency Model description
- * @param {mongoose.Schema} CurrencySchema {@link module:models/Currency~CurrencySchema Currency Schema}
- * @example <caption> Example usage of Currency Model</caption>
- * const currencyObject = {
- * base: 'USA',
- * date: new Date('2019-11-07'),
- * rate['EUR']: 0.89
- * };
- * const currency = new Currency(currencyObject);
- * @see {@link module:models/Currency~CurrencySchema Currency Schema}
+ * @description new mongoose.Schema(curencySchemaObject, {timestamps: true})
+ * @type {mongoose.Schema}
+ * @memberof module:models/Currency~Currency
+ * @param (currencySchemaObject) currencySchemaObject
+ * {@link module:models/Currency~Currency.currencySchemaObject currencySchemaObject}
+ * @param {mongooseSchemaOptions} options {@link https://mongoosejs.com/docs/guide.html#options Schema Options}
+ *
+ * @see {@link module:models/Currency~Currency Currency model}
+ * @see {@link module:models/Currency~Currency.currencySchemaObject currencySchemaObject}
  * <p></p>
  * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
  * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
+ */
+const CurrencySchema = new mongoose.Schema(
+  currencySchemaObject, {
+    timestamps: true
+  }
+);
+
+/**
+ * <i><u>currencyObject</u></i> has 3 properties and all are <b>mandatory</b>:
+ * <p><b>base</b> - base currency code</p>
+ * <p><b>date</b> - date of rate</p>
+ * <p><b>rate</b> - object where key is currency code and value is actual rate</p>
+ * <i>Mongoose new mongoose.Schema({...}, options) creates additional properties</i>:
+ * <b>_id</b>, <b>__v</b>, <b>createdAt</b> and <b>updatedAt</b>, first two by default,
+ * second two when passing {timesatmps: true} as second argument.
+ * <br></br>
+ * It's mongoose {@link https://mongoosejs.com/docs/models.html model} and
+ * the instance is called {@link https://mongoosejs.com/docs/documents.html document}.
+ * <p></p>
+ * Models are fancy constructors compiled from Schema definitions.
+ * An instance of a model is called a document.
+ * Models are responsible for creating and reading documents from the underlying MongoDB database.
+ * <p></p>
+ * {@link https://mongoosejs.com/docs/validation.html#validation Validation} is based on
+ * {@link module:models/Currency~Currency.currencySchemaObject currencySchemaObject}.
+ * @constructor Currency
+ * @classdesc Every expense document in database has reference to particular currency document.
+ * Multiple expense documents can have reference to the same currency document.
+ * <br></br>
+ * Currency document property rate matches to equivalent object in rates property of
+ * {@link module:models/Rate~Rate.rateSchemaObject Rate} document.
+ *
+ * @param {currencyObject} currencyObject
+ * {@link module:models/Currency~Currency.currencySchemaObject currencyObject}
+ * @returns Currency document when using with new.
+ * @example <caption> Example usage of Currency model</caption>
+ * const currencyObject = {
+ *   base: 'USA',
+ *   date: new Date('2019-11-07'),
+ *   rate['EUR']: 0.89
+ * };
+ * const currency = new Currency(currencyObject);
+ * currency.save()
+ * @see {@link module:models/Currency~Currency.CurrencySchema CurrencySchema}
+ * @see {@link module:models/Currency~Currency.currencySchemaObject currencySchemaObject}
+ * <p></p>
+ * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
+ * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
+ * @todo Implement property rate validation!
  */
 const Currency = mongoose.model('Currency', CurrencySchema);
 

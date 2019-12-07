@@ -1,0 +1,32 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "source": {
+        "include": ".",
+        "exclude": [
+            "node_modules",
+            "build",
+            "docs",
+            "docs2",
+            "out",
+            "playground"
+        ],
+        "includePattern": ".js$",
+        "excludePattern": "(node_modules/|docs|docs2)"
+    },
+    "plugins": [
+        
+    ],
+    "opts": {
+        "template": "node_modules/docdash",
+        "encoding": "utf8",
+        "destination": "docs2/",
+        "recurse": true,
+        "verbose": true
+    },
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false
+    }
+}

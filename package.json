@@ -7,7 +7,8 @@
   "scripts": {
     "build": "webpack",
     "build:dev": "webpack --config webpack.config.js",
-    "genereate:docs": "jsdoc -c conf.json",
+    "generate:docs": "jsdoc -c conf.json",
+    "generate:docs2": "jsdoc -c jsdoc.json",
     "postinstall": "npm rebuild node-sass",
     "start": "node --icu-data-dir=node_modules\\full-icu app.js",
     "start:nodemon": "nodemon --icu-data-dir=node_modules\\full-icu app.js",
@@ -32,6 +33,7 @@
     "compression": "^1.7.4",
     "connect-mongo": "^3.2.0",
     "cors": "^2.8.5",
+    "docdash": "^1.1.1",
     "dotenv": "^8.2.0",
     "dotenv-expand": "^5.1.0",
     "errorhandler": "^1.5.1",

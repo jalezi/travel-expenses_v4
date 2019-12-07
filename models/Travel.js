@@ -1,20 +1,48 @@
 /* eslint-disable func-names */
 
 /**
- * Travel Schema
- * _user: link to user => user._id from users collection
- * description: travel description
- * dateFrom: travel start date
- * dateTo: travel end date
- * homeCurrency: currency to calculate all amounts to
- * perMileAmount: amount to convert distance to expense
- * expenses: array of expense' ids - links to expenses collection in DB =>
- * ExpenseSchema in ./models/Expense.js
- * total: total of all expenses linked to this travel
- * useNestedStrict: TODO useNestedStrict description
- * timestamps: creates two values => createdAr, updatedAt - Mongoose Schema option
+ * @author Jaka Daneu
+ * @fileoverview Defines mongoose {@link module:models/Travel~Travel Travel Model} based on
+ * {@link module:models/Travel~Travel.TravelSchema Travel Schema}.
+ * <p>{@link module:models/Travel Travel} module exports
+ * {@link module:models/Travel~Travel Travel Model}</p>
+ * @requires {@link https://www.npmjs.com/package/mongoose module:NPM mongoose}
+ * @requires {@link module:config/logger module:config/logger.addLogger}
+ * @see {@link module:models/Travel Travel module}
+ * @see {@link module:models/Travel~Travel Travel Model}
+ * @see {@link module:models/Travel~Travel.TravelSchema Travel Schema}
+ * <p></p>
+ * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
+ * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
  */
 
+/**
+  * Defines mongoose {@link module:models/Travel~Travel Travel Model} based on
+  * {@link module:models/Travel~Travel.TravelSchema Travel Schema}.
+  * <p>{@link module:models/Travel Travel} module exports
+  * {@link module:models/Travel~Travel Travel Model}</p>
+  * @module
+  * @example <caption> Example usage of Travel Model</caption>
+  * const user = new User(); // see {@link module:models/User~User User Model}
+  *
+  * const travelObject = {
+  *   _user: user._id,
+  *   description: 'Game FC Barcelona vs Maccabi Tel Aviv',
+  *   dateFrom: new Date('2019-11-07'),
+  *   dateTo: new Date('2019-11-09'),
+  *   homeCurrency: user.homeCurrency,
+  *   perMileAmount: user.perMileAmount
+  * };
+  * const expense = new Travel(expenseObject);
+  * expense.save();
+  * @see {@link module:models/Travel~Travel Travel Model}
+  * @see {@link module:models/Travel~Travel.TravelSchema Travel Schema}
+  * <p></p>
+  * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
+  * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
+  */
+
+/** */
 const mongoose = require('mongoose');
 
 const { addLogger } = require('../config/logger');
@@ -24,7 +52,23 @@ const Logger = addLogger(__filename, pathDepth);
 
 const { ObjectId } = mongoose.Schema.Types;
 
-const TravelSchema = new mongoose.Schema({
+/**
+ * @description Represents Travel mongoose document.
+ * <p>Actual object for creating new mongoose Schema has more complex definition. See source!</p>
+ * Mongoose {@link https://mongoosejs.com/docs/validation.html#validation Validation} is based on this object.
+ * @type {Object}
+ * @memberof module:models/Travel~Travel
+ * @property {ObjectId} _user <b>required</b>, reference to user document
+ * @property {String} description <b>required</b>, description of travel
+ * @property {Date} dateFrom <b>required</b>, Travel starts on date
+ * @property {Date} dateTo <b>required</b>, Travel ends on date
+ * @property {String} homeCurrency Currency code to calculate expense's amount to
+ * @property {Decimal128} [perMileAmount=0.00] per mile|kilometer value to convert
+ * distance to amount
+ * @property {ObjectId[]} expenses array with references to expense documents
+ * @property {Decimal128} [total=0.00] Sum of all expenses' converted amounts
+ */
+const travelSchemaObject = {
   _user: {
     type: ObjectId,
     required: true,
@@ -58,7 +102,23 @@ const TravelSchema = new mongoose.Schema({
     type: mongoose.Decimal128,
     default: 0.00
   }
-}, {
+};
+
+/**
+ * @description new mongoose.Schema(travelSchemaObject, {timestamps: true})
+ * @type {mongoose.Schema}
+ * @memberof module:models/Travel~Travel
+ * @param (travelSchemaObject) travelSchemaObject
+ * {@link module:models/Travel~Travel.travelSchemaObject travelSchemaObject}
+ * @param {mongooseSchemaOptions} options {@link https://mongoosejs.com/docs/guide.html#options Schema Options}
+ *
+ * @see {@link module:models/Travel~Travel Travel Model}
+ * @see {@link module:models/Travel~Travel.travelSchemaObject travelSchemaObject}
+ * <p></p>
+ * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
+ * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
+ */
+const TravelSchema = new mongoose.Schema(travelSchemaObject, {
   useNestedStrict: true,
   timestamps: true
 });
@@ -73,6 +133,16 @@ const TravelSchema = new mongoose.Schema({
  * .populate({path: 'expenses', populate: {path: 'curRate'}})
  * .then((doc) => {doc.updateTotal()}
  */
+
+/**
+  * @description Updates travel's total
+  * <p>It is Travel document method.</p>
+  * @function updateTotal
+  * @memberof module:models/Travel~Travel
+  * @instance
+  * @this module:models/Travel~Travel.TravelSchema
+  * @returns travel document with updated total amount
+  */
 TravelSchema.methods.updateTotal = function() {
   Logger.debug('updateTravel Schema methods');
   this.total = 0;
@@ -83,6 +153,15 @@ TravelSchema.methods.updateTotal = function() {
   return this.save();
 };
 
+/**
+ * @description Some description
+ * @function byYear_byMonth
+ * @memberof module:models/Travel~Travel
+ * @this module:models/Travel~Travel.TravelSchema
+ * @param {User} user User
+ * @returns Travel model aggregation Travel.aggregate(Object[])
+ * @todo Add description
+ */
 TravelSchema.statics.byYear_byMonth = function (user) {
   Logger.debug('byYear_byMonth Schema statics');
   return this.aggregate([
@@ -159,6 +238,16 @@ TravelSchema.statics.byYear_byMonth = function (user) {
   ]);
 };
 
+/**
+ * @description Some description
+ * @function byMonth
+ * @memberof module:models/Travel~Travel
+ * @this module:models/Travel~Travel.TravelSchema
+ * @param {User} user User
+ * @returns Travel model aggregation Travel.aggregate(Object[])
+ * @todo Add description
+ * @todo Why is this here?
+ */
 TravelSchema.statics.byMonth = function (user) {
   Logger.debug('byMonth Schema statics');
   return this.aggregate([
@@ -191,6 +280,45 @@ TravelSchema.statics.byMonth = function (user) {
   ]);
 };
 
+/**
+* <i>Mongoose new mongoose.Schema({...}, options) creates additional properties</i>:
+ * <b>_id</b>, <b>__v</b>, <b>createdAt</b> and <b>updatedAt</b>, first two by default,
+ * second two when passing {timesatmps: true} as second argument.
+ * <br></br>
+ * It's mongoose {@link https://mongoosejs.com/docs/models.html model} and
+ * the instance is called {@link https://mongoosejs.com/docs/documents.html document}.
+ * <p></p>
+ * Models are fancy constructors compiled from Schema definitions.
+ * An instance of a model is called a document.
+ * Models are responsible for creating and reading documents from the underlying MongoDB database.
+ * <p></p>
+ * {@link https://mongoosejs.com/docs/validation.html#validation Validation} is based on
+ * {@link module:models/Travel~Travel.travelSchemaObject travelSchemaObject}.
+ * @constructor Travel
+ * @classdesc Parameter {@link module:models/Travel~Travel.travelSchemaObject travelObject}
+ * must compile based on {@link module:models/Travel~Travel.TravelSchema travelSchemaObject}.
+ *
+ * @param {travelObject} travelObject
+ * {@link module:models/Travel~Travel.TravelSchema travelObject}
+ * @example <caption> Example usage of Travel Model</caption>
+ * const user = new User({...}); // see {@link module:models/User~User User Model}
+ *
+ * const travelObject = {
+ *  _user: user._id,
+ *  description: 'Game FC Barcelona vs Maccabi Tel Aviv',
+ *  dateFrom: new Date('2019-11-07'),
+ *  dateTo: new Date('2019-11-09'),
+ *  homeCurrency: user.homeCurrency,
+ *  perMileAmount: user.perMileAmount
+ * };
+ * const travel = new Travel(travelObject);
+ * expense.save();
+ * @see {@link module:models/Travel~Travel.TravelSchema Travel Schema}
+ * @see {@link module:models/Travel~Travel.travelSchemaObject travelSchemaObject}
+ * <p></p>
+ * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
+ * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
+ */
 const Travel = mongoose.model('Travel', TravelSchema);
 
 module.exports = Travel;

@@ -1,44 +1,15 @@
 /* eslint-disable prefer-destructuring */
 // test change gitflow again
 
-/**
- * @fileOverview Functions to create Travel PDF
- *
- * @requires {@link https://www.npmjs.com/package/fs module:NODEjs:fs}
- * @requires {@link https://www.npmjs.com/package/pdfmake module:NPM:pdfmake}
- * @requires {@link https://www.npmjs.com/package/moment module:NPM:moment}
- * @requires {@link https://www.npmjs.com/package/mongoose module:NPM:mongoose}
- *
- * @requires lib/constants.FONTS
- * @requires utils.toCurrencyFormat
- * @requires config/logger.addLogger
- */
-
-/**
- * It creates travel report PDF
- * @module
- * @see {@link https://www.npmjs.com/package/fs module:NODEjs:fs}
- * @see {@link https://www.npmjs.com/package/pdfmake npm pdfmake}
- * @see {@link https://www.npmjs.com/package/moment module:NPM:moment}
- * @see {@link https://www.npmjs.com/package/mongoose module:NPM:mongoose}
- */
-
-/** PdfPrinter */
 const PdfPrinter = require('pdfmake');
-/** moment */
 const moment = require('moment');
-/** mongoose */
 const mongoose = require('mongoose');
-/** fs */
 const fs = require('fs');
 
 const { ObjectId } = mongoose.Types;
 
-/** FONTS */
 const { FONTS } = require('../lib/constants');
-/** toCurrencyFormat */
 const { toCurrencyFormat } = require('./utils');
-/** addLogger */
 const { addLogger } = require('../config/logger');
 
 const pathDepth = module.paths.length - 6;
@@ -47,15 +18,7 @@ const Logger = addLogger(__filename, pathDepth);
 const printer = new PdfPrinter(FONTS);
 
 
-/**
- * Returns pdf table body
- * @memberof module:utils/travelExpensesToPDF
- * @param {*} data
- * @param {*} columns
- * @param {*} tableHeader
- * @param {number} [total=0]
- * @returns {Array}
- */
+// Returns pdfmake table body
 function buildTableBody(data, columns, tableHeader, total = 0) {
   let body = [];
   if (!tableHeader) {
@@ -101,16 +64,7 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
   return body;
 }
 
-/**
- * Creates pdf table
- * @memberof module:utils/travelExpensesToPDF
- * @param {*} data
- * @param {*} columns
- * @param {*} tableHeader
- * @param {*} [style={}]
- * @param {number} [travelTotal=0]
- * @returns {Object}
- */
+// Returns pdfmake table
 function table(data, columns, tableHeader, style = {}, travelTotal = 0) {
   return {
 
@@ -136,12 +90,7 @@ function table(data, columns, tableHeader, style = {}, travelTotal = 0) {
   };
 }
 
-/**
- * Returns travel expense data
- * @memberof module:utils/travelExpensesToPDF
- * @param {Travel} travel
- * @returns {Object[]}
- */
+// Returns data for table data
 function createTravelExpensesTableData (travel) {
   const { expenses } = travel;
   const dataObjects = [];
@@ -164,23 +113,12 @@ function createTravelExpensesTableData (travel) {
   return dataObjects;
 }
 
-/**
- * Returns Travel PDF stream
- *
- * @param {Travel} travel
- * @param {User} user
- * @param {Number[]} idx
- * @returns {fs.createWriteStream}
- */
+// Returns travel pdfmake stream
 module.exports = (travel, user, idx) => {
   Logger.debug('Creating pdf Travel');
   if (!user.profile.name) {
     user.profile.name = 'Unknown';
   }
-
-  // console.log(typeof ObjectId(travel._id).getTimestamp());
-  // console.log(typeof ObjectId(travel._id).toString());
-  // console.log(typeof ObjectId(travel._id).valueOf());
 
   const invoiceNumber = `${ObjectId(travel._id).toString()}-${idx}`;
   const dateFrom = moment(travel.dateFrom).format('ddd, MMM Do YYYY');

@@ -4,39 +4,13 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-async-promise-executor */
 
-/**
- * @fileOverview Functions and methods to import travels and expenses from CSV file.
- *
- * @requires NPM:mongoose
- * @requires NPM:_
- * @requires NPM:fs
- * @requires NPM:papaparse
- * @requires models/User
- * @requires models/Travel
- * @requires models/Expense
- * @requires models/Currency
- * @requires lib/constants
- * @requires utils/myErrors
- */
-
 // TODO Unnecessary try/catch wrapper.eslint(no-useless-catch)
 // TODO iterators/generators require regenerator-runtime,...(no-restricted-syntax)
 // TODO Unexpected `await` inside a loop.eslint(no-await-in-loop)
 // TODO Redundant use of `await` on a return value.eslint(no-return-await)
 // TODO Promise executor functions should not be async.eslint(no-async-promise-executor)
 
-/**
- * Functions and methods to import travels and expenses from CSV file.
- * @module utils/postImport
- * @see module:models/User
- * @see module:models/Travel
- * @see module:models/Expense
- * @see module:models/Currency
- * @see module:lib/constants
- * @see module:utils/myErrors
- * @see module:config/logger
- *
- */
+// Functions and methods to import travels and expenses from CSV file.
 
 const mongoose = require('mongoose');
 const _ = require('lodash');
@@ -48,9 +22,6 @@ const Travel = require('../models/Travel');
 const Expense = require('../models/Expense');
 const Currency = require('../models/Currency');
 
-const { ObjectId } = mongoose.Types;
-
-// const { expenseTypes } = require('../lib/globals');
 const constants = require('../lib/constants');
 const myErrors = require('../utils/myErrors');
 
@@ -59,15 +30,9 @@ const { addLogger } = require('../config/logger');
 const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
 
+const { ObjectId } = mongoose.Types;
 
-/**
- * Reads and parses CSV file
- *
- *
- * @param {string} filePath valid file path
- * @param {string} [enc='utf8] encoding for file
- * @returns {Papa.ParseResult}
- */
+// Reads and parses CSV file
 async function readAndParseFile(filePath, enc = 'utf8') {
   Logger.debug(
     `Reading and parsing CSV file\npath: ${filePath}\nencoding: ${enc}`
@@ -92,14 +57,7 @@ async function readAndParseFile(filePath, enc = 'utf8') {
 }
 
 
-/**
- * Returns Error with message on condition is true
- * @private
- *
- * @param {boolean} condition Specific condition
- * @param {string} message Error message
- * @returns {myError.ImportFileError} Custom error
- */
+// Returns Error with message on condition is true
 async function checkFileFor(condition, message) {
   const suffix =
     'File should be a CSV with header in first line and not empty!';
@@ -112,28 +70,18 @@ async function checkFileFor(condition, message) {
   }
 }
 
-/**
- * Checks if file is valid file
- *
- * @function
- *
- * @param {NodeJS.ReadWriteStream} myFile
- * @returns {Promise<Void | myErrors.ImportFileError>}
- * Promise object represents undefined or specific error
+/*
+ Checks if file is valid file
+ Promise object represents undefined or specific error
  */
 const checkFile = myFile =>
   new Promise(resolve => {
     Logger.debug('Checking file for errors');
     let error;
 
-    /**
-     * Checks if user is trying to import wrong file.
-     * check if file is not empty, CSV or it was not selected
-     *
-     * @async
-     * @function
-     * @returns {(Void | myErrors.ImportFileError)}
-     *
+    /*
+     Checks if user is trying to import wrong file.
+     Checks if file is not empty, CSV or it was not selected
      */
     const tripleCheck = async () => {
       Logger.silly('Beggining of triple check for errors in selected file');
@@ -173,14 +121,7 @@ const checkFile = myFile =>
   });
 
 
-// TODO do better jsdoc
-/**
- * Creates currency object
- *
- *
- * @param {Object} value
- * @returns {Object}
- */
+// Creates currency object
 function createCurrency(value) {
   Logger.debug(`Creating currency from: ${value}`);
   const currency = {};
@@ -193,15 +134,10 @@ function createCurrency(value) {
   return currency;
 }
 
-/**
- * Middleware function for
- * Returns currency if currency doesn't exist
- *
- * @type {Promise}
- *
- * @param {} currency
- * @param {Object} value
- * @returns {Promise<(Void | Object)>} Promise object represents undefined or value object
+/*
+ Middleware function when importing expenses
+ Returns currency if currency doesn't exist
+ Promise object represents undefined or value object
  */
 const getOnlyNewCurrency = (currency, value) =>
   new Promise(resolve => {
@@ -213,12 +149,10 @@ const getOnlyNewCurrency = (currency, value) =>
   });
 
 
-/**
- * Updates traves after with imported expenses
- *
- *
- * @param {string[]} uniqueTravelObjectIds Array of unique travel ids
- * @param {string[]} expenses
+/*
+ Updates traves after with imported expenses
+ Returns updated travels
+ Promise object represents error or updated travels
  */
 const updateTravels = async (uniqueTravelObjectIds, expenses) =>
   new Promise(async resolve => {
@@ -256,23 +190,15 @@ const updateTravels = async (uniqueTravelObjectIds, expenses) =>
   });
 
 
-/**
- * Reads, checks file and returns data or error
- *
- * If file is not validate returns custom error ImportFileError otherwise
- * returns array with expenses data.
- * @member {function} readCheckFileAndGetData
- * @async
- * @function
- * @param {(NodeJS.ReadWriteStream)} myFile
- * @param {string} option travels or expenses
+/*
+ Reads, checks file and returns data or error
+ Returns array with expenses data.
+ Throws custom error ImportFileError
  */
 async function readCheckFileAndGetData(myFile, option) {
   Logger.debug('Check file and get data if no error in file or data');
-  /** @type {(myErrors.ImportFileError | Void)} */
   let error = null;
   const myFilePath = myFile.path;
-  /** @type {string[]} */
   let headerToBe;
   switch (option) {
     case 'travels':
@@ -301,7 +227,6 @@ async function readCheckFileAndGetData(myFile, option) {
     const dataArray = parsedData.data;
 
     // check if data has matching header
-    /** @type {Papa.ParseResults.meta.fields} */
     const parsedHeaderArray = parsedData.meta.fields;
     error = await checkFileFor(
       !_.isEqual(headerToBe, parsedHeaderArray),
@@ -322,13 +247,7 @@ async function readCheckFileAndGetData(myFile, option) {
 }
 
 
-/**
- * Deletes uploaded file from server
- * @member {function} deleteFile
- * @function
- * @param {string} filePath valid file path
- * @param {string} message Logger message
- */
+// Deletes uploaded file from server
 function deleteFile(filePath, message = '') {
   try {
     if (fs.existsSync(filePath)) {
@@ -347,21 +266,12 @@ function deleteFile(filePath, message = '') {
 }
 
 
-/**
- * Gets and prepares currencies from imported file.
- *
- * Removes rate & base from passed array dataArray
- * add property _user to passed array dataArray
- * add property curRate to passed array dataArray
- * @member {function} expensesImportSetCurrencyArray
- * @async
- * @function
- *
- * @param {Array} dataArray
- * @param {string} userId
- * @param {Travel[]} travels
- *
- * @returns {Currency[]}
+/*
+ Gets and prepares currencies from imported file.
+ Removes rate & base from passed array dataArray
+ Adds property _user to passed array dataArray
+ Adds property curRate to passed array dataArray
+ Returns currencies array and message or error and message
  */
 async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
   Logger.debug('Setting currencies array for expenseImport');
@@ -426,8 +336,10 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
       ...new Map(currenciesArray.map(o => [JSON.stringify(o), o])).values()
     ].sort(
       (a, b) =>
-        // Turn your strings into dates, and then subtract them
-        // to get a value that is either negative, positive, or zero.
+        /*
+         Turn your strings into dates, and then subtract them
+         to get a value that is either negative, positive, or zero.
+         */
         a.date - b.date
     );
 
@@ -446,13 +358,11 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
 }
 
 
-/**
- * Prepare new currencies which will save later.
- * Check if currencies are only in DB and return array with new currencies
- * @member {function} expensesImportNewCurrenciesForSave
- * @function
- * @param {Array} array
- * @returns {Promise<Object>}
+/*
+ Prepares new currencies which will save later.
+ Checks if currencies are only in DB and return array with new currencies
+ Resolves object with 2 arrays. Currencies NOT in DB and in DB.
+ Rejects error
  */
 async function expensesImportNewCurrenciesForSave(array) {
   Logger.debug('expensesImport - New Currencies For Save');
@@ -491,11 +401,10 @@ async function expensesImportNewCurrenciesForSave(array) {
 
 // TODO Check if expense is already in DB
 // https://stackoverflow.com/questions/8389811/how-to-query-mongodb-to-test-if-an-item-exists
-/**
- * @member {function} expenseImport
- * @async
- * @function
- * @param {Array} dataArray
+/*
+ Inserts expenses in DB
+ Promise
+ Resolves on success with message, on error with error object
  */
 const expenseImport = async dataArray =>
   new Promise(async resolve => {
@@ -536,12 +445,10 @@ const expenseImport = async dataArray =>
   });
 
 // TODO Check if travel is already in DB
-/**
- * @member {function} travelImport
- * @async
- * @function
- * @param {Array} dataArray
- * @param {string} userId
+/*
+ Inserts travels in DB
+ Returns Promise
+ Promise resolves on success with message, on error with error object
  */
 async function travelImport(dataArray, userId) {
   Logger.debug('Travel import');
@@ -597,16 +504,10 @@ async function travelImport(dataArray, userId) {
 
 
 module.exports = {
-  /** Reads, checks file and returns data or error */
   readCheckFileAndGetData,
-  /** Delete file after data is parsed from file */
   deleteFile,
-  /** Sets currencies array */
   expensesImportSetCurrencyArray,
-  /** Prepeares new currencies to be saved in DB */
   expensesImportNewCurrenciesForSave,
-  /** Imports travels from CSV file */
   travelImport,
-  /** Imports expenses from CSV file */
   expenseImport
 };

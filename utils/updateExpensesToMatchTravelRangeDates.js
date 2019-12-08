@@ -1,8 +1,3 @@
-/**
- * @module utils/updateExpensesToMatchTravelRangeDates
- */
-
-
 const Expense = require('../models/Expense');
 const Currency = require('../models/Currency');
 
@@ -14,16 +9,7 @@ const { addLogger } = require('../config/logger');
 const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
 
-/**
- * Returns if expense date is not in travel's date range.
- *
- * Either is greater than dateTo or lower than dateFrom.
- *
- * @param {Date} expDate Expense date.
- * @param {Date} travelDateFrom Travel date when the travel starts.
- * @param {Date} travelDateTo Travel date when the travel ends.
- * @returns {boolean} If not in travel dates range true otherwise false.
- */
+// Returns true if expense date is not in travel's dates range
 function checkExpenseDate(expDate, travelDateFrom, travelDateTo) {
   const condition = expDate < travelDateFrom || expDate > travelDateTo;
   Logger.debug(`Cheking expense date. Date in travel's dates: ${!condition}`);
@@ -33,39 +19,23 @@ function checkExpenseDate(expDate, travelDateFrom, travelDateTo) {
   return false;
 }
 
-/**
- * Returns new expense, based on travel dates range.
- *
- * @param {Date} expDate Expense date.
- * @param {Date} travelDateFrom Travel date when the travel starts.
- * @param {Date} travelDateTo Travel date when the travel ends.
- * @returns {Date} travelDateFrom || travelDateTo
- */
+// Returns new expense, based on travel dates range.
 function setNewExpenseDate(expDate, travelDateFrom, travelDateTo) {
   if (expDate < travelDateFrom) {
     Logger.debug(`Expense date is lower than travel date from: ${expDate} < ${travelDateFrom}`);
     return travelDateFrom;
-  } if (expDate > travelDateTo) {
+  }
+  if (expDate > travelDateTo) {
     Logger.debug(`Expense date is greater than travel date to: ${expDate} > ${travelDateTo}`);
     return travelDateTo;
   }
 }
 
-/**
- * @typedef {Object} NewCurrency
- * @type {Object}
- * @property {Currency} curRate - Currency
- * @property {Number} convertedRate - Converted rate
- */
 
-/**
- * Create new currency object based on user default currency.
- *
- * @param {Date} expensesDate Expense date
- * @param {string} homeCurrency User default currency
- * @param {string} invoiceCurrency Invoice currency
- * @returns {...NewCurrency} {@link NewCurrency} Object with currency object and rate.
- */
+/*
+Returns new currency object based on user default currency.
+Throws Error if something goes wrong
+*/
 async function createNewCurrency(expenseDate, homeCurrency, invoiceCurrency) {
   Logger.debug('Creating new currency');
   try {
@@ -83,14 +53,13 @@ async function createNewCurrency(expenseDate, homeCurrency, invoiceCurrency) {
       rate: cur
     });
     Logger.debug(`New currency: {base: ${curRate.base}, date: ${curRate.date}, rate: ${cur.toString()}}`);
-    /** @type {NewCurrency} */
     return { curRate, convertedRate };
   } catch (err) {
     throw new Error(err);
   }
 }
 
-// TODO jsdoc
+// Updates expense data
 async function updateExpense(
   expenseId,
   expenseAmount,
@@ -113,8 +82,15 @@ async function updateExpense(
   }
 }
 
-// TODO jsdoc
 // FIXME Promise executor functions should not be async
+
+/*
+  Updates all travel's expenses
+  Loops through all expenses
+  Checks if expense date is in travel's dates range
+  Checks if expense type is mileage
+
+*/
 // eslint-disable-next-line no-async-promise-executor
 module.exports = async travel => new Promise(async (resolve, reject) => {
   const { dateFrom } = travel;

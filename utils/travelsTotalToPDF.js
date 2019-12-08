@@ -1,36 +1,9 @@
-// test change gitflow again
-/**
- * @fileOverview Functions to create Total PDF
- *
- * @requires {@link https://www.npmjs.com/package/fs module:NODEjs:fs}
- * @requires {@link https://www.npmjs.com/package/pdfmake module:NPM:pdfmake}
- * @requires {@link https://www.npmjs.com/package/moment module:NPM:moment}
- *
- * @requires lib/constants.FONTS
- * @requires utils/utils
- * @requires config/logger.addLogger
- */
-
-/**
- * @module utils/travelsTotalToPDF
- * @see {@link https://www.npmjs.com/package/fs module:NODEjs:fs}
- * @see {@link https://www.npmjs.com/package/pdfmake npm pdfmake}
- * @see {@link https://www.npmjs.com/package/moment module:NPM:moment}
- */
-
-
-/** PdfPrinter */
 const PdfPrinter = require('pdfmake');
-/** moment */
 const moment = require('moment');
-/** fs */
 const fs = require('fs');
 
-/** FONTS */
 const { FONTS } = require('../lib/constants');
-/** toCurrencyFormat */
 const { toCurrencyFormat } = require('./utils');
-/** addLogger */
 const { addLogger } = require('../config/logger');
 
 const pathDepth = module.paths.length - 6;
@@ -39,15 +12,7 @@ const Logger = addLogger(__filename, pathDepth);
 const printer = new PdfPrinter(FONTS);
 
 
-/**
- * Creates table body
- * @memberof module:utils/travelsToPDF
- * @param {*} data
- * @param {*} columns
- * @param {*} tableHeader
- * @param {number} [total=0]
- * @returns {Array}
- */
+// Returns pdfmake table body
 function buildTableBody(data, columns, tableHeader, total = 0) {
   const totalInCurrencyFormat = toCurrencyFormat(total);
   let body = [];
@@ -106,16 +71,7 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
   return body;
 }
 
-/**
- * Creates pdfmake table
- * @memberof module:utils/travelsToPDF
- * @param {*} data
- * @param {*} columns
- * @param {*} tableHeader
- * @param {*} [style={}]
- * @param {number} [sum=0]
- * @returns {Object}
- */
+// Returns pdfmake table
 function table(data, columns, tableHeader, style = {}, sum = 0) {
   return {
     style,
@@ -140,13 +96,7 @@ function table(data, columns, tableHeader, style = {}, sum = 0) {
   };
 }
 
-/**
- * Creates data for total table
- * @memberof module:utils/travelsToPDF
- * @param {*} travels
- * @param {*} indexes
- * @returns {Object[]}
- */
+// Retruns data for total table
 function createTravelsTotalTableData(travels, indexes) {
   const dataObjects = [];
   travels.forEach((travel, key) => {
@@ -163,17 +113,7 @@ function createTravelsTotalTableData(travels, indexes) {
   return dataObjects;
 }
 
-/**
- * Return pdf TOTAL file.
- *
- *
- * @param {Travel[]} travels
- * @param {User} user
- * @param {*} dateRange
- * @param {(string | number)} sum
- * @param {Number[]} indexes
- * @returns {fs.createWriteStream}f
- */
+// Returns TOTAL pdfmake stream
 module.exports = (travels, user, dateRange, sum, indexes) => {
   Logger.debug('Creating pdf Total');
   Logger.debug(`Travel indexes: ${indexes}`);

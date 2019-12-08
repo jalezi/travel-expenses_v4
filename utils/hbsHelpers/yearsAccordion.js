@@ -1,9 +1,6 @@
-/**
- * @memberof module:utils/hbsHelpers
- * @type {module}
- */
 const expressHbs = require('express-hbs');
 const moment = require('moment');
+
 const { createElement } = require('../utils');
 const { createTwoCardElements } = require('../utils');
 const { expenseTypes } = require('../../lib/globals');
@@ -15,14 +12,11 @@ const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
 
 
-/**
- * Returns expense curRate object
- * @memberof module:utils/hbsHelpers
- * @param {object} travel
- * @param {object} expense
- *
- * Couldn't populate on travel aggregate expense curRate.
- * Travel Object has new array with unique curRate objects.
+/*
+ Returns expense curRate object
+
+ Couldn't populate on travel aggregate expense curRate.
+ Travel Object has new array with unique curRate objects.
  */
 const findCurRate = (travel, expense) => {
   Logger.debug('findCurRate');
@@ -35,14 +29,8 @@ const findCurRate = (travel, expense) => {
   return curRate;
 };
 
-/**
- * Creates HTML 'option' elements
- * @memberof module:utils/hbsHelpers
- * @param {array} options            Select or datalist options
- * @param {string} selected           Option to be selected
- * @param {object} elemAttrs          HTML element attributes
- * @param {boolean} valueToLowerCase  whether to set option's value to lower case
- *
+/*
+ Creates HTML 'option' elements
  */
 const createSelectOptions = (options, selected, elemAttrs = {}, valueToLowerCase = false) => {
   Logger.debug('createSelectOptions');
@@ -70,9 +58,8 @@ const createSelectOptions = (options, selected, elemAttrs = {}, valueToLowerCase
 
 // }
 
-/**
- * creates Expense Form
- * @memberof module:utils/hbsHelpers
+/*
+ creates Expense Form
  */
 // eslint-disable-next-line no-unused-vars
 const createExpenseForm = (method = 'POST', hiddenMethod = method, csrf = '', expenseTypes = {}, travel, expense, formatter) => {
@@ -508,12 +495,12 @@ const createExpenseForm = (method = 'POST', hiddenMethod = method, csrf = '', ex
   return form;
 };
 
-/**
- * Returns HTML elements
- * @memberof module:utils/hbsHelpers
- * @param {object} value Array with travels mongo aggregate group
- * by year and each year group by month
- * more in Travel Schema /models/Travel.js Travel.byYear_byMonth
+/*
+ Returns HTML elements
+ @param value Array with travels mongo aggregate group
+ by year and each year group by month
+
+ More in Travel Schema /models/Travel.js Travel.byYear_byMonth
  */
 expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
   Logger.debug('yearsAccordionWithForm');
@@ -686,12 +673,12 @@ expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
 });
 
 
-/**
- * Returns HTML elements
- * @memberof module:utils/hbsHelpers
- * @param {object} value Array with travels mongo aggregate
- * group by year and each year group by month
- * more in Travel Schema /models/Travel.js Travel.byYear_byMonth
+/*
+ Returns HTML elements
+ @param value Array with travels mongo aggregate group
+ by year and each year group by month
+
+ More in Travel Schema /models/Travel.js Travel.byYear_byMonth
  */
 expressHbs.registerHelper('yearsAccordion', (value, csrf) => {
   Logger.debug('yearsAccordion');

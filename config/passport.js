@@ -14,25 +14,25 @@ const { addLogger } = require('../config/logger');
 const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
 
-/**
- * Determines which data of the user object should be stored in the session.
- * The result of the serializeUser method is attached to the session
- * as req.session.passport.user = {}.
- * In this case req.session.passport.user = {id: user.id)
+/*
+ Determines which data of the user object should be stored in the session.
+ The result of the serializeUser method is attached to the session
+ as req.session.passport.user = {}.
+ In this case req.session.passport.user = {id: user.id)
  */
 passport.serializeUser((user, done) => {
   Logger.debug('Serialize User');
   done(null, user.id);
 });
 
-/**
- * The first argument of deserializeUser corresponds to the key of the user object
- * that was given to the done function (see 1.).
- * So your whole object is retrieved with help of that key.
- * That key here is the user id (key can be any key of the user object i.e. name,email etc).
- * In deserializeUser that key is matched with the in memory array / database or any data resource.
- *
- * The fetched object is attached to the request object as req.user
+/*
+ The first argument of deserializeUser corresponds to the key of the user object
+ that was given to the done function (see 1.).
+ So your whole object is retrieved with help of that key.
+ That key here is the user id (key can be any key of the user object i.e. name,email etc).
+ In deserializeUser that key is matched with the in memory array / database or any data resource.
+
+ The fetched object is attached to the request object as req.user
  */
 passport.deserializeUser((id, done) => {
   Logger.debug('Deserialize User');
@@ -41,9 +41,8 @@ passport.deserializeUser((id, done) => {
   });
 });
 
-/**
- * Sign in using Email and Password.
- */
+
+// Sign in using Email and Password.
 passport.use(new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
   Logger.debug('Local strategy');
   User.findOne({ email: email.toLowerCase() }, (err, user) => {
@@ -61,24 +60,22 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, (email, password, don
   });
 }));
 
-/**
- * OAuth Strategy Overview
- *
- * - User is already logged in.
- *   - Check if there is an existing account with a provider id.
- *     - If there is, return an error message. (Account merging not supported)
- *     - Else link new OAuth account with currently logged-in user.
- * - User is not logged in.
- *   - Check if it's a returning user.
- *     - If returning user, sign in and we are done.
- *     - Else check if there is an existing account with user's email.
- *       - If there is, return an error message.
- *       - Else create a new account.
+/*
+ OAuth Strategy Overview
+
+ - User is already logged in.
+   - Check if there is an existing account with a provider id.
+     - If there is, return an error message. (Account merging not supported)
+     - Else link new OAuth account with currently logged-in user.
+ - User is not logged in.
+   - Check if it's a returning user.
+     - If returning user, sign in and we are done.
+     - Else check if there is an existing account with user's email.
+       - If there is, return an error message.
+       - Else create a new account.
  */
 
-/**
- * Sign in with Google.
- */
+// Sign in with Google.
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_ID,
   clientSecret: process.env.GOOGLE_SECRET,
@@ -142,9 +139,7 @@ passport.use(new GoogleStrategy({
 }));
 
 
-/**
- * Login Required middleware.
- */
+// Login Required middleware.
 exports.isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
@@ -152,9 +147,8 @@ exports.isAuthenticated = (req, res, next) => {
   res.redirect('/login');
 };
 
-/**
- * Authorization Required middleware.
- */
+
+// Authorization Required middleware.
 exports.isAuthorized = (req, res, next) => {
   const provider = req.path.split('/').slice(-1)[0];
   const token = req.user.tokens.find(token => token.kind === provider);

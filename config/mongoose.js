@@ -14,9 +14,8 @@ const config = require('../config');
 module.exports = async () => {
   Logger.debug('DB connecting');
   const dbURL = config.databaseURL;
-  /**
-   * Mongoose connection events
-   */
+  
+  // Mongoose connection events
   mongoose.connection.on('connecting', () => {
     Logger.debug(`Mongoose connecting to: ${dbURL}`);
   });

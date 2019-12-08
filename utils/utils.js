@@ -1,31 +1,12 @@
 /* eslint-disable func-names */
-/**
- * @fileoverview Different methods
- * @author Jaka Daneu
- * @requires models/Rate
- * @requires config/logger.addLogger
- */
 
-/**
- * @fileoverview Exports 7 methods
- * @module utils/utils
- * @type {Object}
- *
- */
-
-/** Rate */
 const Rate = require('../models/Rate');
-/** addLogger */
 const { addLogger } = require('../config/logger');
 
 const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
 
-/**
- * Converts to currency format
- * @param {(Number | string)} amount
- * @returns {string}
- */
+// Converts number to currency format
 function toCurrencyFormat(amount) {
   const formatter = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2,
@@ -35,13 +16,7 @@ function toCurrencyFormat(amount) {
   return result;
 }
 
-/**
- * Returns converted rate based on user default currency
- * @param {Rate} rates
- * @param {string} homeCurrency User default currency
- * @param {string} invoiceCurrency Invoice currency
- * @returns {Number} Fixed number to 2 decimals
- */
+// Converts rate based on user default currency
 const convertRateToHomeCurrencyRate = (
   rates,
   homeCurrency,
@@ -57,14 +32,11 @@ const convertRateToHomeCurrencyRate = (
   return invoiceRate;
 };
 
-/**
- * Returns date with rates on exact day.
- * If there are no rates for exact date in DB,
- * find rates for closest date and returns date for closest matching date.
- *
- * @param {Date} [date=new Date()] Expense date - default: today
- * @returns {Date} Date with rates in DB
- */
+/*
+ Returns date with rates on exact day.
+ If there are no rates for exact date in DB,
+ find rates for closest date and returns date for closest matching date.
+*/
 const findRatesByExactOrClosestDate = async (date = new Date()) => {
   Logger.debug('Find rates by exact or closest date');
   try {
@@ -125,11 +97,7 @@ const findRatesByExactOrClosestDate = async (date = new Date()) => {
   }
 };
 
-/**
- * Returns TitleCase string
- * @param {String} str Any string
- * @returns {String} TitleCase string
- */
+// Converts string TitleCase string
 const toTitleCase = str =>
   str.replace(
     /\w\S*/g,
@@ -142,14 +110,7 @@ String.prototype.splice = function(idx, rem, str) {
   return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
 };
 
-/**
- * Creates HTML elements
- * @param {string} tag HTML tag
- * @param {object} [options={}]
- * @param {string} [text='Hello World'] Inner text
- * @param {boolean} [closingTag=true] HTML closing tag
- * @return {string} HTML element
- */
+// Creates HTML element as string
 const createElement = (
   tag,
   options = {},
@@ -191,16 +152,7 @@ const createElement = (
   return result;
 };
 
-/**
- * Returns 2 HTML elements as one string
- *
- * @param {Array} tagArr
- * @param {Array} optionArr
- * @param {string[]} [textArr=['', '']]
- * @param {boolean[]} [closingArr=[true, true, true]]
- * @param {string} [insert='']
- * @returns {string} 2 HTML Elements
- */
+// Creates 2 HTML elements as one string
 const createTwoCardElements = (
   tagArr,
   optionArr,
@@ -229,15 +181,7 @@ const createTwoCardElements = (
   return labelElem + insert + expenseElem;
 };
 
-/**
- * will be module:utils.createOptions
- *
- * @param {} options
- * @param {} selected
- * @param {Object} [elemAttrs={}]
- * @param {boolean} [valueToLowerCase=false]
- * @returns {string} HTML Element
- */
+// Not used yet
 const createOptions = (
   options,
   selected,
@@ -265,18 +209,11 @@ const createOptions = (
 };
 
 module.exports = {
-  /** Converts to currency format */
   toCurrencyFormat,
-  /** Converts rate to user defined default currency base */
   convertRateToHomeCurrencyRate,
-  /** Finds rates on exact date or closest date */
   findRatesByExactOrClosestDate,
-  /** Make string TitleCase */
   toTitleCase,
-  /** Creates HTML element */
   createElement,
-  /** Creates 2 HTML elements */
   createTwoCardElements,
-  /** Creates options for HTML element */
   createOptions
 };

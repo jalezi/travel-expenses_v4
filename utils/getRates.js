@@ -1,28 +1,36 @@
 /**
- *
- * @description Get rates from data.fixer.io/api, save them to DB and
+ * @fileoverview Get rates from data.fixer.io/api, save them to DB and
  * creates job to check every hour if we have rates in DB.
- *
- * This module requires:
- * {@link module:models/Rate}
- * {@link config/logger.addLogger}
- *
- * @module utils/getRates
+ * @author Jaka Daneu
  * @requires node_modules/axios
  * @requires node_modules/node-schedule
  * @requires node_modules/moment
- * @requires module:models/Rate
+ * @requires models/Rate
  * @requires config/logger.addLogger
+ * @see {@link module:models/Rate~Rate Rate model}
+ * @see {@link config/logger.addLogger addLogger}
+ */
+
+/**
+ *
+ * @description Get rates from data.fixer.io/api, save them to DB and
+ * creates job to check every hour if we have rates in DB.
+ * @see {@link module:models/Rate Rate model}
+ * @see {@link config/logger.addLogger addLogger}
+ *
+ * @module utils/getRates
  *
  */
 
-
+/** axios */
 const axios = require('axios');
+/** schedule */
 const schedule = require('node-schedule');
+/** momnet */
 const moment = require('moment');
-
+/** Rate */
 const Rate = require('../models/Rate');
-
+/** addLogger */
 const { addLogger } = require('../config/logger');
 
 // Logger
@@ -30,10 +38,10 @@ const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
 
 /**
- * Get rates from data.fixer.io
- *
+ * Get rates from data.fixer.io. Save them to DB.
  * @async
- * @function
+ * @function datafixier
+ * @throws {Error} Will throw an error if something goes wrong
  *
  */
 const dataFixier = async () => {
@@ -82,7 +90,6 @@ const checkDbForTodayRates = new Promise((resolve, reject) => {
     reject(err);
   }
 });
-
 
 /**
  * Get rates from data.fixer.io/api, save them to DB and

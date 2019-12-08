@@ -7,8 +7,8 @@
  * {@link module:models/Rate~Rate.RateSchema Rate Schema}.
  * <p>{@link module:models/Rate Rate} module exports
  * {@link module:models/Rate~Rate Rate Model}</p>
- * @requires {@link https://www.npmjs.com/package/mongoose module:NPM mongoose}
- * @requires {@link module:config/logger module:config/logger.addLogger}
+ * @requires {@link https://www.npmjs.com/package/mongoose module:NPM:mongoose}
+ * @requires config/logger.addLogger
  * @see {@link module:models/Rate Rate module}
  * @see {@link module:models/Rate~Rate Rate Model}
  * @see {@link module:models/Rate~Rate.RateSchema Rate Schema}
@@ -43,8 +43,9 @@
   * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
   */
 
+/** mongoose */
 const mongoose = require('mongoose');
-
+/** addLogger */
 const { addLogger } = require('../config/logger');
 
 const pathDepth = module.paths.length - 6;
@@ -206,4 +207,8 @@ RateSchema.statics.findRateBeforeOrAfterDate = function (travel) {
  */
 const Rate = mongoose.model('Rate', RateSchema);
 
+/**
+ * Expense model
+ * @type {Model<Document, {}>}
+ */
 module.exports = Rate;

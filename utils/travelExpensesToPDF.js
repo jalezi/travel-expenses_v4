@@ -4,23 +4,41 @@
 /**
  * @fileOverview Functions to create Travel PDF
  *
- * @requires NPM:pdfmake
- * @requires NPM:moment
- * @requires NPM:mongoose
- * @requires NPM:fs
+ * @requires {@link https://www.npmjs.com/package/fs module:NODEjs:fs}
+ * @requires {@link https://www.npmjs.com/package/pdfmake module:NPM:pdfmake}
+ * @requires {@link https://www.npmjs.com/package/moment module:NPM:moment}
+ * @requires {@link https://www.npmjs.com/package/mongoose module:NPM:mongoose}
  *
  * @requires lib/constants.FONTS
+ * @requires utils.toCurrencyFormat
  * @requires config/logger.addLogger
  */
+
+/**
+ * It creates travel report PDF
+ * @module
+ * @see {@link https://www.npmjs.com/package/fs module:NODEjs:fs}
+ * @see {@link https://www.npmjs.com/package/pdfmake npm pdfmake}
+ * @see {@link https://www.npmjs.com/package/moment module:NPM:moment}
+ * @see {@link https://www.npmjs.com/package/mongoose module:NPM:mongoose}
+ */
+
+/** PdfPrinter */
 const PdfPrinter = require('pdfmake');
+/** moment */
 const moment = require('moment');
+/** mongoose */
 const mongoose = require('mongoose');
+/** fs */
 const fs = require('fs');
 
 const { ObjectId } = mongoose.Types;
 
+/** FONTS */
 const { FONTS } = require('../lib/constants');
+/** toCurrencyFormat */
 const { toCurrencyFormat } = require('./utils');
+/** addLogger */
 const { addLogger } = require('../config/logger');
 
 const pathDepth = module.paths.length - 6;
@@ -31,7 +49,7 @@ const printer = new PdfPrinter(FONTS);
 
 /**
  * Returns pdf table body
- *
+ * @memberof module:utils/travelExpensesToPDF
  * @param {*} data
  * @param {*} columns
  * @param {*} tableHeader
@@ -85,7 +103,7 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
 
 /**
  * Creates pdf table
- *
+ * @memberof module:utils/travelExpensesToPDF
  * @param {*} data
  * @param {*} columns
  * @param {*} tableHeader
@@ -120,7 +138,7 @@ function table(data, columns, tableHeader, style = {}, travelTotal = 0) {
 
 /**
  * Returns travel expense data
- *
+ * @memberof module:utils/travelExpensesToPDF
  * @param {Travel} travel
  * @returns {Object[]}
  */
@@ -147,11 +165,11 @@ function createTravelExpensesTableData (travel) {
 }
 
 /**
- * Returns Travel PDF
- * @module
+ * Returns Travel PDF stream
+ *
  * @param {Travel} travel
  * @param {User} user
- * @param {*} idx
+ * @param {Number[]} idx
  * @returns {fs.createWriteStream}
  */
 module.exports = (travel, user, idx) => {

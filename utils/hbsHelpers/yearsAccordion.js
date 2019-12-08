@@ -1,3 +1,7 @@
+/**
+ * @memberof module:utils/hbsHelpers
+ * @type {module}
+ */
 const expressHbs = require('express-hbs');
 const moment = require('moment');
 const { createElement } = require('../utils');
@@ -12,7 +16,8 @@ const Logger = addLogger(__filename, pathDepth);
 
 
 /**
- * Returns expense curRate object-
+ * Returns expense curRate object
+ * @memberof module:utils/hbsHelpers
  * @param {object} travel
  * @param {object} expense
  *
@@ -32,6 +37,7 @@ const findCurRate = (travel, expense) => {
 
 /**
  * Creates HTML 'option' elements
+ * @memberof module:utils/hbsHelpers
  * @param {array} options            Select or datalist options
  * @param {string} selected           Option to be selected
  * @param {object} elemAttrs          HTML element attributes
@@ -64,6 +70,10 @@ const createSelectOptions = (options, selected, elemAttrs = {}, valueToLowerCase
 
 // }
 
+/**
+ * creates Expense Form
+ * @memberof module:utils/hbsHelpers
+ */
 // eslint-disable-next-line no-unused-vars
 const createExpenseForm = (method = 'POST', hiddenMethod = method, csrf = '', expenseTypes = {}, travel, expense, formatter) => {
   Logger.debug('createExpenseForm');
@@ -500,6 +510,7 @@ const createExpenseForm = (method = 'POST', hiddenMethod = method, csrf = '', ex
 
 /**
  * Returns HTML elements
+ * @memberof module:utils/hbsHelpers
  * @param {object} value Array with travels mongo aggregate group
  * by year and each year group by month
  * more in Travel Schema /models/Travel.js Travel.byYear_byMonth
@@ -677,6 +688,7 @@ expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
 
 /**
  * Returns HTML elements
+ * @memberof module:utils/hbsHelpers
  * @param {object} value Array with travels mongo aggregate
  * group by year and each year group by month
  * more in Travel Schema /models/Travel.js Travel.byYear_byMonth

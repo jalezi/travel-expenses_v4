@@ -1,12 +1,21 @@
+/* eslint-disable func-names */
 /**
- * @module utils/utils
- *
- * @requires module:models/Rate
+ * @fileoverview Different methods
+ * @author Jaka Daneu
+ * @requires models/Rate
  * @requires config/logger.addLogger
  */
 
-const Rate = require('../models/Rate');
+/**
+ * @fileoverview Exports 7 methods
+ * @module utils/utils
+ * @type {Object}
+ *
+ */
 
+/** Rate */
+const Rate = require('../models/Rate');
+/** addLogger */
 const { addLogger } = require('../config/logger');
 
 const pathDepth = module.paths.length - 6;
@@ -14,12 +23,14 @@ const Logger = addLogger(__filename, pathDepth);
 
 /**
  * Converts to currency format
- *
  * @param {(Number | string)} amount
  * @returns {string}
  */
-function toCurrencyFormat (amount) {
-  const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function toCurrencyFormat(amount) {
+  const formatter = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
   const result = formatter.format(amount);
   return result;
 }
@@ -31,7 +42,11 @@ function toCurrencyFormat (amount) {
  * @param {string} invoiceCurrency Invoice currency
  * @returns {Number} Fixed number to 2 decimals
  */
-const convertRateToHomeCurrencyRate = (rates, homeCurrency, invoiceCurrency) => {
+const convertRateToHomeCurrencyRate = (
+  rates,
+  homeCurrency,
+  invoiceCurrency
+) => {
   Logger.debug('Convert rate to home currency rate');
   homeCurrency = homeCurrency.toUpperCase();
   invoiceCurrency = invoiceCurrency.toUpperCase();
@@ -59,13 +74,19 @@ const findRatesByExactOrClosestDate = async (date = new Date()) => {
       return exactDate[0];
     }
 
-    const greaterDate = await Rate.findOne({
-      date: { $gt: date }
-    }, (err, item) => item).sort({ date: 1 });
+    const greaterDate = await Rate.findOne(
+      {
+        date: { $gt: date }
+      },
+      (err, item) => item
+    ).sort({ date: 1 });
 
-    const lowerDate = await Rate.findOne({
-      date: { $lt: date }
-    }, (err, item) => item).sort({ date: -1 });
+    const lowerDate = await Rate.findOne(
+      {
+        date: { $lt: date }
+      },
+      (err, item) => item
+    ).sort({ date: -1 });
 
     // FIXME Try to refactor - it's ugly
     if (greaterDate && lowerDate) {
@@ -80,14 +101,17 @@ const findRatesByExactOrClosestDate = async (date = new Date()) => {
       Logger.debug('Earlier date is closer than later date');
       Logger.debug(`Find rates for date: ${lowerDate.date}`);
       return lowerDate;
-    } if (!greaterDate && !lowerDate) {
+    }
+    if (!greaterDate && !lowerDate) {
       Logger.warn('Could not calculate dates difference');
       return 'FUCK!';
-    } if (greaterDate) {
+    }
+    if (greaterDate) {
       Logger.warn('Could not calculate date difference to lower date');
       Logger.debug(`Find rates for date: ${greaterDate.date}`);
       return greaterDate;
-    } if (lowerDate) {
+    }
+    if (lowerDate) {
       Logger.warn('Could not calculate date difference to greater date');
       Logger.debug(`Find rates for date: ${lowerDate.date}`);
       return lowerDate;
@@ -101,12 +125,21 @@ const findRatesByExactOrClosestDate = async (date = new Date()) => {
   }
 };
 
-const toTitleCase = str => str.replace(/\w\S*/g,
-  txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+/**
+ * Returns TitleCase string
+ * @param {String} str Any string
+ * @returns {String} TitleCase string
+ */
+const toTitleCase = str =>
+  str.replace(
+    /\w\S*/g,
+    txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+  );
 
 // eslint-disable-next-line no-extend-native
-String.prototype.splice = function(idx, rem, str) { // eslint-disable-line func-names
-  return (this.slice(0, idx) + str + this.slice(idx + Math.abs(rem)));
+String.prototype.splice = function(idx, rem, str) {
+  // eslint-disable-line func-names
+  return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
 };
 
 /**
@@ -117,7 +150,12 @@ String.prototype.splice = function(idx, rem, str) { // eslint-disable-line func-
  * @param {boolean} [closingTag=true] HTML closing tag
  * @return {string} HTML element
  */
-const createElement = (tag, options = {}, text = 'Hello World', closingTag = true) => {
+const createElement = (
+  tag,
+  options = {},
+  text = 'Hello World',
+  closingTag = true
+) => {
   let tagStart = `<${tag}>`;
   let tagEnd = `</${tag}>`;
   let attrs = '';
@@ -147,7 +185,9 @@ const createElement = (tag, options = {}, text = 'Hello World', closingTag = tru
   } else {
     result = tagStart + text;
   }
-  if (!result) { Logger.warn('Element was not created'); }
+  if (!result) {
+    Logger.warn('Element was not created');
+  }
   return result;
 };
 
@@ -161,10 +201,31 @@ const createElement = (tag, options = {}, text = 'Hello World', closingTag = tru
  * @param {string} [insert='']
  * @returns {string} 2 HTML Elements
  */
-const createTwoCardElements = (tagArr, optionArr, textArr = ['', ''], closingArr = [true, true, true], insert = '') => {
-  const labelText = createElement(tagArr[0], optionArr[0], textArr[0], closingArr[0]);
-  const labelElem = createElement(tagArr[1], optionArr[1], labelText, closingArr[1]);
-  const expenseElem = createElement(tagArr[2], optionArr[2], textArr[1], closingArr[2]);
+const createTwoCardElements = (
+  tagArr,
+  optionArr,
+  textArr = ['', ''],
+  closingArr = [true, true, true],
+  insert = ''
+) => {
+  const labelText = createElement(
+    tagArr[0],
+    optionArr[0],
+    textArr[0],
+    closingArr[0]
+  );
+  const labelElem = createElement(
+    tagArr[1],
+    optionArr[1],
+    labelText,
+    closingArr[1]
+  );
+  const expenseElem = createElement(
+    tagArr[2],
+    optionArr[2],
+    textArr[1],
+    closingArr[2]
+  );
   return labelElem + insert + expenseElem;
 };
 
@@ -177,12 +238,17 @@ const createTwoCardElements = (tagArr, optionArr, textArr = ['', ''], closingArr
  * @param {boolean} [valueToLowerCase=false]
  * @returns {string} HTML Element
  */
-const createOptions = (options, selected, elemAttrs = {}, valueToLowerCase = false) => {
+const createOptions = (
+  options,
+  selected,
+  elemAttrs = {},
+  valueToLowerCase = false
+) => {
   let result = '';
-  selected = (!selected) ? '' : selected;
+  selected = !selected ? '' : selected;
   options.forEach(val => {
     // console.log(val);
-    const optionVal = (valueToLowerCase) ? val.toLowerCase() : val;
+    const optionVal = valueToLowerCase ? val.toLowerCase() : val;
     // console.log(optionVal, val, selected);
     elemAttrs.value = optionVal;
     if (optionVal.toLowerCase() === selected.toLowerCase()) {
@@ -199,7 +265,7 @@ const createOptions = (options, selected, elemAttrs = {}, valueToLowerCase = fal
 };
 
 module.exports = {
-  /** Converts to international number currency format */
+  /** Converts to currency format */
   toCurrencyFormat,
   /** Converts rate to user defined default currency base */
   convertRateToHomeCurrencyRate,

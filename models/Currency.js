@@ -4,8 +4,8 @@
  * {@link module:models/Currency~Currency.CurrencySchema Currency schema}.
  * <p>{@link module:models/Currency Currency} module exports
  * {@link module:models/Currency~Currency Currency model}.</p>
- * @requires {@link https://www.npmjs.com/package/mongoose module:NPM mongoose}
- * @requires {@link module:config/logger module:config/logger.addLogger}
+ * @requires {@link https://www.npmjs.com/package/mongoose module:NPM:mongoose}
+ * @requires module:config/logger.addLogger
  *
  * @see {@link module:models/Currency Currency module}
  * @see {@link module:models/Currency~Currency Currency model}
@@ -14,6 +14,7 @@
  * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
  * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
  */
+
 
 /**
  * Defines mongoose {@link module:models/Currency~Currency Currency model} based on
@@ -24,8 +25,8 @@
  * <p>It's mongoose {@link https://mongoosejs.com/docs/models.html model} and
  * the instance is called {@link https://mongoosejs.com/docs/documents.html document}.
  * </p>
- *
  * @module
+ * @exports {Model<Document, {}>} Currency
  * @example <caption> Example usage of Currency model</caption>
  * const currencyObject = {
  *   base: 'USA',
@@ -41,6 +42,7 @@
  * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
  */
 
+/** mongoose */
 const mongoose = require('mongoose');
 
 // const { addLogger } = require('../config/logger');
@@ -54,9 +56,9 @@ const mongoose = require('mongoose');
  * Mongoose {@link https://mongoosejs.com/docs/validation.html#validation Validation} is based on this object.
  * @type {Object}
  * @memberof module:models/Currency~Currency
- * @property {String} base <b>required</b>, base currency code
- * @property {Date} date <b>required</b>, date of rate
- * @property {Object} rate <b>required</b>, rate object with currency code
+ * @property base <b>required</b>, base currency code
+ * @property date <b>required</b>, date of rate
+ * @property rate <b>required</b>, rate object with currency code
  * as key and rate value as value
  */
 const currencySchemaObject = {
@@ -139,4 +141,7 @@ const CurrencySchema = new mongoose.Schema(
  */
 const Currency = mongoose.model('Currency', CurrencySchema);
 
+/**
+ * @type {Model<Document, {}>}
+ */
 module.exports = Currency;

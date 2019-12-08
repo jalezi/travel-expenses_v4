@@ -2,21 +2,35 @@
 /**
  * @fileOverview Functions to create Total PDF
  *
- * @requires NPM:pdfmake
- * @requires NPM:moment
- * @requires NPM:fs
+ * @requires {@link https://www.npmjs.com/package/fs module:NODEjs:fs}
+ * @requires {@link https://www.npmjs.com/package/pdfmake module:NPM:pdfmake}
+ * @requires {@link https://www.npmjs.com/package/moment module:NPM:moment}
  *
  * @requires lib/constants.FONTS
+ * @requires utils/utils
  * @requires config/logger.addLogger
  */
 
-const PdfPrinter = require('pdfmake');
-const moment = require('moment');
+/**
+ * @module utils/travelsTotalToPDF
+ * @see {@link https://www.npmjs.com/package/fs module:NODEjs:fs}
+ * @see {@link https://www.npmjs.com/package/pdfmake npm pdfmake}
+ * @see {@link https://www.npmjs.com/package/moment module:NPM:moment}
+ */
 
+
+/** PdfPrinter */
+const PdfPrinter = require('pdfmake');
+/** moment */
+const moment = require('moment');
+/** fs */
 const fs = require('fs');
 
+/** FONTS */
 const { FONTS } = require('../lib/constants');
+/** toCurrencyFormat */
 const { toCurrencyFormat } = require('./utils');
+/** addLogger */
 const { addLogger } = require('../config/logger');
 
 const pathDepth = module.paths.length - 6;
@@ -27,7 +41,7 @@ const printer = new PdfPrinter(FONTS);
 
 /**
  * Creates table body
- *
+ * @memberof module:utils/travelsToPDF
  * @param {*} data
  * @param {*} columns
  * @param {*} tableHeader
@@ -93,8 +107,8 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
 }
 
 /**
- * Creates pdf table
- *
+ * Creates pdfmake table
+ * @memberof module:utils/travelsToPDF
  * @param {*} data
  * @param {*} columns
  * @param {*} tableHeader
@@ -127,8 +141,8 @@ function table(data, columns, tableHeader, style = {}, sum = 0) {
 }
 
 /**
- *
- *
+ * Creates data for total table
+ * @memberof module:utils/travelsToPDF
  * @param {*} travels
  * @param {*} indexes
  * @returns {Object[]}
@@ -152,7 +166,7 @@ function createTravelsTotalTableData(travels, indexes) {
 /**
  * Return pdf TOTAL file.
  *
- * @module
+ *
  * @param {Travel[]} travels
  * @param {User} user
  * @param {*} dateRange

@@ -6,8 +6,8 @@
  * {@link module:models/User~User User model}.</p>
  * @requires {@link https://nodejs.org/api/crypto.html module:NODEjs:crypto}
  * @requires {@link https://www.npmjs.com/package/bcrypt-nodejs module:NPM:bcrypt-nodejs}
- * @requires {@link https://www.npmjs.com/package/mongoose module:NPM mongoose}
- * @requires {@link module:config/logger module:config/logger.addLOgger}
+ * @requires {@link https://www.npmjs.com/package/mongoose module:NPM:mongoose}
+ * @requires config/logger.addLogger
  *
  * @see {@link module:models/User User module}
  * @see {@link module:models/User~User User model}
@@ -27,7 +27,7 @@
  * the instance is called {@link https://mongoosejs.com/docs/documents.html document}.
  * </p>
  *
- * @module
+ * @module models/User
  * @example <caption> Example usage of User model</caption>
  * const userObject = {
  *   email: 'some.email@example.com',
@@ -36,17 +36,19 @@
  * const user = new User(userObject);
  * user.save();
  * @see {@link module:models/User~User User model}
- * @see {@link module:models/User~User.CurrencySchema User schema}
+ * @see {@link module:models/User~User.UserSchema User schema}
  * <p></p>
  * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
  * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
  */
 
-
+/** bcrypt */
 const bcrypt = require('bcrypt-nodejs');
+/** crypto */
 const crypto = require('crypto');
+/** mongoose */
 const mongoose = require('mongoose');
-
+/** addLogger */
 const { addLogger } = require('../config/logger');
 
 const pathDepth = module.paths.length - 6;
@@ -210,12 +212,6 @@ UserSchema.methods.fullName = function fullName() {
 };
 
 /**
- * @typedef userObject
- * @type {Object}
- * @inherits module:models/User~User.userSchemaObject
- */
-
-/**
  * <i><u>userObject</u></i> has 13 properties:
  * <p><b>email</b> - email</p>
  * <p><b>password</b> - password</p>
@@ -252,4 +248,8 @@ UserSchema.methods.fullName = function fullName() {
  */
 const User = mongoose.model('User', UserSchema);
 
+/**
+ * User model
+ * @type {Model<Document, {}>}
+ */
 module.exports = User;

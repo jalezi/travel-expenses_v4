@@ -5,8 +5,8 @@
  * {@link module:models/Expense~Expense.ExpenseSchema Expense Schema}.
  * <p>{@link module:models/Expense Expense} module exports
  * {@link module:models/Expense~Expense Expense Model}</p>
- * @requires {@link https://www.npmjs.com/package/mongoose module:NPM mongoose}
- * @requires {@link module:config/logger module:config/logger.addLogger}
+ * @requires {@link https://www.npmjs.com/package/mongoose module:NPM:mongoose}
+ * @requires config/logger.addLogger
  * @see {@link module:models/Expense Expense module}
  * @see {@link module:models/Expense~Expense Expense Model}
  * @see {@link module:models/Expense~Expense.ExpenseSchema Expense Schema}
@@ -47,6 +47,7 @@
   * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
   */
 
+/** mongoose */
 const mongoose = require('mongoose');
 
 // const { addLogger } = require('../config/logger');
@@ -199,4 +200,8 @@ const ExpenseSchema = new mongoose.Schema(
  */
 const Expense = mongoose.model('Expense', ExpenseSchema);
 
+/**
+ * Expense model
+ * @type {Model<Document, {}>}
+ */
 module.exports = Expense;

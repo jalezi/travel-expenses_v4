@@ -1,32 +1,54 @@
 {
-    "tags": {
-        "allowUnknownTags": true
-    },
-    "source": {
-        "include": ".",
-        "exclude": [
-            "node_modules",
-            "build",
-            "docs",
-            "docs2",
-            "out",
-            "playground"
-        ],
-        "includePattern": ".js$",
-        "excludePattern": "(node_modules/|docs|docs2)"
-    },
-    "plugins": [
-        
+  "tags": {
+    "allowUnknownTags": true
+  },
+  "source": {
+    "include": ".",
+    "exclude": [
+      "node_modules",
+      "build",
+      "docs",
+      "docs2",
+      "out",
+      "playground"
     ],
-    "opts": {
-        "template": "node_modules/docdash",
-        "encoding": "utf8",
-        "destination": "docs2/",
-        "recurse": true,
-        "verbose": true
-    },
-    "templates": {
-        "cleverLinks": false,
-        "monospaceLinks": false
+    "includePattern": ".js$",
+    "excludePattern": "(node_modules/|docs|docs2)"
+  },
+  "plugins": [],
+  "opts": {
+    "template": "node_modules/docdash",
+    "encoding": "utf8",
+    "destination": "docs2/",
+    "recurse": true,
+    "verbose": true
+  },
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false
+  },
+  "docdash": {
+    "static": false,
+    "sort": true,
+    "sectionOrder": [
+      "Modules",
+      "Classes",
+      "Externals",
+      "Events",
+      "Namespaces",
+      "Mixins",
+      "Tutorials",
+      "Interfaces"
+    ],
+    "search": true,
+    "collapse": true,
+    "menu": {
+      "TravelApp": {
+        "href": "http://localhost:8080",
+        "target": "_blank",
+        "class": "menu-item",
+        "id": "website_link"
+      }
     }
+  }
 }

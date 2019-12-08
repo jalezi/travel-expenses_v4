@@ -6,8 +6,8 @@
  * {@link module:models/Travel~Travel.TravelSchema Travel Schema}.
  * <p>{@link module:models/Travel Travel} module exports
  * {@link module:models/Travel~Travel Travel Model}</p>
- * @requires {@link https://www.npmjs.com/package/mongoose module:NPM mongoose}
- * @requires {@link module:config/logger module:config/logger.addLogger}
+ * @requires {@link https://www.npmjs.com/package/mongoose module:NPM:mongoose}
+ * @requires config/logger.addLogger
  * @see {@link module:models/Travel Travel module}
  * @see {@link module:models/Travel~Travel Travel Model}
  * @see {@link module:models/Travel~Travel.TravelSchema Travel Schema}
@@ -42,9 +42,9 @@
   * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
   */
 
-/** */
+/** mongoose */
 const mongoose = require('mongoose');
-
+/** addLogger */
 const { addLogger } = require('../config/logger');
 
 const pathDepth = module.paths.length - 6;
@@ -321,4 +321,8 @@ TravelSchema.statics.byMonth = function (user) {
  */
 const Travel = mongoose.model('Travel', TravelSchema);
 
+/**
+ * Travel model
+ * @type {Model<Document, {}>}
+ */
 module.exports = Travel;

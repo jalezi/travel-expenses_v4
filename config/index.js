@@ -7,13 +7,10 @@
  *
  */
 
-const appRoot = require('app-root-path');
-const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
-
 /**
- * Config variables module
+ * Config variables object
  * @module
+ * @type {Object}
  * @property {String} envNode Node environment variable: development, production, test
  * @property {String} envHost Environment host
  * @property {String} port Environment port
@@ -71,8 +68,17 @@ const MongoStore = require('connect-mongo')(session);
  * @property {Object} emails
  * @property {String} emails.apiKey
  * @property {String} emails.domain
- * 
+ *
  */
+
+/** appRoot */
+const appRoot = require('app-root-path');
+/** session */
+const session = require('express-session');
+/** MongoStore */
+const MongoStore = require('connect-mongo')(session);
+
+// TODO add datafixer
 module.exports = {
   /**
    * Environment mode
@@ -124,6 +130,23 @@ module.exports = {
    * @type {String}
    */
   jwtSecret: process.env.JWT_SECRET,
+
+  /**
+   * Fixer API key
+   * @type {String}
+   */
+  dataFixer: process.env.DATA_FIXER_IO,
+
+  /**
+   * Google API keys
+   * @type {Object}
+   * @property {String} id
+   * @property {String} secret
+   */
+  google: {
+    id: process.env.GOOGLE_ID,
+    secret: process.env.GOOGLE_SECRET
+  },
 
   /**
    * Used by winston logger

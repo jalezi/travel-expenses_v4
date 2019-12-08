@@ -35,8 +35,9 @@ const config = require('./config');
 // Set the NODE_ENV to 'development' by default
 process.env.NODE_ENV = process.env.NODE_ENV || config.NODE_ENV || 'development';
 
-require('./utils/hbsHelpers/hbsHelpers');
-require('./utils/hbsHelpers/yearsAccordion');
+// Register express-hbs helpers
+require('./utils/hbsHelpers');
+
 require('full-icu');
 
 const { addLogger } = require('./config/logger');

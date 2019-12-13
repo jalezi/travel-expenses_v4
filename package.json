@@ -1,6 +1,6 @@
 {
   "name": "travel-expense-v4",
-  "version": "5.1.2",
+  "version": "1.0.0",
   "description": "App for keeping travel expenses.",
   "author": "Jaka Daneu",
   "license": "",
@@ -72,6 +72,7 @@
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.0",
     "stack-trace": "0.0.10",
+    "strip-ansi": "^6.0.0",
     "validator": "^12.1.0",
     "winston": "^3.2.1"
   },

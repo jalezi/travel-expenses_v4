@@ -6,13 +6,14 @@ const { OAuth2Strategy: GoogleStrategy } = require('passport-google-oauth');
 // const { OAuthStrategy } = require('passport-oauth');
 // const { OAuth2Strategy } = require('passport-oauth');
 
-const User = require('../models/User');
-
-const { addLogger } = require('../config/logger');
-
 // Logger
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
+const LoggerClass = require('../config/LoggerClass');
+
+const Logger = new LoggerClass('passport');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('config\\passport REQUIRED!');
+
+const User = require('../models/User');
 
 /*
  Determines which data of the user object should be stored in the session.
@@ -21,7 +22,7 @@ const Logger = addLogger(__filename, pathDepth);
  In this case req.session.passport.user = {id: user.id)
  */
 passport.serializeUser((user, done) => {
-  Logger.debug('Serialize User');
+  logger.debug('Serialize User');
   done(null, user.id);
 });
 
@@ -35,7 +36,7 @@ passport.serializeUser((user, done) => {
  The fetched object is attached to the request object as req.user
  */
 passport.deserializeUser((id, done) => {
-  Logger.debug('Deserialize User');
+  logger.debug('Deserialize User');
   User.findById(id, (err, user) => {
     done(err, user);
   });
@@ -44,7 +45,7 @@ passport.deserializeUser((id, done) => {
 
 // Sign in using Email and Password.
 passport.use(new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
-  Logger.debug('Local strategy');
+  logger.debug('Local strategy');
   User.findOne({ email: email.toLowerCase() }, (err, user) => {
     if (err) { return done(err); }
     if (!user) {
@@ -82,7 +83,7 @@ passport.use(new GoogleStrategy({
   callbackURL: '/auth/google/callback',
   passReqToCallback: true
 }, (req, accessToken, refreshToken, profile, done) => {
-  Logger.debug('Google Strategy');
+  logger.debug('Google Strategy');
   if (req.user) {
     Logger.debug('req.user exist');
     User.findOne({ google: profile.id }, (err, existingUser) => {
@@ -108,7 +109,7 @@ passport.use(new GoogleStrategy({
       }
     });
   } else {
-    Logger.debug('req.user does not exist');
+    logger.debug('req.user does not exist');
     User.findOne({ google: profile.id }, (err, existingUser) => {
       if (err) { return done(err); }
       if (existingUser) {
@@ -144,6 +145,7 @@ exports.isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
   }
+  logger.debug('Redirecting to /login');
   res.redirect('/login');
 };
 
@@ -153,8 +155,10 @@ exports.isAuthorized = (req, res, next) => {
   const provider = req.path.split('/').slice(-1)[0];
   const token = req.user.tokens.find(token => token.kind === provider);
   if (token) {
+    logger.debug(next());
     next();
   } else {
+    logger.debug(`Redirecting /auth/${provider}`);
     res.redirect(`/auth/${provider}`);
   }
 };

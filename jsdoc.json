@@ -1,6 +1,10 @@
 {
   "tags": {
-    "allowUnknownTags": true
+    "allowUnknownTags": true,
+    "dictionaries": [
+      "jsdoc",
+      "closure"
+    ]
   },
   "source": {
     "include": ".",
@@ -13,7 +17,7 @@
       "playground"
     ],
     "includePattern": ".js$",
-    "excludePattern": "(node_modules/|docs|docs2)"
+    "excludePattern": "(node_modules/|docs|docs2|webpack)"
   },
   "plugins": [],
   "opts": {

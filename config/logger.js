@@ -18,11 +18,12 @@ const logTestFormat = winston.format.printf(info => {
 
 // Format output when in dev mode
 const logDevFormat = winston.format.printf(info => {
-  let { level, label, message } = info;
-  const { pathDepth, timestamp, ms } = info;
+  let { level, label, message, pathDepth } = info;
+  const { timestamp, ms } = info;
   message = deleteNewLine(label, message);
   label = info.label.padStart(27);
   level = info.level.padStart(15);
+  pathDepth = info.pathDepth.toString().padStart(3);
   return `${timestamp} ${level} [${pathDepth}] [${label}]: ${message} [${ms}]`;
 });
 
@@ -108,7 +109,6 @@ const addLogger = (filename, pathDepth) => {
       winston.format.errors({ stack: true }),
       winston.format.label({ label }),
       winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-      winston.format.errors({ stack: true }),
       winston.format.splat(),
       winston.format.json(),
       winston.format.metadata({

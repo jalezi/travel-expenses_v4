@@ -12,6 +12,14 @@ if (env.error) {
   throw env.error;
 }
 
+// Logger
+const LoggerClass = require('./config/LoggerClass');
+
+const Logger = new LoggerClass('app');
+const { mainLogger, logger } = Logger;
+
+mainLogger.info("Let's get started!");
+
 // All configuration variables
 const config = require('./config');
 
@@ -21,17 +29,13 @@ process.env.NODE_ENV = process.env.NODE_ENV || config.NODE_ENV || 'development';
 // Register express-hbs helpers
 require('./utils/hbsHelpers');
 
+// full-icu
 require('full-icu');
 
-const { addLogger } = require('./config/logger');
 const mongoConnection = require('./config/mongoose');
 const expressConfiguration = require('./config/express');
 const errorHandler = require('./config/error');
 const getRates = require('./utils/getRates');
-
-// Create logger
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
 
 // Catch uncaught errors
 process.on('uncaughtException', err => {
@@ -39,35 +43,41 @@ process.on('uncaughtException', err => {
   process.exit(1); // mandatory (as per the Node docs)
 });
 
+/**
+ * @memberof module:app
+ * @async
+ * @function StartServer
+ * @returns {Promise<Express>} Express server.
+ */
 async function startServer() {
-  Logger.info('App initializing');
+  logger.info('App initializing');
 
   // Create express server
   const app = express();
 
   // Connect to MongoDB
   await mongoConnection();
-  Logger.info('DB loaded and connected');
+  logger.info('DB loaded and connected');
 
   // Express Configuration
   await expressConfiguration(app);
-  Logger.info('Express loaded');
+  logger.info('Express loaded');
 
   // Function to check for rates at data.fixer.io and save them to DB
   await getRates();
-  Logger.silly('Function getRates intialized!');
+  logger.silly('Function getRates intialized!');
 
   // Error Handler.
   errorHandler(app);
-  Logger.info('Error handler loaded');
+  logger.info('Error handler loaded');
 
   app.listen(config.port, err => {
     if (err) {
-      Logger.error(err);
+      logger.error(err);
       process.exit(1);
       return;
     }
-    Logger.info(`Server listening on port: ${config.port}`);
+    logger.info(`Server listening on port: ${config.port}`);
 
     // Setup the event emitter to assume that app is running.
     // It's for tests.
@@ -76,6 +86,35 @@ async function startServer() {
   return app;
 }
 
+
 const app = startServer();
 
+/**
+ * @fileoverview This is main module to start application.
+ *
+ * @module app
+ * @author Jaka Daneu
+ * @requires NPM:express
+ * @requires NPM:dotenv
+ * @requires NPM:dotenv-expand
+ * @requires NPM:full-ico
+ * @requires config
+ * @requires config/express
+ * @requires config/error
+ * @requires config/LoggerClass
+ * @requires config/mongoose
+ * @requires utils/hbsHelpers
+ * @requires utils/getRates
+ * @see {@link https://www.npmjs.com/package/express NPM:express}
+ * @see {@link https://www.npmjs.com/package/dotenv NPM:dotenv}
+ * @see {@link https://www.npmjs.com/package/dotenv-expand NPM:dotenv-expand}
+ * @see {@link https://www.npmjs.com/package/full-icu NPM:full-icu}
+ */
+
+/**
+ * Express server.
+ * It is used in mocha tests.
+ * @memberof module:app
+ * @type {Promise<Express>}
+ */
 exports.app = app;

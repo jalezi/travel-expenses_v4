@@ -2,16 +2,17 @@ const errorHandler = require('errorhandler');
 const mongoose = require('mongoose');
 
 const myErrors = require('../utils/myErrors');
-const { addLogger } = require('./logger');
+const LoggerClass = require('../config/LoggerClass');
+
+const Logger = new LoggerClass('passport');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('config\\error REQUIRED!');
 
 const { ImportFileError } = myErrors;
 
-// Create logger
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
 
 module.exports = app => {
-  Logger.debug('Error handler initializing');
+  logger.debug('Error handler initializing');
   if (process.env.NODE_ENV === 'development') {
     // only use in development
     app.use(

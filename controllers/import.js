@@ -147,7 +147,7 @@ exports.postImport = async (req, res, next) => {
     if (message.error) {
       logger.warn('This is usefull');
       let { error } = message;
-      message = message.msg;
+      // message = message.msg;
       throw error;
     }
 

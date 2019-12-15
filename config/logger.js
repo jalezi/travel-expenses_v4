@@ -23,7 +23,7 @@ const logDevFormat = winston.format.printf(info => {
   message = deleteNewLine(label, message);
   label = label.padStart(27);
   level = level.padStart(15);
-  pathDepth = info.pathDepth.toString().padStart(3);
+  pathDepth = pathDepth.toString().padStart(3);
   return `${timestamp} ${level} [${pathDepth}] [${label}]: ${message} [${ms}]`;
 });
 

@@ -6,7 +6,7 @@ const path = require('path');
 const { createLogger, config, transports, format } = require('winston');
 const stripAnsi = require('strip-ansi');
 
-const { envNode, envHost, logs } = require('../config');
+const { envNode, logs } = require('../config');
 const { HTTP } = require('../lib/constants');
 const getTrace = require('../utils/getTrace');
 

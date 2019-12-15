@@ -65,17 +65,6 @@ travels.json
 /out
 audit-resolv.json
 con.js
-<<<<<<< HEAD
-.eslintrc
-.nyc_output
-MongoDB.txt
-/text_files
-.eslintrc
-.eslintrc.json
-
-
-
-=======
 *.txt
 snapshots.js
 /build/*
@@ -86,4 +75,3 @@ app-new.js
 /coverage/*
 /docs/*
 /docs2/*
->>>>>>> develop

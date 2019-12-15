@@ -48,7 +48,7 @@ const getTrace = () => {
     const line = element.getLineNumber();
     const column = element.getColumnNumber();
     const type = element.getTypeName();
-    const short = file ? file.replace(`${dirname}\\`, '') : 'unknown';
+    const short = file.replace(`${dirname}\\`, '');
     if (file.includes('node_modules')) {
       continue;
     }

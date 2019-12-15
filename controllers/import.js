@@ -160,7 +160,7 @@ exports.postImport = async (req, res, next) => {
     postImport.deleteFile(myFilePath, 'File deleted after error!');
     logger.error(`Catching error: ${err.message}`);
     if (!(err instanceof myErrors.ImportFileError)) {
-      message = err.message;
+      // message = err.message;
       logger.warn('Error is not instance of ImportFileError');
       next(err);
     } else {

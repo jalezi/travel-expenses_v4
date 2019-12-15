@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: models/Travel.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: models/Travel.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* eslint-disable func-names */
+
+/**
+ * @author Jaka Daneu
+ * @fileoverview Defines mongoose {@link module:models/Travel~Travel Travel Model} based on
+ * {@link module:models/Travel~Travel.TravelSchema Travel Schema}.
+ * &lt;p>{@link module:models/Travel Travel} module exports
+ * {@link module:models/Travel~Travel Travel Model}&lt;/p>
+ * @requires {@link https://www.npmjs.com/package/mongoose module:NPM:mongoose}
+ * @requires config/logger.addLogger
+ * @see {@link module:models/Travel Travel module}
+ * @see {@link module:models/Travel~Travel Travel Model}
+ * @see {@link module:models/Travel~Travel.TravelSchema Travel Schema}
+ * &lt;p>&lt;/p>
+ * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
+ * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
+ */
+
+/**
+  * Defines mongoose {@link module:models/Travel~Travel Travel Model} based on
+  * {@link module:models/Travel~Travel.TravelSchema Travel Schema}.
+  * &lt;p>{@link module:models/Travel Travel} module exports
+  * {@link module:models/Travel~Travel Travel Model}&lt;/p>
+  * @module
+  * @example &lt;caption> Example usage of Travel Model&lt;/caption>
+  * const user = new User(); // see {@link module:models/User~User User Model}
+  *
+  * const travelObject = {
+  *   _user: user._id,
+  *   description: 'Game FC Barcelona vs Maccabi Tel Aviv',
+  *   dateFrom: new Date('2019-11-07'),
+  *   dateTo: new Date('2019-11-09'),
+  *   homeCurrency: user.homeCurrency,
+  *   perMileAmount: user.perMileAmount
+  * };
+  * const expense = new Travel(expenseObject);
+  * expense.save();
+  * @see {@link module:models/Travel~Travel Travel Model}
+  * @see {@link module:models/Travel~Travel.TravelSchema Travel Schema}
+  * &lt;p>&lt;/p>
+  * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
+  * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
+  */
+
+/** mongoose */
+const mongoose = require('mongoose');
+/** addLogger */
+const { addLogger } = require('../config/logger');
+
+const pathDepth = module.paths.length - 6;
+const Logger = addLogger(__filename, pathDepth);
+
+const { ObjectId } = mongoose.Schema.Types;
+
+/**
+ * @description Represents Travel mongoose document.
+ * &lt;p>Actual object for creating new mongoose Schema has more complex definition. See source!&lt;/p>
+ * Mongoose {@link https://mongoosejs.com/docs/validation.html#validation Validation} is based on this object.
+ * @type {Object}
+ * @memberof module:models/Travel~Travel
+ * @property {ObjectId} _user &lt;b>required&lt;/b>, reference to user document
+ * @property {String} description &lt;b>required&lt;/b>, description of travel
+ * @property {Date} dateFrom &lt;b>required&lt;/b>, Travel starts on date
+ * @property {Date} dateTo &lt;b>required&lt;/b>, Travel ends on date
+ * @property {String} homeCurrency Currency code to calculate expense's amount to
+ * @property {Decimal128} [perMileAmount=0.00] per mile|kilometer value to convert
+ * distance to amount
+ * @property {ObjectId[]} expenses array with references to expense documents
+ * @property {Decimal128} [total=0.00] Sum of all expenses' converted amounts
+ */
+const travelSchemaObject = {
+  _user: {
+    type: ObjectId,
+    required: true,
+    ref: 'User'
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  dateFrom: {
+    type: Date,
+    required: true
+  },
+  dateTo: {
+    type: Date,
+    required: true
+  },
+  homeCurrency: {
+    type: String,
+    required: true
+  },
+  perMileAmount: {
+    type: mongoose.Decimal128,
+    default: 0.00
+  },
+  expenses: [{
+    type: ObjectId,
+    ref: 'Expense'
+  }],
+  total: {
+    type: mongoose.Decimal128,
+    default: 0.00
+  }
+};
+
+/**
+ * @description new mongoose.Schema(travelSchemaObject, {timestamps: true})
+ * @type {mongoose.Schema}
+ * @memberof module:models/Travel~Travel
+ * @param (travelSchemaObject) travelSchemaObject
+ * {@link module:models/Travel~Travel.travelSchemaObject travelSchemaObject}
+ * @param {mongooseSchemaOptions} options {@link https://mongoosejs.com/docs/guide.html#options Schema Options}
+ *
+ * @see {@link module:models/Travel~Travel Travel Model}
+ * @see {@link module:models/Travel~Travel.travelSchemaObject travelSchemaObject}
+ * &lt;p>&lt;/p>
+ * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
+ * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
+ */
+const TravelSchema = new mongoose.Schema(travelSchemaObject, {
+  useNestedStrict: true,
+  timestamps: true
+});
+
+/**
+ * Helper method to update travel's total amount
+ * Returns same document for which the total is calculated.
+ * Before use you have to find document with populate expenses
+ * EXAMPLE:
+ * Travel
+ * .findOne({_id: doc._id, _user: req.user.id})
+ * .populate({path: 'expenses', populate: {path: 'curRate'}})
+ * .then((doc) => {doc.updateTotal()}
+ */
+
+/**
+  * @description Updates travel's total
+  * &lt;p>It is Travel document method.&lt;/p>
+  * @function updateTotal
+  * @memberof module:models/Travel~Travel
+  * @instance
+  * @this module:models/Travel~Travel.TravelSchema
+  * @returns travel document with updated total amount
+  */
+TravelSchema.methods.updateTotal = function() {
+  Logger.debug('updateTravel Schema methods');
+  this.total = 0;
+  this.expenses.forEach(expense => {
+    this.total = Number(this.total) + Number(expense.amountConverted);
+  });
+  this.total = parseFloat(this.total).toFixed(2);
+  return this.save();
+};
+
+/**
+ * @description Some description
+ * @function byYear_byMonth
+ * @memberof module:models/Travel~Travel
+ * @this module:models/Travel~Travel.TravelSchema
+ * @param {User} user User
+ * @returns Travel model aggregation Travel.aggregate(Object[])
+ * @todo Add description
+ */
+TravelSchema.statics.byYear_byMonth = function (user) {
+  Logger.debug('byYear_byMonth Schema statics');
+  return this.aggregate([
+    {
+      $match: {
+        _user: user._id
+      }
+    }, {
+      $sort: {
+        dateFrom: -1
+      }
+    }, {
+      $lookup: {
+        from: 'expenses',
+        localField: 'expenses',
+        foreignField: '_id',
+        as: 'expenses'
+      }
+    }, {
+      $lookup: {
+        from: 'currencies',
+        localField: 'expenses.curRate',
+        foreignField: '_id',
+        as: 'curRates'
+      }
+    }, {
+      $group: {
+        _id: {
+          month: {
+            $month: '$dateFrom'
+          },
+          year: {
+            $year: '$dateFrom'
+          }
+        },
+        byMonth: {
+          $push: '$$ROOT'
+        },
+        count: {
+          $sum: 1
+        },
+        dateFirst: {
+          $first: '$dateFrom'
+        },
+        dateLast: {
+          $last: '$dateFrom'
+        }
+      }
+    },
+    { $sort: { dateFirst: -1 } },
+    {
+      $group: {
+        _id: {
+          year: {
+            $year: '$dateFirst'
+          }
+        },
+        byYear: {
+          $push: '$$ROOT'
+        },
+        count: {
+          $sum: 1
+        },
+        countTotal: { $sum: '$count' },
+        dateFirst: {
+          $first: '$dateFirst'
+        },
+        dateLast: {
+          $last: '$dateLast'
+        }
+      }
+    },
+    { $sort: { dateFirst: -1 } }
+  ]);
+};
+
+/**
+ * @description Some description
+ * @function byMonth
+ * @memberof module:models/Travel~Travel
+ * @this module:models/Travel~Travel.TravelSchema
+ * @param {User} user User
+ * @returns Travel model aggregation Travel.aggregate(Object[])
+ * @todo Add description
+ * @todo Why is this here?
+ */
+TravelSchema.statics.byMonth = function (user) {
+  Logger.debug('byMonth Schema statics');
+  return this.aggregate([
+    {
+      $match: {
+        _user: user._id
+      }
+    },
+    {
+      $group: {
+        _id: {
+          month: { $month: '$dateFrom' },
+          year: { $year: '$dateFrom' }
+        },
+        travels: { $addToSet: '$_id' },
+        myArray: { $push: '$$ROOT' },
+        count: { $sum: 1 },
+        date: { $first: '$dateFrom' }
+      }
+    },
+    {
+      $project: {
+        date: { $dateToString: { format: '%Y-%m', date: '$date' } },
+        travels: '$travels',
+        myArray: '$myArray',
+        count: 1,
+        _id: 0
+      }
+    }
+  ]);
+};
+
+/**
+* &lt;i>Mongoose new mongoose.Schema({...}, options) creates additional properties&lt;/i>:
+ * &lt;b>_id&lt;/b>, &lt;b>__v&lt;/b>, &lt;b>createdAt&lt;/b> and &lt;b>updatedAt&lt;/b>, first two by default,
+ * second two when passing {timesatmps: true} as second argument.
+ * &lt;br>&lt;/br>
+ * It's mongoose {@link https://mongoosejs.com/docs/models.html model} and
+ * the instance is called {@link https://mongoosejs.com/docs/documents.html document}.
+ * &lt;p>&lt;/p>
+ * Models are fancy constructors compiled from Schema definitions.
+ * An instance of a model is called a document.
+ * Models are responsible for creating and reading documents from the underlying MongoDB database.
+ * &lt;p>&lt;/p>
+ * {@link https://mongoosejs.com/docs/validation.html#validation Validation} is based on
+ * {@link module:models/Travel~Travel.travelSchemaObject travelSchemaObject}.
+ * @constructor Travel
+ * @classdesc Parameter {@link module:models/Travel~Travel.travelSchemaObject travelObject}
+ * must compile based on {@link module:models/Travel~Travel.TravelSchema travelSchemaObject}.
+ *
+ * @param {travelObject} travelObject
+ * {@link module:models/Travel~Travel.TravelSchema travelObject}
+ * @example &lt;caption> Example usage of Travel Model&lt;/caption>
+ * const user = new User({...}); // see {@link module:models/User~User User Model}
+ *
+ * const travelObject = {
+ *  _user: user._id,
+ *  description: 'Game FC Barcelona vs Maccabi Tel Aviv',
+ *  dateFrom: new Date('2019-11-07'),
+ *  dateTo: new Date('2019-11-09'),
+ *  homeCurrency: user.homeCurrency,
+ *  perMileAmount: user.perMileAmount
+ * };
+ * const travel = new Travel(travelObject);
+ * expense.save();
+ * @see {@link module:models/Travel~Travel.TravelSchema Travel Schema}
+ * @see {@link module:models/Travel~Travel.travelSchemaObject travelSchemaObject}
+ * &lt;p>&lt;/p>
+ * @see {@link https://mongoosejs.com/docs/models.html mongoose Models}
+ * @see {@link https://mongoosejs.com/docs/guide.html mongoose Schemas}
+ */
+const Travel = mongoose.model('Travel', TravelSchema);
+
+/**
+ * Travel model
+ * @type {Model&lt;Document, {}>}
+ */
+module.exports = Travel;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-config_index.html">config/index</a></li><li><a href="module-models_Currency.html">models/Currency</a></li><li><a href="module-models_Expense.html">models/Expense</a></li><li><a href="module-models_Rate.html">models/Rate</a></li><li><a href="module-models_Travel.html">models/Travel</a></li><li><a href="module-models_User.html">models/User</a></li><li><a href="module-utils_getRates.html">utils/getRates</a></li><li><a href="module-utils_hbsHelpers.html">utils/hbsHelpers</a></li><li><a href="module-utils_myErrors.html">utils/myErrors</a></li><li><a href="module-utils_postImport.html">utils/postImport</a></li><li><a href="module-utils_travelExpensesToPDF.html">utils/travelExpensesToPDF</a></li><li><a href="module-utils_travelsTotalToPDF.html">utils/travelsTotalToPDF</a></li><li><a href="module-utils_updateExpensesToMatchTravelRangeDates.html">utils/updateExpensesToMatchTravelRangeDates</a></li><li><a href="module-utils_utils.html">utils/utils</a></li></ul><h3>Classes</h3><ul><li><a href="module-models_Currency-Currency.html">Currency</a></li><li><a href="module-models_Expense-Expense.html">Expense</a></li><li><a href="module-models_Rate-Rate.html">Rate</a></li><li><a href="module-models_Travel-Travel.html">Travel</a></li><li><a href="module-models_User-User.html">User</a></li><li><a href="module-utils_myErrors-ImportFileError.html">ImportFileError</a></li><li><a href="module-utils_myErrors-SaveToDbError.html">SaveToDbError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#deleteExpense">deleteExpense</a></li><li><a href="global.html#getAccount">getAccount</a></li><li><a href="global.html#getContact">getContact</a></li><li><a href="global.html#getExpense">getExpense</a></li><li><a href="global.html#getForgot">getForgot</a></li><li><a href="global.html#getImport">getImport</a></li><li><a href="global.html#getLogin">getLogin</a></li><li><a href="global.html#getOauthUnlink">getOauthUnlink</a></li><li><a href="global.html#getReset">getReset</a></li><li><a href="global.html#getSignup">getSignup</a></li><li><a href="global.html#getTravel">getTravel</a></li><li><a href="global.html#index">index</a></li><li><a href="global.html#isAuthenticated">isAuthenticated</a></li><li><a href="global.html#isAuthorized">isAuthorized</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#postContact">postContact</a></li><li><a href="global.html#postDeleteAccount">postDeleteAccount</a></li><li><a href="global.html#postForgot">postForgot</a></li><li><a href="global.html#postImport">postImport</a></li><li><a href="global.html#postLogin">postLogin</a></li><li><a href="global.html#postNewExpense">postNewExpense</a></li><li><a href="global.html#postReset">postReset</a></li><li><a href="global.html#postSignup">postSignup</a></li><li><a href="global.html#postUpdatePassword">postUpdatePassword</a></li><li><a href="global.html#postUpdateProfile">postUpdateProfile</a></li><li><a href="global.html#updateExpense">updateExpense</a></li><li><a href="global.html#updateTravel">updateTravel</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sun Dec 08 2019 12:43:45 GMT+0100 (GMT+01:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

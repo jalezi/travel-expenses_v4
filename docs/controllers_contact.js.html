@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: controllers/contact.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: controllers/contact.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const mailjet = require('node-mailjet').connect(
+  process.env.MJ_APIKEY_PUBLIC,
+  process.env.MJ_APIKEY_PRIVATE
+);
+
+const LoggerClass = require('../config/LoggerClass');
+
+const Logger = new LoggerClass('contact');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('controllers\\contact INITIALIZING!');
+
+/**
+ * Contact routes.
+ * @module controllers/contact
+ * @requires NPM:node-mailjet
+ * @requires module:config/LoggerClass
+ * @see {@link https://www.npmjs.com/package/node-mailjet NPM:node-mailjet}
+ */
+
+/**
+ * GET /contact
+ *
+ * Contact form page.
+ * @memberof module:controllers/contact
+ * @alias getContact
+ * @param {http.request} req
+ * @param {http.response} res
+ */
+exports.getContact = (req, res) => {
+  logger.debug('Geting contact form');
+  const unknownUser = !req.user;
+  res.render('contact', {
+    title: 'Contact',
+    unknownUser
+  });
+};
+
+/**
+ * POST /contact
+ *
+ * Sends a contact form via MailJet.
+ * @memberof module:controllers/contact
+ * @alias postContact
+ * @param {http.request} req
+ * @param {http.response} res
+ * @param {function} next
+ */
+exports.postContact = (req, res, next) => {
+  logger.debug('Posting contact form');
+  let fromName;
+  let fromEmail;
+  if (!req.user) {
+    req.assert('name', 'Name cannot be blank').notEmpty();
+    req.assert('email', 'Email is not valid').isEmail();
+  }
+  req.assert('message', 'Message cannot be blank').notEmpty();
+
+  const errors = req.validationErrors();
+
+  if (errors) {
+    req.flash('errors', errors);
+    return res.redirect('/contact');
+  }
+
+  if (!req.user) {
+    fromName = req.body.name;
+    fromEmail = req.body.email;
+  } else {
+    fromName = req.user.profile.name || '';
+    fromEmail = req.user.email;
+  }
+
+  const sendContactForm = async () => {
+    const sendEmail = mailjet.post('send', { version: 'v3.1' });
+    const emailData = {
+      Messages: [
+        {
+          From: {
+            Email: 'jaka.daneu@siol.net',
+            Name: `${fromName} - ${fromEmail}`
+          },
+          To: [
+            {
+              Email: 'jakad@me.com',
+              Name: 'TExpenses App'
+            }
+          ],
+          Subject: 'Contact TExpenses App',
+          TextPart: req.body.message
+        }
+      ]
+    };
+
+    try {
+      await sendEmail.request(emailData);
+      return req.flash('info', {
+        msg: 'An e-mail has been sent to TExpenses App.'
+      });
+    } catch (err) {
+      logger.error(err);
+      req.flash('errors', {
+        msg: 'Error sending the contact message. Please try again shortly.'
+      });
+      return err;
+    }
+  };
+
+  sendContactForm()
+    .then(() => {
+      res.redirect('/');
+    })
+    .catch(next);
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-config.html">config</a></li><li><a href="module-config_error.html">config/error</a></li><li><a href="module-config_express.html">config/express</a></li><li><a href="module-config_LoggerClass.html">config/LoggerClass</a></li><li><a href="module-config_mongoose.html">config/mongoose</a></li><li><a href="module-config_passport.html">config/passport</a></li><li><a href="module-config_routes.html">config/routes</a></li><li><a href="module-config_routes_expenses.html">config/routes/expenses</a></li><li><a href="module-config_routes_oAuth.html">config/routes/oAuth</a></li><li><a href="module-config_routes_travels.html">config/routes/travels</a></li><li><a href="module-config_routes_user.html">config/routes/user</a></li><li><a href="module-controllers_contact.html">controllers/contact</a></li><li><a href="module-controllers_expense.html">controllers/expense</a></li><li><a href="module-controllers_home.html">controllers/home</a></li><li><a href="module-controllers_import.html">controllers/import</a></li><li><a href="module-controllers_travel.html">controllers/travel</a></li><li><a href="module-controllers_user.html">controllers/user</a></li><li><a href="module-utils_getTrace.html">utils/getTrace</a></li></ul><h3>Classes</h3><ul><li><a href="Logger.html">Logger</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sun Dec 15 2019 13:10:12 GMT+0100 (GMT+01:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

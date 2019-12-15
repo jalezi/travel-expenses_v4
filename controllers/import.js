@@ -75,9 +75,8 @@ exports.postImport = async (req, res, next) => {
       logger.debug('Importing travels');
       message = await postImport.travelImport(dataArray, req.user._id);
       if (message.error) {
-        let { error } = message;
-        message = message.msg;
-        logger.error(`Importing travels error: ${message}`);
+        let { msg, error } = message;
+        logger.error(`Importing travels error: ${msg}`);
         throw error;
       }
     } else {
@@ -89,12 +88,11 @@ exports.postImport = async (req, res, next) => {
         res.locals.travels
       );
       const { currenciesArray } = getCurrenciesArray;
-      message = getCurrenciesArray.message;
-      let error = getCurrenciesArray.err;
-      if (error) {
+      let { err, message } = getCurrenciesArray;
+      if (err) {
         logger.warn(`Experiment error message: ${message}`);
-        logger.error(`getCurrenciesArray error: ${error.message}`);
-        throw error;
+        logger.error(`getCurrenciesArray error: ${err.message}`);
+        throw err;
       }
 
       // Create new currencies

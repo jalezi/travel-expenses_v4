@@ -117,11 +117,11 @@ expressHbs.registerHelper('setUnit', homeDistance => {
 
 expressHbs.registerHelper('setUnit2', homeDistance => {
   Logger.debug('setUnit2 helper');
-  if (homeDistance !== 'mi') {
-    return 'mile';
-  }
-  if (homeDistance !== 'km') {
+  if (homeDistance === 'mi') {
     return 'km';
+  }
+  if (homeDistance === 'km') {
+    return 'mile';
   }
   return '';
 });

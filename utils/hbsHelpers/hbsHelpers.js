@@ -108,7 +108,8 @@ expressHbs.registerHelper('setUnit', homeDistance => {
   Logger.debug('setUnit helper');
   if (homeDistance === 'mi') {
     return 'mile';
-  } if (homeDistance === 'km') {
+  }
+  if (homeDistance === 'km') {
     return 'km';
   }
   return '';
@@ -118,7 +119,8 @@ expressHbs.registerHelper('setUnit2', homeDistance => {
   Logger.debug('setUnit2 helper');
   if (homeDistance !== 'mi') {
     return 'mile';
-  } if (homeDistance !== 'km') {
+  }
+  if (homeDistance !== 'km') {
     return 'km';
   }
   return '';

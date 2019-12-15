@@ -54,7 +54,7 @@ exports.postImport = async (req, res, next) => {
   logger.debug('Middleware postImport');
   let message = '';
   const { myFile } = req.files;
-  const myFilePath = req.files.myFile.path;
+  const { myFilePath } = req.files.myFile;
   let combinedCurrencies = [];
 
   try {
@@ -89,9 +89,10 @@ exports.postImport = async (req, res, next) => {
         res.locals.travels
       );
       const { currenciesArray } = getCurrenciesArray;
-      // message = getCurrenciesArray.message;
+      message = getCurrenciesArray.message;
       let error = getCurrenciesArray.err;
       if (error) {
+        logger.warn(`Experiment error message: ${message}`)
         logger.error(`getCurrenciesArray error: ${error.message}`);
         throw error;
       }
@@ -145,9 +146,9 @@ exports.postImport = async (req, res, next) => {
 
     // TODO this might be unnecessary
     if (message.error) {
-      logger.warn('This is usefull');
       let { error } = message;
-      // message = message.msg;
+      message = message.msg;
+      logger.warn(`This is useful error: ${message}`)
       throw error;
     }
 
@@ -160,12 +161,11 @@ exports.postImport = async (req, res, next) => {
     postImport.deleteFile(myFilePath, 'File deleted after error!');
     logger.error(`Catching error: ${err.message}`);
     if (!(err instanceof myErrors.ImportFileError)) {
-      // message = err.message;
       logger.warn('Error is not instance of ImportFileError');
       next(err);
     } else {
       res.status(500);
-      message = err.message;
+      let { message } = err;
       logger.warn('Error is instance of ImportFIleError');
       req.flash('errors', {
         msg: message

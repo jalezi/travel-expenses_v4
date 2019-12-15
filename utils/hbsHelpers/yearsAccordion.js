@@ -62,7 +62,7 @@ const createSelectOptions = (options, selected, elemAttrs = {}, valueToLowerCase
  creates Expense Form
  */
 // eslint-disable-next-line no-unused-vars
-const createExpenseForm = (method = 'POST', hiddenMethod = method, csrf = '', expenseTypes = {}, travel, expense, formatter) => {
+const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMethod = method, csrf = '', expenseTypes = {}) => {
   Logger.debug('createExpenseForm');
   if (!travel || !expense) {
     return;
@@ -533,7 +533,7 @@ expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
           const expenseCardOptions = { class: ['card', 'text-white', 'bg-secondary', 'mx-2', 'my-2', 'border-warning'], id: `expense_${expenseId}_Card` };
 
 
-          const form = createExpenseForm('post', 'patch', csrf, expenseTypes, travelObject, expenseObject, formatter);
+          const form = createExpenseForm(travelObject, expenseObject, formatter, 'post', 'patch', csrf, expenseTypes);
           const expenseCardBody = createElement('div', expenseCardBodyOptions, form);
           const expenseCard = createElement('div', expenseCardOptions, expenseCardBody);
           expenseObjectsArray.push(expenseCard);
@@ -765,7 +765,7 @@ expressHbs.registerHelper('yearsAccordion', (value, csrf) => {
           const expenseBodyElements = expenseCardBodyTitle + expenseDateElem +
           expenseDescriptionElem + expenseAmountElem + expenseRateElem + expenseAmountConvertedElem;
           // test
-          const form = createExpenseForm('post', 'patch', csrf, expenseTypes, travelObject, expenseObject, formatter);
+          const form = createExpenseForm(travelObject, expenseObject, formatter, 'post', 'patch', csrf, expenseTypes);
           const expenseCardBody = createElement('div', expenseCardBodyOptions, form + expenseBodyElements);
           // eslint-disable-next-line max-len
           // const expenseCardBody = createElement('div', expenseCardBodyOptions, expenseBodyElements);

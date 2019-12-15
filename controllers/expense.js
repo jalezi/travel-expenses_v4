@@ -1,23 +1,14 @@
-<<<<<<< HEAD
-/* eslint-disable func-names */
-/* eslint-disable prefer-destructuring */
-=======
 /* eslint-disable quote-props */
->>>>>>> develop
 const mongoose = require('mongoose');
 const _ = require('lodash');
 const moment = require('moment');
 
-<<<<<<< HEAD
-// const User = require('../models/User');
-=======
 const LoggerClass = require('../config/LoggerClass');
 
 const Logger = new LoggerClass('expense');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('controllers\\expense INITIALIZING!');
 
->>>>>>> develop
 const Travel = require('../models/Travel');
 const Expense = require('../models/Expense');
 const Currency = require('../models/Currency');
@@ -53,13 +44,6 @@ const constants = require('../lib/constants');
  * @param {function} next
  */
 exports.getExpense = (req, res, next) => {
-<<<<<<< HEAD
-  const id = req.params.id;
-  if (!ObjectId.isValid(id)) { return next(new Error('Not valid Object Id')); }
-  let mileageType;
-  const expense = res.locals.expense;
-  const travel = res.locals.travel;
-=======
   logger.debug('Getting expense');
   const { id } = req.params;
   if (!ObjectId.isValid(id)) {
@@ -68,7 +52,6 @@ exports.getExpense = (req, res, next) => {
   let mileageType;
   const { expense } = res.locals;
   const { travel } = res.locals;
->>>>>>> develop
   const tDateFrom = travel.dateFrom;
   const tDateTo = travel.dateTo;
 
@@ -81,10 +64,6 @@ exports.getExpense = (req, res, next) => {
     mileageType = true;
   }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> develop
   res.render('expenses/expense', {
     title: 'Expense',
     travel,
@@ -99,30 +78,6 @@ exports.getExpense = (req, res, next) => {
   });
 };
 
-<<<<<<< HEAD
-/*
-  * DELETE /travels/:id/expenses/:id
-  */
-exports.deleteExpense = async (req, res, next) => {
-  const expenseId = req.params.id;
-  const travel = res.locals.travel;
-  const expense = res.locals.expense;
-  // const splitUrl = req.url.split('/');
-  Expense.findOneAndDelete({ _id: expenseId, travel: travel._id })
-    .then(() => {
-      Travel.findByIdAndUpdate(travel._id, {
-        // eslint-disable-next-line quote-props
-        $pullAll: { 'expenses': [expenseId] },
-        // eslint-disable-next-line quote-props
-        $inc: { 'total': -expense.amountConverted }
-      }, (err) => {
-        if (!err) { return next(err); }
-      });
-    }).then(() => {
-      req.flash('info', { msg: 'Expense successfully deleted!!' });
-      res.redirect(`/travels/${travel._id}`);
-    }).catch((err) => {
-=======
 /**
  * DELETE /travels/:id/expenses/:id
  *
@@ -156,7 +111,6 @@ exports.deleteExpense = async (req, res, next) => {
       res.redirect(`/travels/${travel._id}`);
     })
     .catch(err => {
->>>>>>> develop
       next(err);
     });
 };
@@ -186,23 +140,6 @@ exports.updateExpense = async (req, res, next) => {
   };
   const decimalOptions = { decimal_digits: 2 };
 
-<<<<<<< HEAD
-  req.assert('expenseDescription', 'Description is empty or to long (max 60 characters)!').isLength({ min: 1, max: 60 });
-  let dateCompare = moment(res.locals.travel.dateFrom).add(-1, 'days').format('YYYY-MM-DD');
-  req.assert('invoiceDate', 'Invoice date should be within travel dates').isAfter(dateCompare);
-  dateCompare = moment(res.locals.travel.dateTo).add(1, 'days').format('YYYY-MM-DD');
-  req.assert('invoiceDate', 'Invoice date should be within travel dates').isBefore(dateCompare);
-
-  if (req.body.expenseType === 'Mileage') {
-    req.assert('travelPerMileAmount', 'Per mile amount should be positive number with 2 decimals!').isDecimal(decimalOptions);
-    req.assert('invoiceUnit', 'Must be "km" or "mi"').custom(() => req.body.invoiceUnit === 'km' || req.body.invoiceUnit === 'mi');
-    req.assert('amountDistance', 'Number with 2 decimals').isDecimal(decimalOptions);
-    req.assert('amountDistance2', 'Number with 2 decimals').isDecimal(decimalOptions);
-    req.assert('amountConverted2', 'Number with 2 decimals').isDecimal(decimalOptions);
-  } else {
-    req.assert('invoiceCurrency', 'Currency name must be 3 characters long').isLength({ min: 3, max: 3 });
-    req.assert('rate', 'Currency rate with 2 decimals').isNumeric().isCurrency(currencyOptions);
-=======
   req
     .assert(
       'expenseDescription',
@@ -251,7 +188,6 @@ exports.updateExpense = async (req, res, next) => {
       .assert('rate', 'Currency rate with 2 decimals')
       .isNumeric()
       .isCurrency(currencyOptions);
->>>>>>> develop
     req.assert('amount', 'Number with 2 decimals').isDecimal(decimalOptions);
     req
       .assert('amountConverted', 'Number with 2 decimals')
@@ -278,36 +214,6 @@ exports.updateExpense = async (req, res, next) => {
     'amount'
   ]);
   const invoiceDate = new Date(req.body.invoiceDate);
-<<<<<<< HEAD
-  travel.total = (travel.total - Number(expense.amountConverted)
-  + Number(body.amountConverted) + Number(body.amountConverted2)).toFixed(2);
-  // Different data if expense type is Mileage
-  if (req.body.expenseType !== 'Mileage') {
-    const invoiceCurrency = req.body.invoiceCurrency.toUpperCase();
-    // const invDate = moment(invoiceDate).format('YYYY-MM-DD');
-    const rate = req.body.rate;
-    const cur = {};
-
-    cur[invoiceCurrency] = Number(rate);
-    let curRate = {};
-    await Currency.find({
-      base: res.locals.travel.homeCurrency,
-      date: invoiceDate,
-      rate: cur
-    }, async (err, item) => {
-      if (item.length === 1) {
-        curRate = item[0];
-      } else {
-        curRate = new Currency({
-          base: res.locals.travel.homeCurrency,
-          date: invoiceDate,
-          rate: cur
-        });
-        await curRate.save().then(() => {
-        }).catch((err) => {
-          next(err);
-        });
-=======
   travel.total = (
     travel.total -
     Number(expense.amountConverted) +
@@ -346,7 +252,6 @@ exports.updateExpense = async (req, res, next) => {
               next(err);
             });
         }
->>>>>>> develop
       }
     );
 
@@ -369,19 +274,6 @@ exports.updateExpense = async (req, res, next) => {
     expense.curRate = undefined;
   }
 
-<<<<<<< HEAD
-  await expense.save()
-    .then(() => {
-      travel.save()
-        .then(() => {
-          req.flash('info', { msg: 'Expense successfully updated!' });
-          res.redirect(`/travels/${travel._id}`);
-        }).catch((err) => {
-          next(err);
-        });
-    })
-    .catch((err) => {
-=======
   await expense
     .save()
     .then(() => {
@@ -396,7 +288,6 @@ exports.updateExpense = async (req, res, next) => {
         });
     })
     .catch(err => {
->>>>>>> develop
       next(err);
     });
 };
@@ -409,12 +300,8 @@ exports.updateExpense = async (req, res, next) => {
  * @param {http.response} res
  * @param {function} next
  */
-<<<<<<< HEAD
-exports.postNewExpense = async function (req, res, next) {
-=======
 exports.postNewExpense = async (req, res, next) => {
   logger.debug('Creating new expense');
->>>>>>> develop
   const currencyOptions = {
     allow_negatives: false,
     allow_negative_sign_placeholder: true,
@@ -427,23 +314,6 @@ exports.postNewExpense = async (req, res, next) => {
   };
   const decimalOptions = { decimal_digits: 2 };
 
-<<<<<<< HEAD
-  req.assert('expenseDescription', 'Description is empty or to long (max 60 characters)!').isLength({ min: 1, max: 60 });
-  let dateCompare = moment(res.locals.travel.dateFrom).add(-1, 'days').format('YYYY-MM-DD');
-  req.assert('invoiceDate', 'Invoice date should be within travel dates').isAfter(dateCompare);
-  dateCompare = moment(res.locals.travel.dateTo).add(1, 'days').format('YYYY-MM-DD');
-  req.assert('invoiceDate', 'Invoice date should be within travel dates').isBefore(dateCompare);
-
-  if (req.body.expenseType === 'Mileage') {
-    req.assert('travelPerMileAmount', 'Per mile amount should be positive number with 2 decimals!').isDecimal(decimalOptions);
-    req.assert('invoiceUnit', 'Must be "km" or "mi"').custom(() => req.body.invoiceUnit === 'km' || req.body.invoiceUnit === 'mi');
-    req.assert('amountDistance', 'Number with 2 decimals').isDecimal(decimalOptions);
-    req.assert('amountDistance2', 'Number with 2 decimals').isDecimal(decimalOptions);
-    req.assert('amountConverted2', 'Number with 2 decimals').isDecimal(decimalOptions);
-  } else {
-    req.assert('invoiceCurrency', 'Currency name must be 3 characters long').isLength({ min: 3, max: 3 });
-    req.assert('rate', 'Currency rate with 2 decimals').isNumeric().isCurrency(currencyOptions);
-=======
   req
     .assert(
       'expenseDescription',
@@ -492,7 +362,6 @@ exports.postNewExpense = async (req, res, next) => {
       .assert('rate', 'Currency rate with 2 decimals')
       .isNumeric()
       .isCurrency(currencyOptions);
->>>>>>> develop
     req.assert('amount', 'Number with 2 decimals').isDecimal(decimalOptions);
     req
       .assert('amountConverted', 'Number with 2 decimals')
@@ -509,34 +378,6 @@ exports.postNewExpense = async (req, res, next) => {
   let expense = {};
   const invoiceDate = new Date(req.body.invoiceDate);
 
-<<<<<<< HEAD
-  // const invoiceCurrency = req.body.invoiceCurrency.toUpperCase();
-  // let invDate = moment(invoiceDate).format('YYYY-MM-DD');
-
-  // Different data if expense type is Mileage
-  if (req.body.expenseType !== 'Mileage') {
-    const invoiceCurrency = req.body.invoiceCurrency.toUpperCase();
-    // let invDate = moment(invoiceDate).format('YYYY-MM-DD');
-    const rate = req.body.rate;
-    const cur = {};
-
-    cur[invoiceCurrency] = Number(rate);
-    let curRate = {};
-    await Currency.find({
-      base: res.locals.travel.homeCurrency,
-      date: invoiceDate,
-      rate: cur
-    }, async (err, item) => {
-      if (item.length === 1) {
-        curRate = item[0];
-      } else {
-        curRate = new Currency({
-          base: res.locals.travel.homeCurrency,
-          date: invoiceDate,
-          rate: cur
-        });
-        await curRate.save();
-=======
   // Different data if expense type is Mileage
   if (req.body.expenseType !== 'Mileage') {
     const invoiceCurrency = req.body.invoiceCurrency.toUpperCase();
@@ -563,7 +404,6 @@ exports.postNewExpense = async (req, res, next) => {
           });
           await curRate.save();
         }
->>>>>>> develop
       }
     );
 
@@ -593,28 +433,6 @@ exports.postNewExpense = async (req, res, next) => {
 
   try {
     const doc = await expense.save();
-<<<<<<< HEAD
-    const travel = await Travel.findByIdAndUpdate(res.locals.travel._id,
-      // eslint-disable-next-line quote-props
-      { $addToSet: { 'expenses': doc._id } }, (err) => {
-        if (err) {
-          return next(err);
-        }
-      });
-    // TODO refactor if statement. No need for if statement.
-    const result = Number(travel.total) + Number(doc.amountConverted);
-    travel.total = result.toFixed(2);
-    travel.save();
-    // if (doc.type !== 'Mileage') {
-    //   const result = Number(travel.total) + Number(doc.amountConverted);
-    //   travel.total = result.toFixed(2);
-    //   travel.save();
-    // } else {
-    //   const result = Number(travel.total) + Number(doc.amountConverted);
-    //   travel.total = result.toFixed(2);
-    //   travel.save();
-    // }
-=======
     const travel = await Travel.findByIdAndUpdate(
       res.locals.travel._id,
       { $addToSet: { expenses: doc._id } },
@@ -634,7 +452,6 @@ exports.postNewExpense = async (req, res, next) => {
       travel.total = result.toFixed(2);
       travel.save();
     }
->>>>>>> develop
   } catch (err) {
     return next(err);
   }

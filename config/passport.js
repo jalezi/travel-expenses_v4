@@ -5,8 +5,6 @@ const { Strategy: LocalStrategy } = require('passport-local');
 const { OAuth2Strategy: GoogleStrategy } = require('passport-google-oauth');
 // const { OAuthStrategy } = require('passport-oauth');
 // const { OAuth2Strategy } = require('passport-oauth');
-<<<<<<< HEAD
-=======
 
 // Logger
 const LoggerClass = require('../config/LoggerClass');
@@ -14,7 +12,6 @@ const LoggerClass = require('../config/LoggerClass');
 const Logger = new LoggerClass('passport');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('config\\passport INITIALIZING!');
->>>>>>> develop
 
 const User = require('../models/User');
 

@@ -20,12 +20,8 @@ const { mainLogger, logger } = Logger;
 
 mainLogger.info("Let's get started!");
 
-<<<<<<< HEAD
-const { ImportFileError } = myErrors;
-=======
 // All configuration variables
 const config = require('./config');
->>>>>>> develop
 
 // Set the NODE_ENV to 'development' by default
 process.env.NODE_ENV = process.env.NODE_ENV || config.NODE_ENV || 'development';
@@ -116,39 +112,6 @@ const app = startServer();
  * @see {@link https://www.npmjs.com/package/dotenv-expand NPM:dotenv-expand}
  * @see {@link https://www.npmjs.com/package/full-icu NPM:full-icu}
  */
-<<<<<<< HEAD
-if (process.env.NODE_ENV === 'development') {
-  // only use in development
-  app.use(errorHandler({
-    log: (err, str, req, res) => {
-      if (err instanceof ImportFileError || err instanceof mongoose.CastError) {
-        console.log(str);
-      } else {
-        console.log(err);
-      }
-    }
-  }));
-} else {
-  app.use((err, req, res, next) => {
-    if (err instanceof ImportFileError) {
-      console.log(err.stack);
-      res.status(400);
-      res.redirect(req.path);
-    } else if (err instanceof mongoose.CastError) {
-      console.log(err.stack);
-      res.status(400);
-      res.redirect('/travels');
-    } else {
-      console.log(err);
-      res.status(500).render('error', {
-        layout: 'errorLayout',
-        title: 'Error'
-      });
-    }
-  });
-}
-=======
->>>>>>> develop
 
 /**
  * Express server.

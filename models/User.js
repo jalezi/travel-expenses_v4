@@ -1,26 +1,3 @@
-<<<<<<< HEAD
-/*
- * User Schema
- * email: login email
- * password: login password
- * passwordResetToken: token send to user to reset the password
- * passwordResetExpires: when passwordResetToken expires
- * google: google id when user signin or link the account
- * tokens: array of tokens
- * profile: object with user's -
- *  name, gender, location, website, picture, first name (fName), last name (lName)
- * team: user's team
- * jobPosition: user's job
- * travels: array of travel' ids -
- *  links to travels collection in DB => TravelSchema in ./models/Expense.js
- * homeCurrency: currency to calculate all amounts to
- * homeDistance: to which linear measure expense will be calculate to: miles(mi) or kilometers(km)
- * perMileAmount: amount to convert distance to expense
- * timestamps: creates two values => createdAr, updatedAt - Mongoose Schema option
- */
-
-=======
->>>>>>> develop
 const bcrypt = require('bcrypt-nodejs');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
@@ -126,12 +103,6 @@ Helper method for getting user's full name
 It is User document method.</p>
 Returns User's full name
 */
-<<<<<<< HEAD
-userSchema.methods.fullName = function fullName() {
-  const result = `${this.profile.fName} ${this.profile.lName}`;
-  return result;
-};
-=======
 UserSchema.methods.fullName = function fullName() {
   const result = `${this.profile.fName} ${this.profile.lName}`;
   return result;
@@ -139,7 +110,6 @@ UserSchema.methods.fullName = function fullName() {
 
 // User mongoose model
 const User = mongoose.model('User', UserSchema);
->>>>>>> develop
 
 
 module.exports = User;

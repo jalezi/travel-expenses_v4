@@ -1,34 +1,11 @@
 /* eslint-disable func-names */
-<<<<<<< HEAD
-/* eslint-disable quote-props */
-/*
- * Travel Schema
- * _user: link to user => user._id from users collection
- * description: travel description
- * dateFrom: travel start date
- * dateTo: travel end date
- * homeCurrency: currency to calculate all amounts to
- * perMileAmount: amount to convert distance to expense
- * expenses: array of expense' ids -
- *  links to expenses collection in DB => ExpenseSchema in ./models/Expense.js
- * total: total of all expenses linked to this travel
- * useNestedStrict: TODO useNestedStrict description
- * timestamps: creates two values => createdAr, updatedAt - Mongoose Schema option
- */
-=======
->>>>>>> develop
 
 const mongoose = require('mongoose');
 const { addLogger } = require('../config/logger');
 
-<<<<<<< HEAD
-// const User = require('../models/User');
-// const Expense = require('../models/Expense');
-=======
 // Logger
 const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
->>>>>>> develop
 
 const { ObjectId } = mongoose.Schema.Types;
 
@@ -86,12 +63,8 @@ const TravelSchema = new mongoose.Schema(travelSchemaObject, {
  .populate({path: 'expenses', populate: {path: 'curRate'}})
  .then((doc) => {doc.updateTotal()}
  */
-<<<<<<< HEAD
-TravelSchema.methods.updateTotal = () => {
-=======
 TravelSchema.methods.updateTotal = function() {
   Logger.debug('updateTravel Schema methods');
->>>>>>> develop
   this.total = 0;
   this.expenses.forEach(expense => {
     this.total = Number(this.total) + Number(expense.amountConverted);
@@ -100,20 +73,6 @@ TravelSchema.methods.updateTotal = function() {
   return this.save();
 };
 
-<<<<<<< HEAD
-TravelSchema.statics.byYear_byMonth = function (user) {
-  return this.aggregate([
-    {
-      '$match': {
-        '_user': user._id
-      }
-    }, {
-      '$sort': {
-        'dateFrom': -1
-      }
-    }, {
-      '$lookup': {
-=======
 /*
  Aggregate by year and inside year by month
  It's Travel model method
@@ -132,77 +91,19 @@ TravelSchema.statics.byYear_byMonth = function (user) {
       }
     }, {
       $lookup: {
->>>>>>> develop
         from: 'expenses',
         localField: 'expenses',
         foreignField: '_id',
         as: 'expenses'
       }
     }, {
-<<<<<<< HEAD
-      '$lookup': {
-=======
       $lookup: {
->>>>>>> develop
         from: 'currencies',
         localField: 'expenses.curRate',
         foreignField: '_id',
         as: 'curRates'
       }
     }, {
-<<<<<<< HEAD
-      '$group': {
-        '_id': {
-          'month': {
-            '$month': '$dateFrom'
-          },
-          'year': {
-            '$year': '$dateFrom'
-          }
-        },
-        'byMonth': {
-          '$push': '$$ROOT'
-        },
-        'count': {
-          '$sum': 1
-        },
-        'dateFirst': {
-          '$first': '$dateFrom'
-        },
-        'dateLast': {
-          '$last': '$dateFrom'
-        }
-      }
-    },
-    { $sort: { 'dateFirst': -1 } },
-    {
-      '$group': {
-        '_id': {
-          'year': {
-            '$year': '$dateFirst'
-          }
-        },
-        'byYear': {
-          '$push': '$$ROOT'
-        },
-        'count': {
-          '$sum': 1
-        },
-        'countTotal': { $sum: '$count' },
-        'dateFirst': {
-          '$first': '$dateFirst'
-        },
-        'dateLast': {
-          '$last': '$dateLast'
-        }
-      }
-    },
-    { $sort: { 'dateFirst': -1 } }
-  ]);
-};
-
-TravelSchema.statics.byMonth = function (user) {
-=======
       $group: {
         _id: {
           month: {
@@ -260,7 +161,6 @@ TravelSchema.statics.byMonth = function (user) {
  */
 TravelSchema.statics.byMonth = function (user) {
   Logger.debug('byMonth Schema statics');
->>>>>>> develop
   return this.aggregate([
     {
       $match: {
@@ -274,11 +174,7 @@ TravelSchema.statics.byMonth = function (user) {
           year: { $year: '$dateFrom' }
         },
         travels: { $addToSet: '$_id' },
-<<<<<<< HEAD
-        myArray: { '$push': '$$ROOT' },
-=======
         myArray: { $push: '$$ROOT' },
->>>>>>> develop
         count: { $sum: 1 },
         date: { $first: '$dateFrom' }
       }

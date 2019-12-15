@@ -1,26 +1,13 @@
-<<<<<<< HEAD
-/* eslint-disable security/detect-object-injection */
-/* eslint-disable prefer-destructuring */
-// const moment = require('moment');
-
-// const Travel = require('../models/Travel');
 const Expense = require('../models/Expense');
-// const Rate = require('../models/Rate');
-=======
-const Expense = require('../models/Expense');
->>>>>>> develop
 const Currency = require('../models/Currency');
 
 const { findRatesByExactOrClosestDate } = require('./utils');
 const { convertRateToHomeCurrencyRate } = require('./utils');
-<<<<<<< HEAD
-=======
 
 const { addLogger } = require('../config/logger');
 
 const pathDepth = module.paths.length - 6;
 const Logger = addLogger(__filename, pathDepth);
->>>>>>> develop
 
 // Returns true if expense date is not in travel's dates range
 function checkExpenseDate(expDate, travelDateFrom, travelDateTo) {
@@ -37,13 +24,10 @@ function setNewExpenseDate(expDate, travelDateFrom, travelDateTo) {
   if (expDate < travelDateFrom) {
     Logger.debug(`Expense date is lower than travel date from: ${expDate} < ${travelDateFrom}`);
     return travelDateFrom;
-<<<<<<< HEAD
-=======
   }
   if (expDate > travelDateTo) {
     Logger.debug(`Expense date is greater than travel date to: ${expDate} > ${travelDateTo}`);
     return travelDateTo;
->>>>>>> develop
   }
   return travelDateTo;
 }
@@ -58,28 +42,18 @@ async function createNewCurrency(expenseDate, homeCurrency, invoiceCurrency) {
   try {
     const cur = {};
     const dateRates = await findRatesByExactOrClosestDate(expenseDate);
-<<<<<<< HEAD
-    const convertedRate = convertRateToHomeCurrencyRate(dateRates.rates,
-      homeCurrency,
-      invoiceCurrency);
-    // eslint-disable-next-line security/detect-object-injection
-=======
     const convertedRate = await convertRateToHomeCurrencyRate(
       dateRates.rates,
       homeCurrency,
       invoiceCurrency
     );
->>>>>>> develop
     cur[invoiceCurrency] = convertedRate;
     const curRate = new Currency({
       base: homeCurrency,
       date: expenseDate,
       rate: cur
     });
-<<<<<<< HEAD
-=======
     Logger.debug(`New currency: {base: ${curRate.base}, date: ${curRate.date}, rate: ${cur.toString()}}`);
->>>>>>> develop
     return { curRate, convertedRate };
   } catch (err) {
     throw new Error(err);
@@ -109,17 +83,6 @@ async function updateExpense(
   }
 }
 
-<<<<<<< HEAD
-module.exports = async (travel) => new Promise((resolve, reject) => {
-  const dateFrom = travel.dateFrom;
-  const dateTo = travel.dateTo;
-  const travelHomeCurrency = travel.homeCurrency;
-  const expenses = travel.expenses;
-  const result = [];
-
-  try {
-    expenses.forEach(async (expense) => {
-=======
 // FIXME Promise executor functions should not be async
 
 /*
@@ -139,30 +102,10 @@ module.exports = async travel => new Promise(async (resolve, reject) => {
 
   try {
     await expenses.forEach(async expense => {
->>>>>>> develop
       if (checkExpenseDate(expense.date, dateFrom, dateTo)) {
         expense.date = setNewExpenseDate(expense.date, dateFrom, dateTo);
 
         if (expense.type !== 'Mileage') {
-<<<<<<< HEAD
-          const invoiceCurrency = Object.keys(expense.curRate.rate)[0];
-          Currency.find({
-            base: travelHomeCurrency,
-            date: expense.date
-          },
-          async (err, curRates) => {
-            // eslint-disable-next-line security/detect-object-injection
-            // eslint-disable-next-line max-len
-            const filertedRatesFromDB = curRates.filter((item) => !isNaN(item.rate[invoiceCurrency])); // eslint-disable-line no-restricted-globals
-            if (filertedRatesFromDB.length === 0) {
-              // eslint-disable-next-line max-len
-              const { curRate, convertedRate } = await createNewCurrency(expense.date, travelHomeCurrency, invoiceCurrency);
-              await curRate.save();
-              const rateObjectId = curRate._id;
-              await updateExpense(expense._id,
-                expense.amount, expense.date, convertedRate, rateObjectId)
-                .then((doc) => {
-=======
           let invoiceCurrency = Object.keys(expense.curRate.rate)[0];
           Currency.find(
             { base: travelHomeCurrency, date: expense.date },
@@ -202,35 +145,16 @@ module.exports = async travel => new Promise(async (resolve, reject) => {
                   convertedRate,
                   rateObjectId
                 ).then(doc => {
->>>>>>> develop
                   result.push(doc);
                   if (result.length === expenses.length) {
                     resolve(result);
                   }
                 });
-<<<<<<< HEAD
-            } else {
-              // eslint-disable-next-line security/detect-object-injection
-              const convertedRate = filertedRatesFromDB[0].rate[invoiceCurrency];
-              const rateObjectId = filertedRatesFromDB[0]._id;
-              await updateExpense(expense._id,
-                expense.amount, expense.date, convertedRate, rateObjectId).then((doc) => {
-                result.push(doc);
-                if (result.length === expenses.length) {
-                  resolve(result);
-                }
-              });
-            }
-          });
-        } else {
-          await expense.save((doc) => {
-=======
               }
             }
           );
         } else {
           await expense.save(doc => {
->>>>>>> develop
             result.push(doc);
             if (result.length === expenses.length) {
               resolve(result);

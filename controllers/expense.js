@@ -35,6 +35,18 @@ const constants = require('../lib/constants');
  * @see {@link https://www.npmjs.com/package/moment NPM:moment}
  */
 
+const currencyOptions = {
+  allow_negatives: false,
+  allow_negative_sign_placeholder: true,
+  thousands_separator: ',',
+  decimal_separator: '.',
+  allow_decimal: true,
+  require_decimal: false,
+  digits_after_decimal: [2],
+  allow_space_after_digits: false
+};
+const decimalOptions = { decimal_digits: 2 };
+
 /**
  * GET /travels/:id/expenses/:id
  *
@@ -127,18 +139,6 @@ exports.updateExpense = async (req, res, next) => {
   logger.debug('Updating expense');
   const { travel } = res.locals;
   const { expense } = res.locals;
-
-  const currencyOptions = {
-    allow_negatives: false,
-    allow_negative_sign_placeholder: true,
-    thousands_separator: ',',
-    decimal_separator: '.',
-    allow_decimal: true,
-    require_decimal: false,
-    digits_after_decimal: [2],
-    allow_space_after_digits: false
-  };
-  const decimalOptions = { decimal_digits: 2 };
 
   req
     .assert(
@@ -302,17 +302,6 @@ exports.updateExpense = async (req, res, next) => {
  */
 exports.postNewExpense = async (req, res, next) => {
   logger.debug('Creating new expense');
-  const currencyOptions = {
-    allow_negatives: false,
-    allow_negative_sign_placeholder: true,
-    thousands_separator: ',',
-    decimal_separator: '.',
-    allow_decimal: true,
-    require_decimal: false,
-    digits_after_decimal: [2],
-    allow_space_after_digits: false
-  };
-  const decimalOptions = { decimal_digits: 2 };
 
   req
     .assert(

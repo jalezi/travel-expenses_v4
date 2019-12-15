@@ -1,16 +1,34 @@
 const errorHandler = require('errorhandler');
 const mongoose = require('mongoose');
 
-const myErrors = require('../utils/myErrors');
 const LoggerClass = require('../config/LoggerClass');
 
 const Logger = new LoggerClass('passport');
 const { mainLogger, logger } = Logger;
-mainLogger.debug('config\\error REQUIRED!');
+mainLogger.debug('config\\error INITIALIZING!');
+
+const myErrors = require('../utils/myErrors');
 
 const { ImportFileError } = myErrors;
 
+/**
+ * @fileoverview Sets Express and Node error handling.
+ *
+ * @module config/error
+ * @author Jaka Daneu
+ * @requires NPM:errorHandler
+ * @requires NPM:mongoose
+ * @requires module:utils/myErrors
+ * @requires module:config/LoggerClass
+ * @see {@link https://www.npmjs.com/package/errorhandler NPM:errorhandler}
+ * @see {@link https://www.npmjs.com/package/mongoose NPM:mongoose}
+ *
+ */
 
+/**
+ * Different error handling for development and production.
+ * @param {Express} app Express server Nodejs web framework.
+ */
 module.exports = app => {
   logger.debug('Error handler initializing');
   if (process.env.NODE_ENV === 'development') {

@@ -5,6 +5,12 @@ const mongoose = require('mongoose');
 const _ = require('lodash');
 const moment = require('moment');
 
+const LoggerClass = require('../config/LoggerClass');
+
+const Logger = new LoggerClass('travel');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('controllers\\travel INITIALIZING!');
+
 const User = require('../models/User');
 const Travel = require('../models/Travel');
 const Expense = require('../models/Expense');
@@ -19,11 +25,34 @@ const updateExpensesToMatchTravelRangeDates = require('../utils/updateExpensesTo
 const travelExpensesToPDF = require('../utils/travelExpensesToPDF');
 const travelsTotalToPDF = require('../utils/travelsTotalToPDF');
 
-/*
- * GET /travels/total_pdf
- * Create, open in new tab and save PDF file for filtered travels
+/**
+ * Travel routes.
+ * @module controllers/travel
+ * @requires NPM:mongoose
+ * @requires NPM:lodash
+ * @requires NPM:moment
+ * @requires module:models/User
+ * @requires module:models/Travel
+ * @requires module:models/Expense
+ * @requires module:lib/globals
+ * @requires module:lib/constants
+ * @requires module:utils/updateExpensesToMatchTravelRangeDates
+ * @see {@link https://www.npmjs.com/package/mongoose NPM:mongoose}
+ * @see {@link https://www.npmjs.com/package/lodash NPM:lodash}
+ * @see {@link https://www.npmjs.com/package/moment NPM:moment}
  */
-exports.getTravelsTotalPDF = async function(req, res, next) {
+
+/**
+ * GET /travels/total_pdf
+ *
+ * Create, open in new tab and save PDF file for filtered travels
+ * @async
+ * @param {http.request} req
+ * @param {http.response} res
+ * @param {function} next
+ */
+exports.getTravelsTotalPDF = async function (req, res, next) {
+  logger.debug('Middleware getTravelsTotalPDF');
   // Create and open PDF
   function createTravelsTotalPDF(res, travels, user, dateRange, sum, indexes) {
     const stream = travelsTotalToPDF(travels, user, dateRange, sum, indexes);
@@ -146,11 +175,17 @@ exports.getTravelsTotalPDF = async function(req, res, next) {
   }
 };
 
-/*
+/**
  * GET /travels/:id/pdf
+ *
  * Create, open in new tab and save PDF for displayed travel
+ * @async
+ * @param {http.request} req
+ * @param {http.response} res
+ * @param {function} next
  */
-exports.getTravelExpensesPDF = async function(req, res) {
+exports.getTravelExpensesPDF = async function (req, res) {
+  logger.debug('MIddleware getTravelExpensesPDF');
   const invoiceNumberArray = await User.aggregate([
     {
       $project: {
@@ -175,11 +210,17 @@ exports.getTravelExpensesPDF = async function(req, res) {
   stream.pipe(res);
 };
 
-/*
+/**
  * GET /travels
+ *
  * All travels
+ * @async
+ * @param {http.request} req
+ * @param {http.response} res
+ * @param {function} next
  */
-exports.getTravels = async function(req, res, next) {
+exports.getTravels = async function (req, res, next) {
+  logger.debug('Getting travels');
   let filter;
   let sortBy;
   let searchMinDate;
@@ -263,22 +304,33 @@ exports.getTravels = async function(req, res, next) {
   }
 };
 
-/*
+/**
  * GET /travels/new
  * Form to post new travel
+ * @async
+ * @param {http.request} req
+ * @param {http.response} res
+ * @param {function} next
  */
-exports.getNewTravel = async function(req, res) {
+exports.getNewTravel = async function (req, res) {
+  logger.debug('Getting new travel');
   res.render('travels/new', {
     title: 'New travel',
     user: req.user
   });
 };
 
-/*
+/**
  * POST /travels/new
+ *
  * Create new travel based on user input
+ * @async
+ * @param {http.request} req
+ * @param {http.response} res
+ * @param {function} next
  */
-exports.postNewTravel = async function(req, res, next) {
+exports.postNewTravel = async function (req, res, next) {
+  logger.debug('Posting new travel');
   req
     .assert(
       'description',
@@ -343,9 +395,15 @@ exports.postNewTravel = async function(req, res, next) {
 
 /**
  * GET /travels/:id
+ *
  * Show  travel
+ * @async
+ * @param {http.request} req
+ * @param {http.response} res
+ * @param {function} next
  */
-exports.getTravel = async function(req, res, next) {
+exports.getTravel = async function (req, res, next) {
+  logger.debug('Getting single travel');
   const { id } = req.params;
   if (!ObjectId.isValid(id)) {
     return next(new Error('Not valid Object Id'));
@@ -381,11 +439,17 @@ exports.getTravel = async function(req, res, next) {
   }
 };
 
-/*
+/**
  * DELETE /travels/:id
+ *
  * Delete chosen/displayed travel
+ * @async
+ * @param {http.request} req
+ * @param {http.response} res
+ * @param {function} next
  */
-exports.deleteTravel = async function(req, res, next) {
+exports.deleteTravel = async function (req, res, next) {
+  logger.debug('Deleting single travel');
   const { id } = req.params;
 
   if (!ObjectId.isValid(id)) {
@@ -427,11 +491,17 @@ exports.deleteTravel = async function(req, res, next) {
 
 /**
  * PATCH /travels/new
+ *
  * Update travel information
  * If travel's expenses dates are not within travel date range,
  * update expenses and recalculate travel total
+ * @async
+ * @param {http.request} req
+ * @param {http.response} res
+ * @param {function} next
  */
-exports.updateTravel = async function(req, res, next) {
+exports.updateTravel = async function (req, res, next) {
+  logger.debug('Updating(PATCH) single travel');
   const currencyOptions = {
     allow_negatives: false,
     allow_negative_sign_placeholder: true,
@@ -498,7 +568,7 @@ exports.updateTravel = async function(req, res, next) {
     if (!travel) {
       return next(new Error('Travel not found'));
     }
-    /*
+    /**
      * Check expenses dates and set them within travel dates.
      * Calculate travel total. New expenses date, new rate.
      * Rates for same currency are not the same for different dates.

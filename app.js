@@ -44,6 +44,8 @@ process.on('uncaughtException', err => {
 });
 
 /**
+ * Starts express server
+ * @private
  * @memberof module:app
  * @async
  * @function StartServer
@@ -115,6 +117,7 @@ const app = startServer();
  * Express server.
  * It is used in mocha tests.
  * @memberof module:app
+ * @alias app
  * @type {Promise<Express>}
  */
 exports.app = app;

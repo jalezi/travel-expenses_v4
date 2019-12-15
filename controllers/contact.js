@@ -3,18 +3,31 @@ const mailjet = require('node-mailjet').connect(
   process.env.MJ_APIKEY_PRIVATE
 );
 
-const { addLogger } = require('../config/logger');
+const LoggerClass = require('../config/LoggerClass');
 
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
+const Logger = new LoggerClass('contact');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('controllers\\contact INITIALIZING!');
 
-// TODO implement contact form
+/**
+ * Contact routes.
+ * @module controllers/contact
+ * @requires NPM:node-mailjet
+ * @requires module:config/LoggerClass
+ * @see {@link https://www.npmjs.com/package/node-mailjet NPM:node-mailjet}
+ */
 
 /**
  * GET /contact
+ *
  * Contact form page.
+ * @memberof module:controllers/contact
+ * @alias getContact
+ * @param {http.request} req
+ * @param {http.response} res
  */
 exports.getContact = (req, res) => {
+  logger.debug('Geting contact form');
   const unknownUser = !req.user;
   res.render('contact', {
     title: 'Contact',
@@ -24,10 +37,16 @@ exports.getContact = (req, res) => {
 
 /**
  * POST /contact
- * Send a contact form via Nodemailer.
+ *
+ * Sends a contact form via MailJet.
+ * @memberof module:controllers/contact
+ * @alias postContact
+ * @param {http.request} req
+ * @param {http.response} res
+ * @param {function} next
  */
 exports.postContact = (req, res, next) => {
-  Logger.debug('Posting contact');
+  logger.debug('Posting contact form');
   let fromName;
   let fromEmail;
   if (!req.user) {
@@ -78,7 +97,7 @@ exports.postContact = (req, res, next) => {
         msg: 'An e-mail has been sent to TExpenses App.'
       });
     } catch (err) {
-      Logger.error(err);
+      logger.error(err);
       req.flash('errors', {
         msg: 'Error sending the contact message. Please try again shortly.'
       });

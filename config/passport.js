@@ -11,29 +11,40 @@ const LoggerClass = require('../config/LoggerClass');
 
 const Logger = new LoggerClass('passport');
 const { mainLogger, logger } = Logger;
-mainLogger.debug('config\\passport REQUIRED!');
+mainLogger.debug('config\\passport INITIALIZING!');
 
 const User = require('../models/User');
 
-/*
+/**
  Determines which data of the user object should be stored in the session.
  The result of the serializeUser method is attached to the session
  as req.session.passport.user = {}.
  In this case req.session.passport.user = {id: user.id)
+ * @memberof module:config/passport
+ * @param {serializeUser~callback} cb
  */
 passport.serializeUser((user, done) => {
   logger.debug('Serialize User');
   done(null, user.id);
 });
 
-/*
- The first argument of deserializeUser corresponds to the key of the user object
- that was given to the done function (see 1.).
- So your whole object is retrieved with help of that key.
- That key here is the user id (key can be any key of the user object i.e. name,email etc).
- In deserializeUser that key is matched with the in memory array / database or any data resource.
+/**
+ * Passport deserializeUser callback
+ * @callback serializeUser~callback
+ * @param user
+ * @param {function} done
+ */
 
- The fetched object is attached to the request object as req.user
+/**
+ * The first argument of deserializeUser corresponds to the key of the user object
+ * that was given to the done function (see 1.).
+ * So your whole object is retrieved with help of that key.
+ * That key here is the user id (key can be any key of the user object i.e. name,email etc).
+ * In deserializeUser that key is matched with the in memory array / database or any data resource.
+
+ * The fetched object is attached to the request object as req.user
+ * @memberof module:config/passport
+ * @param {deserializeUser~callback} cb
  */
 passport.deserializeUser((id, done) => {
   logger.debug('Deserialize User');
@@ -42,8 +53,15 @@ passport.deserializeUser((id, done) => {
   });
 });
 
+/**
+ * Passport deserializeUser callback
+ * @callback deserializeUser~callback
+ * @param id
+ * @param {function} done
+ */
 
-// Sign in using Email and Password.
+
+/** Passport use LocalStrategy. */
 passport.use(new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
   logger.debug('Local strategy');
   User.findOne({ email: email.toLowerCase() }, (err, user) => {
@@ -76,7 +94,7 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, (email, password, don
        - Else create a new account.
  */
 
-// Sign in with Google.
+/** Passport use LocalStrategy. */
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_ID,
   clientSecret: process.env.GOOGLE_SECRET,
@@ -140,7 +158,31 @@ passport.use(new GoogleStrategy({
 }));
 
 
-// Login Required middleware.
+/**
+ * @fileoverview Login and Authorization middleware.
+ *
+ * @module config/passport
+ * @author Jaka Daneu
+ * @requires NPM:passport
+ * @requires NPM:passport-local
+ * @requires NPM:passport-google-oauth
+ * @requires module:config/LoggerClass
+ * @requires module:models/User
+ * @see {@link https://www.npmjs.com/package/passport NPM:passport}
+ * @see {@link https://www.npmjs.com/package/passport-local NPM:passport-local}
+ * @see {@link https://www.npmjs.com/package/passport-google-oauth NPM:passport-google-oauth}
+ */
+
+
+/**
+ * Login Required middleware.
+ * @memberof module:config/passport
+ * @alias isAuthenticated
+ * @type {function}
+ * @param {http.request} req
+ * @param {http.response} res
+ * @param {function} next
+ */
 exports.isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
@@ -150,7 +192,14 @@ exports.isAuthenticated = (req, res, next) => {
 };
 
 
-// Authorization Required middleware.
+/**
+ * Authorization Required middleware.
+ * @memberof module:config/passport
+ * @alias isAuthorized
+ * @param {http.request} req
+ * @param {http.response} res
+ * @param {function} next
+ */
 exports.isAuthorized = (req, res, next) => {
   const provider = req.path.split('/').slice(-1)[0];
   const token = req.user.tokens.find(token => token.kind === provider);

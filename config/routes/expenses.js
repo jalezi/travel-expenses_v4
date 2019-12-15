@@ -1,13 +1,26 @@
+const LoggerClass = require('../LoggerClass');
+
+const Logger = new LoggerClass('expense');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('config\\routes\\expense INITIALIZING!');
+
 const { isAuthenticated } = require('../../config/passport');
 const expenseController = require('../../controllers/expense');
-const { addLogger } = require('../logger');
 
-// Logger
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
+/**
+ * Defines Expenses routes.
+ * @module config/routes/expenses
+ * @requires module:config/LoggerClass
+ * @requires module:config/passport
+ * @requires module:controllers/expense
+ */
 
+/**
+ * Expenses Routes.
+ * @param {Express} app
+ */
 module.exports = app => {
-  Logger.debug('Expenses routes initializing');
+  logger.debug('Expenses routes initializing');
   app.post(
     '/travels/:id/expenses/new',
     isAuthenticated,

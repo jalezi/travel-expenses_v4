@@ -1,15 +1,26 @@
 const passport = require('passport');
 
-const { addLogger } = require('..//logger');
+const LoggerClass = require('../LoggerClass');
 
-// Logger
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
+const Logger = new LoggerClass('oAuth');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('config\\routes\\oAuth INITIALIZING!');
 
+/**
+ * Defines oAuth routes.
+ * @module config/routes/oAuth
+ * @requires module:config/LoggerClass
+ * @requires module:config/passport
+ * @requires module:controllers/expense
+ */
 
+/**
+ * oAuth Routes.
+ * @param {Express} app
+ */
 module.exports = app => {
   // OAuth authentication routes. (Sign in)
-  Logger.debug('OAuth routes initializing');
+  logger.debug('OAuth routes initializing');
   app.get(
     '/auth/google',
     passport.authenticate('google', {

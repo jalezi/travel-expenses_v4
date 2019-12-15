@@ -6,11 +6,13 @@ const path = require('path');
 const { createLogger, config, transports, format } = require('winston');
 const stripAnsi = require('strip-ansi');
 
-const { envNode, logs } = require('../config');
+const { envNode, envHost, logs } = require('../config');
 const { HTTP } = require('../lib/constants');
 const getTrace = require('../utils/getTrace');
 
 /**
+ * @memberof module:config/LoggerClass
+ * @alias loggerTraceObject
  * @typedef {object} loggerTraceObject Some information about files.
  * @property {stackTraceObject} trace Trace information.
  * @property {string} mainModule Main application module.
@@ -22,6 +24,7 @@ const getTrace = require('../utils/getTrace');
 
 /**
  * Creates logger trace object. You can access with {Logger.traceObject}.
+ * @private
  * @memberof module:config/LoggerClass
  * @function stackTrace
  * @returns {loggerTraceObject} With 6 properties: traceObject, main module, callerModule,
@@ -48,6 +51,7 @@ const stackTrace = () => {
 /**
  * Winston format.printf function for test mode.
  * If label is not provided then sets label as filename.
+ * @private
  * @memberof module:config/LoggerClass
  * @function logTestFormat
  * @param {object} info Winston info object.
@@ -61,6 +65,7 @@ const logTestFormat = format.printf(info => {
 /**
  * Winston format.printf function for development mode.
  * If label for Logger.mainLogger is not provided then sets label as 'main.
+ * @private
  * @memberof module:config/LoggerClass
  * @function logDevFormat
  * @param {object} info Winston info object.
@@ -73,7 +78,10 @@ const logDevFormat = format.printf(info => {
   label = label.padStart(23); // timestamp, level.verbose and requestID are 23 chars long
   level = level.padStart(17); // timestamp, level.verbose are 17 chars long
   requestId = requestId.toString().padStart(3, '0'); // adds zeros in front of number
-  return `${timestamp} ${level} [${requestId}] [${label}]: ${message} [${ms}] in ${short} [${line}:${column}]`;
+  let msg = `${timestamp} ${level} [${requestId}] [${label}]: ${message} [${ms}] in ${short} [${line}:${column}]`;
+  // console.log(stripAnsi(msg).length + 4, process.stdout.columns);
+  // msg = (stripAnsi(msg).length + 4 > process.stdout.columns) ? `${msg}\n` : msg;
+  return msg;
 });
 
 /**
@@ -83,6 +91,7 @@ const logDevFormat = format.printf(info => {
  * of message.
  *
  * Adds new properties from trace object to info object: line, column and short.
+ * @private
  * @memberof module:config/LoggerClass
  * @function specialFormat
  * @param {object} info
@@ -94,6 +103,12 @@ const specialFormat = format(info => {
   info.label = !label ? 'main' : label;
   info.requestId = !requestId ? 0 : requestId;
 
+  // Gets trace object and sets line, column and short info properties.
+  let { stack, trace } = getTrace();
+  info.line = !info.line ? trace.line : info.line;
+  info.column = !info.column ? trace.column : info.column;
+  info.short = !info.short ? trace.short : info.short;
+
   // Removes ANSI code in string
   const http = stripAnsi(info.message.substring(0, info.message.indexOf(' ')));
   // Checks if message is from morgan logger. If true, sets label to 'http'.
@@ -101,18 +116,13 @@ const specialFormat = format(info => {
     info.label = 'http';
     info.message = info.message.replace(/\n/g, '');
   }
-
-  // Gets trace object and sets line, column and short info properties.
-  let { stack, trace } = getTrace();
-  info.line = trace.line;
-  info.column = trace.column;
-  info.short = trace.short;
   return info;
 });
 
 /**
  * Winston transports.
  * Different tranports for test, development & production mode.
+ * @private
  * @memberof module:config/LoggerClass
  * @type {transports[]}
  */
@@ -120,6 +130,7 @@ const wTransports = [];
 
 /**
  * Winton Console transport.
+ * @private
  * @memberof module:config/LoggerClass
  * @type {transports.Console}
  */
@@ -146,6 +157,7 @@ wTransports.push(consoleTransport);
 
 /**
  * It's winston logger created with  winston createLogger() function.
+ * @private
  * @memberof module:config/LoggerClass
  * @constant logger Winston logger
  *
@@ -172,6 +184,7 @@ const logger = createLogger({
 });
 
 /**
+ * @private
  * @description This is used by morgan logger.
  * @memberof module:config/LoggerClass
  * @type {object}
@@ -199,7 +212,7 @@ const stream = {
  * @param {number} [requestId=999]      To be defined. Default value: 0.
  * @property mainLogger Winston logger
  * @property logger Winston child logger
- * @property {fileData} fileData Files informations
+ * @property {loggerTraceObject} traceObject Files informations
  * @property {number} count Number of class instances
  * @example Example
  * const LoggerClass = require('./config/LoggerClass');

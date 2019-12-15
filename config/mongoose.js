@@ -1,17 +1,30 @@
 /* eslint-disable func-names */
 const mongoose = require('mongoose');
-// const { Db } = require('mongodb');
-// const chalk = require('chalk');
 
 // Logger
 const LoggerClass = require('../config/LoggerClass');
 
 const Logger = new LoggerClass('mongoose');
 const { mainLogger, logger } = Logger;
-mainLogger.debug('config\\mongoose REQUIRED!');
+mainLogger.debug('config\\mongoose INITIALIZING!');
 
 const config = require('../config');
 
+/**
+ * @fileoverview Connects to MongooDB with NPM:mongoose.
+ *
+ * @module config/mongoose
+ * @author Jaka Daneu
+ * @requires NPM:mongoose
+ * @requires module:config/LoggerClass
+ * @requires module:config
+ * @see {@link https://www.npmjs.com/package/mongoose NPM:mongoose}
+ */
+
+/**
+ * Connects to database.
+ * @async
+ */
 module.exports = async () => {
   logger.debug('DB connecting');
   const dbURL = config.databaseURL;

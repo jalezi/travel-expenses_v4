@@ -1,5 +1,4 @@
 const morgan = require('morgan');
-// const winston = require('winston');
 const expressHbs = require('express-hbs');
 const compression = require('compression');
 const sass = require('node-sass-middleware');
@@ -15,12 +14,14 @@ const cors = require('cors');
 
 const LoggerClass = require('../config/LoggerClass');
 
-const Logger = new LoggerClass('passport');
+const Logger = new LoggerClass('express');
 const { mainLogger, logger } = Logger;
-mainLogger.debug('config\\express REQUIRED!');
 const LoggerHttp = new LoggerClass('http');
-const { mainLogger: httpMain, logger: httpLogger } = LoggerHttp;
+const { logger: httpLogger } = LoggerHttp;
+mainLogger.debug('config\\express INITIALIZING!');
+
 const config = require('.');
+
 
 // Middlewares
 const redirectAfterLogin = require('../utils/middleware/redirectAfterLogin');
@@ -46,6 +47,38 @@ switch (config.envNode) {
     morganOption = 'tiny';
 }
 
+/**
+ * @fileoverview Runs all expres configurations.
+ *
+ * @module config/express
+ * @author Jaka Daneu
+ * @requires NPM:morgan
+ * @requires NPM:expressHbs
+ * @requires NPM:compression
+ * @requires NPM:node-sass-middleware
+ * @requires NPM:body-parser
+ * @requires NPM:express-validator
+ * @requires NPM:express-session
+ * @requires NPM:passport
+ * @requires NPM:flash
+ * @requires NPM:formidable
+ * @requires NPM:lusca
+ * @requires NPM:express
+ * @requires NPM:cors
+ * @requires module:config/LoggerClass
+ * @requires module:utils/middleware/redirectAfterLogin
+ * @requires module:utils/middleware/methodOverride
+ * @requires module:utils/middleware/importMiddleware
+ * @requires module:utils/middleware/expenseMiddleware
+ * @requires module:utils/middleware/travelMiddleware
+ * @requires module:config/routes
+ */
+
+/**
+ * Express configuration setup.
+ * @async
+ * @param {Express} app Express server Nodejs web framework.
+ */
 module.exports = async app => {
   logger.debug('Express configuration initializing');
   // Set MORGAN logger to use WINSTON stream write

@@ -30,8 +30,8 @@ const path = require('path');
 /**
  * Creates trace information until internal modules.
  * @memberof module:utils/getTrace
+ * @alias getTrace
  * @function getTrace
- *
  * @returns {stackTraceObject} Object with 3 properties.
  */
 const getTrace = () => {
@@ -42,15 +42,13 @@ const getTrace = () => {
   for (let index = 0; index < trace.length; index++) {
     let element = trace[index];
     let file = element.getFileName();
-    file = !file ? 'localhost' : file;
+    file = !file ? 'unknown' : file;
     const func = element.getFunctionName();
     const method = element.getMethodName();
     const line = element.getLineNumber();
     const column = element.getColumnNumber();
     const type = element.getTypeName();
-
-    const short = file ? file.replace(`${dirname}\\`, '') : 'localhost';
-    // console.log(index, '/', trace.length - 1, file, short);
+    const short = file ? file.replace(`${dirname}\\`, '') : 'unknown';
     if (file.includes('node_modules')) {
       continue;
     }
@@ -85,5 +83,8 @@ const getTrace = () => {
  * @see {@link https://www.npmjs.com/package/path NPM:path}
  */
 
-/** Gets trace */
+/**
+ * Gets trace.
+ * @type {stackTraceObject}
+ */
 module.exports = getTrace;

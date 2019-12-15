@@ -35,8 +35,8 @@
     "static": false,
     "sort": true,
     "sectionOrder": [
-      "Modules",
       "Classes",
+      "Modules",
       "Externals",
       "Events",
       "Namespaces",

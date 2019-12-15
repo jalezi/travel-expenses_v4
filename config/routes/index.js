@@ -1,5 +1,8 @@
+const LoggerClass = require('../LoggerClass');
 
-const { addLogger } = require('..//logger');
+const Logger = new LoggerClass('index');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('config\\routes INITIALIZING!');
 
 const userRoutes = require('./user');
 const travelsRoutes = require('./travels');
@@ -12,12 +15,28 @@ const importController = require('../../controllers/import');
 
 const passportConfig = require('../../config/passport');
 
-// Logger
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
 
+/**
+ * Defines all routes.
+ * @module module:config/routes
+ * @author Jaka Daneu
+ * @requires module:config/routes/user
+ * @requires module:config/routes/travels
+ * @requires module:config/routes/expenses
+ * @requires module:config/routes/oAuth
+ * @requires module:controllers/home
+ * @requires module:controllers/contact
+ * @requires module:controllers/import
+ * @requires module:config/passport
+ * @requires module:config/LoggerClass
+ */
+
+/**
+ * Routes
+ * @param {Express} app
+ */
 module.exports = app => {
-  Logger.debug('Routes initialzing');
+  logger.debug('Routes initialzing');
   app.get('/', homeController.index);
   app.get('/contact', contactController.getContact);
   app.post('/contact', contactController.postContact);

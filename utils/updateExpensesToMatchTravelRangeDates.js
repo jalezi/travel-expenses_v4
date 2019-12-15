@@ -41,7 +41,7 @@ async function createNewCurrency(expenseDate, homeCurrency, invoiceCurrency) {
   try {
     let cur = {};
     const dateRates = await findRatesByExactOrClosestDate(expenseDate);
-    const convertedRate = await convertRateToHomeCurrencyRate(
+    const convertedRate = convertRateToHomeCurrencyRate(
       dateRates.rates,
       homeCurrency,
       invoiceCurrency

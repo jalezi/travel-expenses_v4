@@ -89,7 +89,7 @@ exports.postImport = async (req, res, next) => {
         res.locals.travels
       );
       const { currenciesArray } = getCurrenciesArray;
-      message = getCurrenciesArray.message;
+      // message = getCurrenciesArray.message;
       let error = getCurrenciesArray.err;
       if (error) {
         logger.error(`getCurrenciesArray error: ${error.message}`);

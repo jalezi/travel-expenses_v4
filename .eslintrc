@@ -1,11 +1,11 @@
 {
   "plugins": [
-    "chai-friendly",
+    "chai-friendly"
     // "prettier/recommended"
     // "prettier"
   ],
   "extends": [
-    "airbnb-base",
+    "airbnb-base"
     // "plugin:prettier/recommended"
   ],
   "env": {

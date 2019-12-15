@@ -17,6 +17,12 @@ const _ = require('lodash');
 const fs = require('fs');
 const Papa = require('papaparse');
 
+const LoggerClass = require('../config/LoggerClass');
+
+const Logger = new LoggerClass('postImport');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('utils\\postImport INITIALIZING!');
+
 const User = require('../models/User');
 const Travel = require('../models/Travel');
 const Expense = require('../models/Expense');
@@ -25,16 +31,11 @@ const Currency = require('../models/Currency');
 const constants = require('../lib/constants');
 const myErrors = require('../utils/myErrors');
 
-const { addLogger } = require('../config/logger');
-
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
-
 const { ObjectId } = mongoose.Types;
 
 // Reads and parses CSV file
 async function readAndParseFile(filePath, enc = 'utf8') {
-  Logger.debug(
+  logger.debug(
     `Reading and parsing CSV file\npath: ${filePath}\nencoding: ${enc}`
   );
   try {
@@ -51,7 +52,7 @@ async function readAndParseFile(filePath, enc = 'utf8') {
     });
     return parsedData;
   } catch (err) {
-    Logger.error(err);
+    logger.error(err);
     throw err;
   }
 }
@@ -76,7 +77,7 @@ async function checkFileFor(condition, message) {
  */
 const checkFile = myFile =>
   new Promise(resolve => {
-    Logger.debug('Checking file for errors');
+    logger.debug('Checking file for errors');
     let error;
 
     /*
@@ -84,7 +85,7 @@ const checkFile = myFile =>
      Checks if file is not empty, CSV or it was not selected
      */
     const tripleCheck = async () => {
-      Logger.silly('Beggining of triple check for errors in selected file');
+      logger.silly('Beggining of triple check for errors in selected file');
       try {
         error = await checkFileFor(myFile.name === '', 'No file selected!');
         if (error) {
@@ -101,21 +102,21 @@ const checkFile = myFile =>
         if (error) {
           return error;
         }
-        Logger.silly('Triple check. No errors');
+        logger.silly('Triple check. No errors');
         return;
       } catch (err) {
-        Logger.warn(`Selected file is not OK\n${err}`);
+        logger.warn(`Selected file is not OK\n${err}`);
         return err;
       }
     };
 
     tripleCheck()
       .then(result => {
-        Logger.debug(`File triple check => ${result}`);
+        logger.debug(`File triple check => ${result}`);
         resolve(result);
       })
       .catch(err => {
-        Logger.error(err);
+        logger.error(err);
         resolve(err);
       });
   });
@@ -123,14 +124,14 @@ const checkFile = myFile =>
 
 // Creates currency object
 function createCurrency(value) {
-  Logger.debug(`Creating currency from: ${value}`);
+  logger.debug(`Creating currency from: ${value}`);
   const currency = {};
   const curRate = {};
   currency.base = value.base;
   currency.date = new Date(value.date);
   curRate[value.currency] = Number(value.rate);
   currency.rate = curRate;
-  Logger.silly(`Create currency: ${currency}\nfrom value: ${value}`);
+  logger.silly(`Create currency: ${currency}\nfrom value: ${value}`);
   return currency;
 }
 
@@ -141,7 +142,7 @@ function createCurrency(value) {
  */
 const getOnlyNewCurrency = (currency, value) =>
   new Promise(resolve => {
-    Logger.silly(`@param currency: ${currency}, @param value: ${value}`);
+    logger.silly(`@param currency: ${currency}, @param value: ${value}`);
     if (!currency) {
       return resolve(value);
     }
@@ -196,7 +197,7 @@ const updateTravels = async (uniqueTravelObjectIds, expenses) =>
  Throws custom error ImportFileError
  */
 async function readCheckFileAndGetData(myFile, option) {
-  Logger.debug('Check file and get data if no error in file or data');
+  logger.debug('Check file and get data if no error in file or data');
   let error = null;
   const myFilePath = myFile.path;
   let headerToBe;
@@ -212,7 +213,7 @@ async function readCheckFileAndGetData(myFile, option) {
 
   try {
     // check if file is CSV, not empty or not even selected
-    Logger.debug('Checking if file is CSV, not empty or not even selected');
+    logger.debug('Checking if file is CSV, not empty or not even selected');
     error = await checkFile(myFile).catch(err => {
       throw err;
     });
@@ -221,7 +222,7 @@ async function readCheckFileAndGetData(myFile, option) {
     }
 
     // no error - file is CSV & has some data
-    Logger.debug('No error - file is CSV & has some data');
+    logger.debug('No error - file is CSV & has some data');
     const parsedData = await readAndParseFile(myFilePath);
     /** @type {Papa.ParseResult.data} */
     const dataArray = parsedData.data;
@@ -232,16 +233,16 @@ async function readCheckFileAndGetData(myFile, option) {
       !_.isEqual(headerToBe, parsedHeaderArray),
       `Header should be: ${headerToBe}`
     ).catch(err => {
-      Logger.error(`Catching and throwing error in checkFileFor => ${err}`);
+      logger.error(`Catching and throwing error in checkFileFor => ${err}`);
       throw err;
     });
     if (error) {
-      Logger.error(`Throwing error after checkFileFor => ${error}`);
+      logger.error(`Throwing error after checkFileFor => ${error}`);
       throw error;
     }
     return dataArray;
   } catch (err) {
-    Logger.error(`Returning error in try/catch => ${err}`);
+    logger.error(`Returning error in try/catch => ${err}`);
     return err;
   }
 }
@@ -255,12 +256,12 @@ function deleteFile(filePath, message = '') {
         if (err) {
           throw err;
         }
-        Logger.debug(message);
+        logger.debug(message);
       });
     }
   } catch (err) {
-    Logger.error(`File: ${filePath} not deleted!`);
-    Logger.error(err);
+    logger.error(`File: ${filePath} not deleted!`);
+    logger.error(err);
     throw err;
   }
 }
@@ -274,7 +275,7 @@ function deleteFile(filePath, message = '') {
  Returns currencies array and message or error and message
  */
 async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
-  Logger.debug('Setting currencies array for expenseImport');
+  logger.debug('Setting currencies array for expenseImport');
   let message = '';
 
   try {
@@ -347,12 +348,12 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
     const invalidExpensesCount = expensesCountBefore - expensesCountAfter;
     const validExpensesCount = expensesCountBefore - invalidExpensesCount;
     message = `INVALID EXPENSES: ${invalidExpensesCount}. VALID EXPENSES: ${validExpensesCount}`;
-    Logger.debug(message);
+    logger.debug(message);
     return { currenciesArray, message };
   } catch (err) {
     message = 'Something went wrong during expenses import! Check console log!';
-    Logger.error(message);
-    Logger.error(err);
+    logger.error(message);
+    logger.error(err);
     return { err, message };
   }
 }
@@ -365,7 +366,7 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
  Rejects error
  */
 async function expensesImportNewCurrenciesForSave(array) {
-  Logger.debug('expensesImport - New Currencies For Save');
+  logger.debug('expensesImport - New Currencies For Save');
   const notExistingCurrenciesDB = [];
   const existingCurrenciesDB = [];
   return await new Promise(async (resolve, reject) => {
@@ -408,10 +409,10 @@ async function expensesImportNewCurrenciesForSave(array) {
  */
 const expenseImport = async dataArray =>
   new Promise(async resolve => {
-    Logger.debug('Expense Import');
+    logger.debug('Expense Import');
     try {
       const expenses = await Expense.insertMany(dataArray).catch(err => {
-        Logger.error(err);
+        logger.error(err);
         throw new myErrors.SaveToDbError(
           'Something went wrong during saving expenses to DB!'
         );
@@ -425,18 +426,18 @@ const expenseImport = async dataArray =>
         uniqueTravelObjectIds,
         expenses
       ).catch(err => {
-        Logger.error(err);
+        logger.error(err);
         throw new myErrors.SaveToDbError(
           'Something went wrong during updating travels with expenses!'
         );
       });
 
       const message = `${expenses.length} imported. ${updatedTravels.length} travels updated!`;
-      Logger.info(message);
+      logger.info(message);
       resolve(message);
     } catch (err) {
-      Logger.error('Something went wrong during expense import!');
-      Logger.error(err);
+      logger.error('Something went wrong during expense import!');
+      logger.error(err);
       resolve({
         error: err,
         msg: 'Something went wrong during expense import!'
@@ -451,7 +452,7 @@ const expenseImport = async dataArray =>
  Promise resolves on success with message, on error with error object
  */
 async function travelImport(dataArray, userId) {
-  Logger.debug('Travel import');
+  logger.debug('Travel import');
   let message = '';
   return new Promise(async resolve => {
     try {
@@ -463,7 +464,7 @@ async function travelImport(dataArray, userId) {
 
       // insert travels and update user with travel._id
       const travels = await Travel.insertMany(dataArray).catch(err => {
-        Logger.error(err);
+        logger.error(err);
         throw new myErrors.SaveToDbError(
           'Something went wrong during saving to DB!'
         );
@@ -481,19 +482,19 @@ async function travelImport(dataArray, userId) {
           }
         }
       }).catch(err => {
-        Logger.error('Something went wrong during updating user with travels');
-        Logger.error(err);
+        logger.error('Something went wrong during updating user with travels');
+        logger.error(err);
         throw new myErrors.SaveToDbError(
           'Something went wrong during updating user with travels!'
         );
       });
 
       message = `${travelObjectIds.length} travels added successfully!`;
-      Logger.info(message);
+      logger.info(message);
       resolve(message);
     } catch (err) {
-      Logger.error('Something went wrong during travel import!');
-      Logger.error(err);
+      logger.error('Something went wrong during travel import!');
+      logger.error(err);
       resolve({
         error: err,
         msg: 'Something went wrong during travel import!'

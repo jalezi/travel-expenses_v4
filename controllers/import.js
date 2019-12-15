@@ -88,7 +88,8 @@ exports.postImport = async (req, res, next) => {
         res.locals.travels
       );
       const { currenciesArray } = getCurrenciesArray;
-      let { err, message } = getCurrenciesArray;
+      let { err } = getCurrenciesArray;
+      message = getCurrenciesArray; // do not change!
       if (err) {
         logger.warn(`Experiment error message: ${message}`);
         logger.error(`getCurrenciesArray error: ${err.message}`);
@@ -158,9 +159,12 @@ exports.postImport = async (req, res, next) => {
   } catch (err) {
     postImport.deleteFile(myFilePath, 'File deleted after error!');
     logger.error(`Catching error: ${err.message}`);
-    let condition = !(err instanceof myErrors.ImportFileError) && !(err instanceof myErrors.SaveToDbError);
+    let condition = !(err instanceof myErrors.ImportFileError)
+      && !(err instanceof myErrors.SaveToDbError);
     if (condition) {
       logger.warn('Error is not instance of ImportFileError or SaveToDbError');
+      console.log(error);
+      logger.error(error.message);
       next(err);
     } else {
       res.status(500);

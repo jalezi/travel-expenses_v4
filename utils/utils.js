@@ -1,10 +1,11 @@
 /* eslint-disable func-names */
 
 const Rate = require('../models/Rate');
-const { addLogger } = require('../config/logger');
+const LoggerClass = require('../config/LoggerClass');
 
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
+const Logger = new LoggerClass('utils');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('utils\\utils INITIALIZING!');
 
 // Converts number to currency format
 function toCurrencyFormat(amount) {
@@ -22,7 +23,7 @@ const convertRateToHomeCurrencyRate = (
   homeCurrency,
   invoiceCurrency
 ) => {
-  Logger.debug('Convert rate to home currency rate');
+  logger.debug('Convert rate to home currency rate');
   homeCurrency = homeCurrency.toUpperCase();
   invoiceCurrency = invoiceCurrency.toUpperCase();
   const homeCurrencyRate = rates[homeCurrency];
@@ -38,11 +39,11 @@ const convertRateToHomeCurrencyRate = (
  find rates for closest date and returns date for closest matching date.
 */
 const findRatesByExactOrClosestDate = async (date = new Date()) => {
-  Logger.debug('Find rates by exact or closest date');
+  logger.debug('Find rates by exact or closest date');
   try {
     const exactDate = await Rate.find({ date }, (err, items) => items);
     if (exactDate.length === 1) {
-      Logger.debug(`Find rates for EXACT date: ${exactDate[0].date}`);
+      logger.debug(`Find rates for EXACT date: ${exactDate[0].date}`);
       return exactDate[0];
     }
 
@@ -66,33 +67,33 @@ const findRatesByExactOrClosestDate = async (date = new Date()) => {
       const diffLower = Math.abs(date.getTime() - lowerDate.date.getTime());
 
       if (diffGreater < diffLower) {
-        Logger.debug('Later date is closer than earlier date');
-        Logger.debug(`Find rates for date: ${greaterDate.date}`);
+        logger.debug('Later date is closer than earlier date');
+        logger.debug(`Find rates for date: ${greaterDate.date}`);
         return greaterDate;
       }
-      Logger.debug('Earlier date is closer than later date');
-      Logger.debug(`Find rates for date: ${lowerDate.date}`);
+      logger.debug('Earlier date is closer than later date');
+      logger.debug(`Find rates for date: ${lowerDate.date}`);
       return lowerDate;
     }
     if (!greaterDate && !lowerDate) {
-      Logger.warn('Could not calculate dates difference');
+      logger.warn('Could not calculate dates difference');
       return 'FUCK!';
     }
     if (greaterDate) {
-      Logger.warn('Could not calculate date difference to lower date');
-      Logger.debug(`Find rates for date: ${greaterDate.date}`);
+      logger.warn('Could not calculate date difference to lower date');
+      logger.debug(`Find rates for date: ${greaterDate.date}`);
       return greaterDate;
     }
     if (lowerDate) {
-      Logger.warn('Could not calculate date difference to greater date');
-      Logger.debug(`Find rates for date: ${lowerDate.date}`);
+      logger.warn('Could not calculate date difference to greater date');
+      logger.debug(`Find rates for date: ${lowerDate.date}`);
       return lowerDate;
     }
     // FIXME throw error
-    Logger.error('Could not find any rates for exact, greater or lower date');
+    logger.error('Could not find any rates for exact, greater or lower date');
     return 'FUCK AGAIN!';
   } catch (err) {
-    Logger.error(err);
+    logger.error(err);
     return err;
   }
 };
@@ -147,7 +148,7 @@ const createElement = (
     result = tagStart + text;
   }
   if (!result) {
-    Logger.warn('Element was not created');
+    logger.warn('Element was not created');
   }
   return result;
 };

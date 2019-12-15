@@ -92,7 +92,7 @@ exports.postImport = async (req, res, next) => {
       message = getCurrenciesArray.message;
       let error = getCurrenciesArray.err;
       if (error) {
-        logger.warn(`Experiment error message: ${message}`)
+        logger.warn(`Experiment error message: ${message}`);
         logger.error(`getCurrenciesArray error: ${error.message}`);
         throw error;
       }
@@ -148,7 +148,7 @@ exports.postImport = async (req, res, next) => {
     if (message.error) {
       let { error } = message;
       message = message.msg;
-      logger.warn(`This is useful error: ${message}`)
+      logger.warn(`This is useful error: ${message}`);
       throw error;
     }
 

@@ -17,12 +17,17 @@ $(document).ready(() => {
   // Place JavaScript code here...
 
   // show/hide form row 2 & 3 based on selection
+<<<<<<< HEAD
   // eslint-disable-next-line no-unused-vars
   // eslint-disable-next-line no-undef
   expenseType.onchange = () => {
     // eslint-disable-next-line no-undef
     if (expenseType.value === 'Mileage') {
       // eslint-disable-next-line no-undef
+=======
+  expenseType.onchange = function() {
+    if (expenseType.value === 'Mileage') {
+>>>>>>> develop
       invoiceCurrency.value = '';
       amount.value = 0;
       rate.value = 0;
@@ -61,7 +66,11 @@ $(document).ready(() => {
     }
   };
 
+<<<<<<< HEAD
   amount.onchange = function () {
+=======
+  amount.onchange = function() {
+>>>>>>> develop
     if (amount.value !== '' && rate.value !== '' && rate.value !== 0) {
       amountConverted.value = amount.value / rate.value;
       amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
@@ -74,7 +83,10 @@ $(document).ready(() => {
     }
   };
 
+<<<<<<< HEAD
   // eslint-disable-next-line func-names
+=======
+>>>>>>> develop
   rate.onchange = function () {
     if (amount.value !== '' && rate.value !== '' && rate.value !== 0) {
       amountConverted.value = amount.value / rate.value;

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
  * User Schema
  * email: login email
@@ -18,11 +19,21 @@
  * timestamps: creates two values => createdAr, updatedAt - Mongoose Schema option
  */
 
+=======
+>>>>>>> develop
 const bcrypt = require('bcrypt-nodejs');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 
-const userSchema = new mongoose.Schema({
+const { addLogger } = require('../config/logger');
+
+// Logger
+const pathDepth = module.paths.length - 6;
+const Logger = addLogger(__filename, pathDepth);
+
+// Represents User mongoose document
+const userSchemaObject = {
+
   email: { type: String, unique: true },
   password: String,
   passwordResetToken: String,
@@ -60,13 +71,18 @@ const userSchema = new mongoose.Schema({
   perMileAmount: {
     type: Number,
     default: 0.54
-  },
-}, { timestamps: true });
+  }
+};
 
-/**
- * Password hash middleware.
- */
-userSchema.pre('save', function save(next) {
+// User Schema
+const UserSchema = new mongoose.Schema(
+  userSchemaObject,
+  { timestamps: true }
+);
+
+// Password hash mongoose pre hook middleware function
+UserSchema.pre('save', function save(next) {
+  Logger.debug('UserSchema.pre save()');
   const user = this;
   if (!user.isModified('password')) { return next(); }
   bcrypt.genSalt(10, (err, salt) => {
@@ -79,19 +95,22 @@ userSchema.pre('save', function save(next) {
   });
 });
 
-/**
- * Helper method for validating user's password.
+/*
+ Helper method for validating user's password
+ It is User document method.
  */
-userSchema.methods.comparePassword = function comparePassword(candidatePassword, cb) {
+UserSchema.methods.comparePassword = function comparePassword(candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
     cb(err, isMatch);
   });
 };
 
-/**
- * Helper method for getting user's gravatar.
+/*
+ Helper method for getting user's gravatar.
+ It is User document method.
+ Returns gravatar url
  */
-userSchema.methods.gravatar = function gravatar(size) {
+UserSchema.methods.gravatar = function gravatar(size) {
   if (!size) {
     size = 200;
   }
@@ -102,14 +121,25 @@ userSchema.methods.gravatar = function gravatar(size) {
   return `https://gravatar.com/avatar/${md5}?s=${size}&d=retro`;
 };
 
-/**
-* Helper method for getting user's full name
+/*
+Helper method for getting user's full name
+It is User document method.</p>
+Returns User's full name
 */
+<<<<<<< HEAD
 userSchema.methods.fullName = function fullName() {
   const result = `${this.profile.fName} ${this.profile.lName}`;
   return result;
 };
+=======
+UserSchema.methods.fullName = function fullName() {
+  const result = `${this.profile.fName} ${this.profile.lName}`;
+  return result;
+};
 
-const User = mongoose.model('User', userSchema);
+// User mongoose model
+const User = mongoose.model('User', UserSchema);
+>>>>>>> develop
+
 
 module.exports = User;

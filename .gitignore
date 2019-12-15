@@ -65,6 +65,7 @@ travels.json
 /out
 audit-resolv.json
 con.js
+<<<<<<< HEAD
 .eslintrc
 .nyc_output
 MongoDB.txt
@@ -74,3 +75,15 @@ MongoDB.txt
 
 
 
+=======
+*.txt
+snapshots.js
+/build/*
+
+app-new.js
+/loaders/*
+/api/*
+/coverage/*
+/docs/*
+/docs2/*
+>>>>>>> develop

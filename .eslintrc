@@ -1,30 +1,82 @@
 {
+<<<<<<< HEAD
   "extends": [
     "airbnb-base",
     "plugin:node/recommended", 
     "plugin:security/recommended"],
+=======
+  "plugins": [
+    "chai-friendly"
+    // "prettier/recommended"
+    // "prettier"
+  ],
+  "extends": [
+    "airbnb-base"
+    // "plugin:prettier/recommended"
+  ],
+>>>>>>> develop
   "env": {
+    "browser": true,
     "node": true,
     "mocha": true,
     "es6": true
   },
+<<<<<<< HEAD
   "plugins": [
     "chai-friendly",
     "security"
   ],
+=======
+>>>>>>> develop
   "rules": {
+    "arrow-parens": ["error", "as-needed"],
     "comma-dangle": 0,
     "consistent-return": 0,
-    "function-paren-newline": ["error", "never"],
-    "implicit-arrow-linebreak": ["off"],
+    "function-paren-newline": [
+      "error",
+      "consistent"
+    ],
+    "implicit-arrow-linebreak": [
+      "off"
+    ],
     "no-param-reassign": 0,
     "no-underscore-dangle": 0,
     "no-shadow": 0,
     "no-console": 0,
     "no-plusplus": 0,
     "no-unused-expressions": 0,
-    "no-unused-vars": ["error", { "argsIgnorePattern": "next" }],
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "next"
+      }
+    ],
+    "prefer-const": "off",
+    "operator-linebreak": 0,
+    "object-curly-newline": [
+      "error",
+      {
+        "ObjectExpression": {
+          "multiline": true,
+          "minProperties": 6,
+          "consistent": true
+        },
+        "ObjectPattern": {
+          "multiline": true,
+          "minProperties": 5,
+          "consistent": true
+        },
+        "ImportDeclaration": "never",
+        "ExportDeclaration": {
+          "multiline": true,
+          "minProperties": 3,
+          "consistent": true
+        }
+      }
+    ],
+    "space-before-function-paren": "off",
     "chai-friendly/no-unused-expressions": 2,
     "linebreak-style": 0
+    // "prettier/prettier": "error"
   }
 }

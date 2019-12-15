@@ -1,4 +1,5 @@
 /* eslint-disable func-names */
+<<<<<<< HEAD
 /* eslint-disable quote-props */
 /*
  * Travel Schema
@@ -14,15 +15,25 @@
  * useNestedStrict: TODO useNestedStrict description
  * timestamps: creates two values => createdAr, updatedAt - Mongoose Schema option
  */
+=======
+>>>>>>> develop
 
 const mongoose = require('mongoose');
+const { addLogger } = require('../config/logger');
 
+<<<<<<< HEAD
 // const User = require('../models/User');
 // const Expense = require('../models/Expense');
+=======
+// Logger
+const pathDepth = module.paths.length - 6;
+const Logger = addLogger(__filename, pathDepth);
+>>>>>>> develop
 
 const { ObjectId } = mongoose.Schema.Types;
 
-const TravelSchema = new mongoose.Schema({
+// Represents Travel mongoose document
+const travelSchemaObject = {
   _user: {
     type: ObjectId,
     required: true,
@@ -56,30 +67,40 @@ const TravelSchema = new mongoose.Schema({
     type: mongoose.Decimal128,
     default: 0.00
   }
-}, {
+};
+
+// Travel Schema
+const TravelSchema = new mongoose.Schema(travelSchemaObject, {
   useNestedStrict: true,
   timestamps: true
 });
 
 /*
- * Helper method to update travel's total amount
- * Returns same document for which the total is calculated.
- * Before use you have to find document with populate expenses
- * EXAMPLE:
- * Travel
- * .findOne({_id: doc._id, _user: req.user.id})
- * .populate({path: 'expenses', populate: {path: 'curRate'}})
- * .then((doc) => {doc.updateTotal()}
+ Helper method to update travel's total amount
+ It's Travel document method.
+ Returns same document for which the total is calculated.
+ Before use you have to find document with populate expenses
+ EXAMPLE:
+ Travel
+ .findOne({_id: doc._id, _user: req.user.id})
+ .populate({path: 'expenses', populate: {path: 'curRate'}})
+ .then((doc) => {doc.updateTotal()}
  */
+<<<<<<< HEAD
 TravelSchema.methods.updateTotal = () => {
+=======
+TravelSchema.methods.updateTotal = function() {
+  Logger.debug('updateTravel Schema methods');
+>>>>>>> develop
   this.total = 0;
-  this.expenses.forEach((expense) => {
+  this.expenses.forEach(expense => {
     this.total = Number(this.total) + Number(expense.amountConverted);
   });
   this.total = parseFloat(this.total).toFixed(2);
   return this.save();
 };
 
+<<<<<<< HEAD
 TravelSchema.statics.byYear_byMonth = function (user) {
   return this.aggregate([
     {
@@ -92,19 +113,44 @@ TravelSchema.statics.byYear_byMonth = function (user) {
       }
     }, {
       '$lookup': {
+=======
+/*
+ Aggregate by year and inside year by month
+ It's Travel model method
+ Returns Travel model aggregation Travel.aggregate(Object[])
+ */
+TravelSchema.statics.byYear_byMonth = function (user) {
+  Logger.debug('byYear_byMonth Schema statics');
+  return this.aggregate([
+    {
+      $match: {
+        _user: user._id
+      }
+    }, {
+      $sort: {
+        dateFrom: -1
+      }
+    }, {
+      $lookup: {
+>>>>>>> develop
         from: 'expenses',
         localField: 'expenses',
         foreignField: '_id',
         as: 'expenses'
       }
     }, {
+<<<<<<< HEAD
       '$lookup': {
+=======
+      $lookup: {
+>>>>>>> develop
         from: 'currencies',
         localField: 'expenses.curRate',
         foreignField: '_id',
         as: 'curRates'
       }
     }, {
+<<<<<<< HEAD
       '$group': {
         '_id': {
           'month': {
@@ -156,6 +202,65 @@ TravelSchema.statics.byYear_byMonth = function (user) {
 };
 
 TravelSchema.statics.byMonth = function (user) {
+=======
+      $group: {
+        _id: {
+          month: {
+            $month: '$dateFrom'
+          },
+          year: {
+            $year: '$dateFrom'
+          }
+        },
+        byMonth: {
+          $push: '$$ROOT'
+        },
+        count: {
+          $sum: 1
+        },
+        dateFirst: {
+          $first: '$dateFrom'
+        },
+        dateLast: {
+          $last: '$dateFrom'
+        }
+      }
+    },
+    { $sort: { dateFirst: -1 } },
+    {
+      $group: {
+        _id: {
+          year: {
+            $year: '$dateFirst'
+          }
+        },
+        byYear: {
+          $push: '$$ROOT'
+        },
+        count: {
+          $sum: 1
+        },
+        countTotal: { $sum: '$count' },
+        dateFirst: {
+          $first: '$dateFirst'
+        },
+        dateLast: {
+          $last: '$dateLast'
+        }
+      }
+    },
+    { $sort: { dateFirst: -1 } }
+  ]);
+};
+
+/*
+ Aggregate by month
+ It's Travel model method
+ Returns Travel model aggregation Travel.aggregate(Object[])
+ */
+TravelSchema.statics.byMonth = function (user) {
+  Logger.debug('byMonth Schema statics');
+>>>>>>> develop
   return this.aggregate([
     {
       $match: {
@@ -169,7 +274,11 @@ TravelSchema.statics.byMonth = function (user) {
           year: { $year: '$dateFrom' }
         },
         travels: { $addToSet: '$_id' },
+<<<<<<< HEAD
         myArray: { '$push': '$$ROOT' },
+=======
+        myArray: { $push: '$$ROOT' },
+>>>>>>> develop
         count: { $sum: 1 },
         date: { $first: '$dateFrom' }
       }
@@ -186,6 +295,8 @@ TravelSchema.statics.byMonth = function (user) {
   ]);
 };
 
+// Travel model
 const Travel = mongoose.model('Travel', TravelSchema);
+
 
 module.exports = Travel;

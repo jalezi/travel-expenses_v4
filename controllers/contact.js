@@ -1,29 +1,52 @@
-// jshint esversion: 8
-const nodemailer = require('nodemailer');
 const mailjet = require('node-mailjet').connect(
   process.env.MJ_APIKEY_PUBLIC,
   process.env.MJ_APIKEY_PRIVATE
 );
 
-// TODO implement contact form
+const LoggerClass = require('../config/LoggerClass');
+
+const Logger = new LoggerClass('contact');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('controllers\\contact INITIALIZING!');
+
+/**
+ * Contact routes.
+ * @module controllers/contact
+ * @requires NPM:node-mailjet
+ * @requires module:config/LoggerClass
+ * @see {@link https://www.npmjs.com/package/node-mailjet NPM:node-mailjet}
+ */
 
 /**
  * GET /contact
+ *
  * Contact form page.
+ * @memberof module:controllers/contact
+ * @alias getContact
+ * @param {http.request} req
+ * @param {http.response} res
  */
 exports.getContact = (req, res) => {
-  const unknownUser = !(req.user);
+  logger.debug('Geting contact form');
+  const unknownUser = !req.user;
   res.render('contact', {
     title: 'Contact',
-    unknownUser,
+    unknownUser
   });
 };
 
 /**
  * POST /contact
- * Send a contact form via Nodemailer.
+ *
+ * Sends a contact form via MailJet.
+ * @memberof module:controllers/contact
+ * @alias postContact
+ * @param {http.request} req
+ * @param {http.response} res
+ * @param {function} next
  */
 exports.postContact = (req, res, next) => {
+  logger.debug('Posting contact form');
   let fromName;
   let fromEmail;
   if (!req.user) {
@@ -48,31 +71,33 @@ exports.postContact = (req, res, next) => {
   }
 
   const sendContactForm = async () => {
-    const sendEmail = mailjet.post('send', {version: 'v3.1'});
+    const sendEmail = mailjet.post('send', { version: 'v3.1' });
     const emailData = {
-      "Messages": [{
-        "From": {
-          "Email": "jaka.daneu@siol.net",
-          "Name": `${fromName} - ${fromEmail}`
-        },
-        "To": [{
-          "Email": "jakad@me.com",
-          "Name": 'TExpenses App'
-        }],
-        'Subject': 'Contact TExpenses App',
-        'TextPart': req.body.message
-      }]
+      Messages: [
+        {
+          From: {
+            Email: 'jaka.daneu@siol.net',
+            Name: `${fromName} - ${fromEmail}`
+          },
+          To: [
+            {
+              Email: 'jakad@me.com',
+              Name: 'TExpenses App'
+            }
+          ],
+          Subject: 'Contact TExpenses App',
+          TextPart: req.body.message
+        }
+      ]
     };
 
     try {
       await sendEmail.request(emailData);
       return req.flash('info', {
-        msg: `An e-mail has been sent to TExpenses App.`
+        msg: 'An e-mail has been sent to TExpenses App.'
       });
-    }
-    catch (err) {
-      console.log(err);
-
+    } catch (err) {
+      logger.error(err);
       req.flash('errors', {
         msg: 'Error sending the contact message. Please try again shortly.'
       });
@@ -85,5 +110,4 @@ exports.postContact = (req, res, next) => {
       res.redirect('/');
     })
     .catch(next);
-
 };

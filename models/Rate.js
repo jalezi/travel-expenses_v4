@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
  * Rates Schema
  * Same object as data from data.fixer.io
@@ -8,21 +9,45 @@
  * rates: object with all rates to convert from => {USD: 1.12, HRK: 7.45, GBP: 0.88, ....}
  * timestamps: creates two values => createdAr, updatedAt - Mongoose Schema option
  */
+=======
+/* eslint-disable func-names */
+/* eslint-disable quote-props */
+>>>>>>> develop
 const mongoose = require('mongoose');
 
-const RateSchema = new mongoose.Schema({
+const { addLogger } = require('../config/logger');
+
+// Logger
+const pathDepth = module.paths.length - 6;
+const Logger = addLogger(__filename, pathDepth);
+
+// Represents Rate mongoose document
+const rateSchemaObject = {
   success: Boolean,
   timestamp: Number,
   base: String,
   date: Date,
   rates: Object
+<<<<<<< HEAD
 },
 { timestamps: true });
+=======
+};
+
+// Rate Schema
+const RateSchema = new mongoose.Schema(
+  rateSchemaObject,
+  { timestamps: true }
+);
+>>>>>>> develop
 
 /*
- * Returns array with rates between two dates.
- * keys: [rates, date]
+ It finds Rate documents in travel document date range.
+ It is Rate <b>model</b> static function.
+ It has to be unnamed function! Otherwise we have to use bind.
+ Returns Array with partial (date and rates properties)
  */
+<<<<<<< HEAD
 // eslint-disable-next-line func-names
 RateSchema.statics.findRatesOnDate = function (travel) {
   return this.find({
@@ -50,7 +75,51 @@ RateSchema.statics.findRateBeforeOrAfterDate = (travel) => this.find({
   .limit(1)
 // eslint-disable-next-line quote-props
   .select({ 'rates': 1, 'date': 1, '_id': 0 },);
+=======
+RateSchema.statics.findRatesOnDate = function(travel) {
+  Logger.debug('findRatesOnDate');
+  return this.find({
+    $and: [
+      { date: { $gte: travel.dateFrom } }, { date: { $lte: travel.dateTo } }
+    ]
+  }, (err, doc) => {
+    if (err) {
+      Logger.error(err.message);
+    } else {
+      Logger.debug(`Find rates for date range from ${travel.dateFrom} to ${travel.dateTo}.`);
+      Logger.debug(`Find rates for ${doc.length} day(s)`);
+    }
+  }).select({ 'rates': 1, 'date': 1, '_id': 0 });
+};
 
+
+/*
+ It finds document closest to travel document date range.
+ It is Rate <b>model</b> static function.
+ It has to be unnamed function! Otherwise we have to use bind.
+ Returns Array with one partial (date and rate property)
+ */
+RateSchema.statics.findRateBeforeOrAfterDate = function (travel) {
+  Logger.debug('findRateBeforeOrAfterDate');
+  return this.find({
+    $or: [{ date: { $gte: travel.dateFrom } }, { date: { $lte: travel.dateFrom } }]
+  }, (err, doc) => {
+    if (err) {
+      Logger.error(err.message);
+    } else {
+      Logger.debug(`Find rates for date range from ${travel.dateFrom} to ${travel.dateTo}.`);
+      Logger.debug(`Find rates for ${doc.length} day(s)`);
+    }
+  })
+    .sort({ 'date': 1 })
+    .limit(1)
+    .select({ 'rates': 1, 'date': 1, '_id': 0 },);
+};
+>>>>>>> develop
+
+
+// Rate model
 const Rate = mongoose.model('Rate', RateSchema);
+
 
 module.exports = Rate;

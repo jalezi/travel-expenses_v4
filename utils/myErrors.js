@@ -1,4 +1,10 @@
 /* eslint-disable max-classes-per-file */
+<<<<<<< HEAD
+=======
+
+// My custom errors module
+
+>>>>>>> develop
 class ImportFileError extends Error {
   constructor(...args) {
     super(...args);
@@ -7,6 +13,10 @@ class ImportFileError extends Error {
   }
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> develop
 class SaveToDbError extends Error {
   constructor(...args) {
     super(...args);
@@ -16,4 +26,8 @@ class SaveToDbError extends Error {
 }
 
 exports.ImportFileError = ImportFileError;
+<<<<<<< HEAD
+=======
+
+>>>>>>> develop
 exports.SaveToDbError = SaveToDbError;

@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: User</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: User</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>
+            <span class="ancestors"><a href="module-models_User.html">models/User</a>~</span>User<span class="signature">(userObject)</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">Parameter <a href="module-models_User-User.html#.userSchemaObject">userObject</a>must compile based on <a href="module-models_User-User.html#.UserSchema">userSchemaObject</a>.</div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="User"><span class="type-signature"></span>new User<span class="signature">(userObject)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <i><u>userObject</u></i> has 13 properties:<p><b>email</b> - email</p><p><b>password</b> - password</p><i>Mongoose new mongoose.Schema({...}, options) creates additional properties</i>:<b>_id</b>, <b>__v</b>, <b>createdAt</b> and <b>updatedAt</b>, first two by default,second two when passing {timesatmps: true} as second argument.<br></br>It's mongoose <a href="https://mongoosejs.com/docs/models.html">model</a> andthe instance is called <a href="https://mongoosejs.com/docs/documents.html">document</a>.<p></p>Models are fancy constructors compiled from Schema definitions.An instance of a model is called a document.Models are responsible for creating and reading documents from the underlying MongoDB database.<p></p><a href="https://mongoosejs.com/docs/validation.html#validation">Validation</a> is based on<a href="module-models_User-User.html#.userSchemaObject">userSchemaObject</a>.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>userObject</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">userObject</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><a href="module-models_User-User.html#.UserSchema">userObject</a></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_User.js.html">models/User.js</a>, <a href="models_User.js.html#line214">line 214</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="module-models_User-User.html#.UserSchema">User Schema</a></li>
+        
+            <li><a href="module-models_User-User.html#.userSchemaObject">userSchemaObject</a><p></p></li>
+        
+            <li><a href="https://mongoosejs.com/docs/models.html">mongoose Models</a></li>
+        
+            <li><a href="https://mongoosejs.com/docs/guide.html">mongoose Schemas</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption"> Example usage of User Model</p>
+    
+    <pre class="prettyprint"><code>const userObject = {};const user = new User(userObject);user.save();</code></pre>
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id=".UserSchema"><span class="type-signature">(static, constant) </span>UserSchema<span class="type-signature"> :mongoose.Schema</span></h4>
+
+
+
+
+<div class="description">
+    new mongoose.Schema(userSchemaObject, {timestamps: true})
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">mongoose.Schema</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_User.js.html">models/User.js</a>, <a href="models_User.js.html#line135">line 135</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="module-models_User-User.html">User model</a></li>
+        
+            <li><a href="module-models_User-User.html#.userSchemaObject">userSchemaObject</a><p></p></li>
+        
+            <li><a href="https://mongoosejs.com/docs/models.html">mongoose Models</a></li>
+        
+            <li><a href="https://mongoosejs.com/docs/guide.html">mongoose Schemas</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".userSchemaObject"><span class="type-signature">(static, constant) </span>userSchemaObject<span class="type-signature"> :Object</span></h4>
+
+
+
+
+<div class="description">
+    Represents User mongoose document.<p>Actual object for creating new mongoose Schema has more complex definition. See source!</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>email</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><b>unique</b>, user's email</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>password</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">user's password</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>paswordResetToken</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">token to reset password</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>passwordResetExpires</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Date</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">when token to reset password expires</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>google</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">google account id</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tokens</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;String></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>profile</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">full name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gender</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">gender</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>location</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">location</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>picture</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">path to user's avatar</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">first name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>lName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">last name</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>team</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><b>max length: 30</b>, user's team | company | organization</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>jobPosition</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><b>max length: 30</b>, job position</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>travels</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;ObjectId></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">array with references to Travel documents</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>homeCurrency</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    'USD'
+                
+                </td>
+            
+
+            <td class="description last">home currency</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>homeDistance</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    'mi'
+                
+                </td>
+            
+
+            <td class="description last">home distance unit ('mi'|'km')</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>perMileAmount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0.54
+                
+                </td>
+            
+
+            <td class="description last">per mile amount (convert distance to money)</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_User.js.html">models/User.js</a>, <a href="models_User.js.html#line83">line 83</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="comparePassword"><span class="type-signature"></span>comparePassword<span class="signature">(candidatePassword, cb)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Helper method for validating user's password.<p>It is User document method.</p>
+</div>
+
+
+
+
+
+
+
+    <h5>This:</h5>
+    <ul><li><a href="module-models_User-User.html#.UserSchema">module:models/User~User.UserSchema</a></li></ul>
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>candidatePassword</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">password to compare</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">callback function</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_User.js.html">models/User.js</a>, <a href="models_User.js.html#line163">line 163</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="fullName"><span class="type-signature"></span>fullName<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Helper method for getting user's full name<p>It is User document method.</p>
+</div>
+
+
+
+
+
+
+
+    <h5>This:</h5>
+    <ul><li>module:models/User~UserSchema</li></ul>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_User.js.html">models/User.js</a>, <a href="models_User.js.html#line200">line 200</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    User's full name
+</div>
+
+
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="gravatar"><span class="type-signature"></span>gravatar<span class="signature">(size)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Helper method for getting user's gravatar.<p>It is User document method.</p>
+</div>
+
+
+
+
+
+
+
+    <h5>This:</h5>
+    <ul><li><a href="module-models_User-User.html#.UserSchema">module:models/User~User.UserSchema</a></li></ul>
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>size</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_User.js.html">models/User.js</a>, <a href="models_User.js.html#line179">line 179</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    url to gravatar.com/avatar
+</div>
+
+
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~save"><span class="type-signature">(inner) </span>save<span class="signature">(next)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Password hash <a href="https://mongoosejs.com/docs/middleware.html#pre">mongoose pre hook middleware</a> function.
+</div>
+
+
+
+
+
+
+
+    <h5>This:</h5>
+    <ul><li><a href="module-models_User-User.html#.UserSchema">module:models/User~User.UserSchema</a></li></ul>
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>next</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_User.js.html">models/User.js</a>, <a href="models_User.js.html#line140">line 140</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://mongoosejs.com/docs/middleware.html#pre">mongoose pre middleware</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-config_index.html">config/index</a></li><li><a href="module-models_Currency.html">models/Currency</a></li><li><a href="module-models_Expense.html">models/Expense</a></li><li><a href="module-models_Rate.html">models/Rate</a></li><li><a href="module-models_Travel.html">models/Travel</a></li><li><a href="module-models_User.html">models/User</a></li><li><a href="module-utils_getRates.html">utils/getRates</a></li><li><a href="module-utils_hbsHelpers.html">utils/hbsHelpers</a></li><li><a href="module-utils_myErrors.html">utils/myErrors</a></li><li><a href="module-utils_postImport.html">utils/postImport</a></li><li><a href="module-utils_travelExpensesToPDF.html">utils/travelExpensesToPDF</a></li><li><a href="module-utils_travelsTotalToPDF.html">utils/travelsTotalToPDF</a></li><li><a href="module-utils_updateExpensesToMatchTravelRangeDates.html">utils/updateExpensesToMatchTravelRangeDates</a></li><li><a href="module-utils_utils.html">utils/utils</a></li></ul><h3>Classes</h3><ul><li><a href="module-models_Currency-Currency.html">Currency</a></li><li><a href="module-models_Expense-Expense.html">Expense</a></li><li><a href="module-models_Rate-Rate.html">Rate</a></li><li><a href="module-models_Travel-Travel.html">Travel</a></li><li><a href="module-models_User-User.html">User</a></li><li><a href="module-utils_myErrors-ImportFileError.html">ImportFileError</a></li><li><a href="module-utils_myErrors-SaveToDbError.html">SaveToDbError</a></li></ul><h3>Global</h3><ul><li><a href="global.html#deleteExpense">deleteExpense</a></li><li><a href="global.html#getAccount">getAccount</a></li><li><a href="global.html#getContact">getContact</a></li><li><a href="global.html#getExpense">getExpense</a></li><li><a href="global.html#getForgot">getForgot</a></li><li><a href="global.html#getImport">getImport</a></li><li><a href="global.html#getLogin">getLogin</a></li><li><a href="global.html#getOauthUnlink">getOauthUnlink</a></li><li><a href="global.html#getReset">getReset</a></li><li><a href="global.html#getSignup">getSignup</a></li><li><a href="global.html#getTravel">getTravel</a></li><li><a href="global.html#index">index</a></li><li><a href="global.html#isAuthenticated">isAuthenticated</a></li><li><a href="global.html#isAuthorized">isAuthorized</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#postContact">postContact</a></li><li><a href="global.html#postDeleteAccount">postDeleteAccount</a></li><li><a href="global.html#postForgot">postForgot</a></li><li><a href="global.html#postImport">postImport</a></li><li><a href="global.html#postLogin">postLogin</a></li><li><a href="global.html#postNewExpense">postNewExpense</a></li><li><a href="global.html#postReset">postReset</a></li><li><a href="global.html#postSignup">postSignup</a></li><li><a href="global.html#postUpdatePassword">postUpdatePassword</a></li><li><a href="global.html#postUpdateProfile">postUpdateProfile</a></li><li><a href="global.html#updateExpense">updateExpense</a></li><li><a href="global.html#updateTravel">updateTravel</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sun Dec 08 2019 12:43:45 GMT+0100 (GMT+01:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

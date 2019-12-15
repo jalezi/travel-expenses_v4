@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>app - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h2><a href="http://localhost:8080" target="_blank" class="menu-item" id="website_link" >TravelApp</a></h2><h3>Classes</h3><ul><li><a href="Logger.html">Logger</a></li></ul><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li><li><a href="module-config.html">config</a></li><li><a href="module-config_error.html">config/error</a></li><li><a href="module-config_express.html">config/express</a></li><li><a href="module-config_LoggerClass.html">config/LoggerClass</a></li><li><a href="module-config_mongoose.html">config/mongoose</a></li><li><a href="module-config_passport.html">config/passport</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-config_passport.html">isAuthenticated</a></li><li data-type='method' style='display: none;'><a href="module-config_passport.html">isAuthorized</a></li></ul></li><li><a href="module-config_routes.html">config/routes</a></li><li><a href="module-config_routes_expenses.html">config/routes/expenses</a></li><li><a href="module-config_routes_oAuth.html">config/routes/oAuth</a></li><li><a href="module-config_routes_travels.html">config/routes/travels</a></li><li><a href="module-config_routes_user.html">config/routes/user</a></li><li><a href="module-controllers_contact.html">controllers/contact</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-controllers_contact.html">getContact</a></li><li data-type='method' style='display: none;'><a href="module-controllers_contact.html">postContact</a></li></ul></li><li><a href="module-controllers_expense.html">controllers/expense</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-controllers_expense.html#.deleteExpense">deleteExpense</a></li><li data-type='method' style='display: none;'><a href="module-controllers_expense.html#.getExpense">getExpense</a></li><li data-type='method' style='display: none;'><a href="module-controllers_expense.html#.postNewExpense">postNewExpense</a></li><li data-type='method' style='display: none;'><a href="module-controllers_expense.html#.updateExpense">updateExpense</a></li></ul></li><li><a href="module-controllers_home.html">controllers/home</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-controllers_home.html#.index">index</a></li></ul></li><li><a href="module-controllers_import.html">controllers/import</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-controllers_import.html#.getImport">getImport</a></li><li data-type='method' style='display: none;'><a href="module-controllers_import.html#.postImport">postImport</a></li></ul></li><li><a href="module-controllers_travel.html">controllers/travel</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-controllers_travel.html#.deleteTravel">deleteTravel</a></li><li data-type='method' style='display: none;'><a href="module-controllers_travel.html#.getNewTravel">getNewTravel</a></li><li data-type='method' style='display: none;'><a href="module-controllers_travel.html#.getTravel">getTravel</a></li><li data-type='method' style='display: none;'><a href="module-controllers_travel.html#.getTravelExpensesPDF">getTravelExpensesPDF</a></li><li data-type='method' style='display: none;'><a href="module-controllers_travel.html#.getTravels">getTravels</a></li><li data-type='method' style='display: none;'><a href="module-controllers_travel.html#.getTravelsTotalPDF">getTravelsTotalPDF</a></li><li data-type='method' style='display: none;'><a href="module-controllers_travel.html#.postNewTravel">postNewTravel</a></li><li data-type='method' style='display: none;'><a href="module-controllers_travel.html#.updateTravel">updateTravel</a></li></ul></li><li><a href="module-controllers_user.html">controllers/user</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.getAccount">getAccount</a></li><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.getForgot">getForgot</a></li><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.getLogin">getLogin</a></li><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.getOauthUnlink">getOauthUnlink</a></li><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.getReset">getReset</a></li><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.getSignup">getSignup</a></li><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.logout">logout</a></li><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.postDeleteAccount">postDeleteAccount</a></li><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.postForgot">postForgot</a></li><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.postLogin">postLogin</a></li><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.postReset">postReset</a></li><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.postSignup">postSignup</a></li><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.postUpdatePassword">postUpdatePassword</a></li><li data-type='method' style='display: none;'><a href="module-controllers_user.html#.postUpdateProfile">postUpdateProfile</a></li></ul></li><li><a href="module-utils_getTrace.html">utils/getTrace</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_getTrace.html#getTrace">getTrace</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">app</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    
+        <div class="container-overview">
+        
+            
+                <div class="description">This is main module to start application.</div>
+            
+
+            
+                
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line94">line 94</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Jaka Daneu</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://www.npmjs.com/package/express">NPM:express</a></li>
+        
+            <li><a href="https://www.npmjs.com/package/dotenv">NPM:dotenv</a></li>
+        
+            <li><a href="https://www.npmjs.com/package/dotenv-expand">NPM:dotenv-expand</a></li>
+        
+            <li><a href="https://www.npmjs.com/package/full-icu">NPM:full-icu</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+        
+        </div>
+    
+
+    
+
+    
+        <h3 class="subsection-title">Requires</h3>
+
+        <ul>
+            <li>module:NPM:express</li>
+        
+            <li>module:NPM:dotenv</li>
+        
+            <li>module:NPM:dotenv-expand</li>
+        
+            <li>module:NPM:full-ico</li>
+        
+            <li><a href="module-config.html">module:config</a></li>
+        
+            <li><a href="module-config_express.html">module:config/express</a></li>
+        
+            <li><a href="module-config_error.html">module:config/error</a></li>
+        
+            <li><a href="module-config_LoggerClass.html">module:config/LoggerClass</a></li>
+        
+            <li><a href="module-config_mongoose.html">module:config/mongoose</a></li>
+        
+            <li>module:utils/hbsHelpers</li>
+        
+            <li>module:utils/getRates</li>
+        </ul>
+    
+
+    
+    
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="app"><span class="type-signature"></span>app<span class="type-signature"> :Promise.&lt;Express></span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="app.js.html">app.js</a>, <a href="app.js.html#line123">line 123</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    Express server.It is used in mocha tests.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Promise.&lt;Express></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sun Dec 15 2019 13:09:45 GMT+0100 (GMT+01:00) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>

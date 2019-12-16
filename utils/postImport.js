@@ -214,17 +214,21 @@ async function readCheckFileAndGetData(myFile, option) {
   try {
     // check if file is CSV, not empty or not even selected
     logger.debug('Checking if file is CSV, not empty or not even selected');
+    logger.silly(myFile.path);
     error = await checkFile(myFile).catch(err => {
+      logger.warn('checkFile inside error');
+      logger.silly(err.message);
       throw err;
     });
     if (error) {
+      logger.warn('checkFile returned error');
+      logger.silly(error.message);
       throw error;
     }
 
     // no error - file is CSV & has some data
     logger.debug('No error - file is CSV & has some data');
     const parsedData = await readAndParseFile(myFilePath);
-    /** @type {Papa.ParseResult.data} */
     const dataArray = parsedData.data;
 
     // check if data has matching header
@@ -233,16 +237,22 @@ async function readCheckFileAndGetData(myFile, option) {
       !_.isEqual(headerToBe, parsedHeaderArray),
       `Header should be: ${headerToBe}`
     ).catch(err => {
-      logger.error(`Catching and throwing error in checkFileFor => ${err}`);
+      logger.warn('Catching and throwing error in checkFileFor');
+      logger.silly(err);
       throw err;
     });
+
     if (error) {
-      logger.error(`Throwing error after checkFileFor => ${error}`);
+      logger.silly(`parsHeader: ${parsedHeaderArray}`);
+      logger.silly(`headerToBe: ${headerToBe}`);
+      logger.warn('Throwing error after checkFileFor');
+      logger.silly(error);
       throw error;
     }
     return dataArray;
   } catch (err) {
-    logger.error(`Returning error in try/catch => ${err}`);
+    logger.warn('Returning error in try/catch');
+    logger.silly(err);
     return err;
   }
 }
@@ -250,6 +260,7 @@ async function readCheckFileAndGetData(myFile, option) {
 
 // Deletes uploaded file from server
 function deleteFile(filePath, message = '') {
+  logger.silly(`Deleteing: ${filePath}`);
   try {
     if (fs.existsSync(filePath)) {
       fs.unlink(filePath, err => {
@@ -464,9 +475,23 @@ async function travelImport(dataArray, userId) {
 
       // insert travels and update user with travel._id
       const travels = await Travel.insertMany(dataArray).catch(err => {
+        // TODO check mongoose model validation
+        // [ 'message', 'name', 'stringValue', 'kind', 'value', 'path', 'reason' ]
+        let errMsg = `${err.name}: `;
+        Object.entries(err.errors).forEach(([key, value]) => {
+          // console.log(key);
+          // console.log(value.name);
+          // console.log(value.stringValue);
+          // console.log(value.kind);
+          // console.log(value.value);
+          // console.log(value.path);
+          let msg = `${value.path} {${value.kind} ${value.value}}`
+          errMsg += ` ${value.path}: ${value.value},`
+          logger.debug(msg);
+        });
         logger.error(err);
         throw new myErrors.SaveToDbError(
-          'Something went wrong during saving to DB!'
+          errMsg
         );
       });
 
@@ -493,7 +518,7 @@ async function travelImport(dataArray, userId) {
       logger.info(message);
       resolve(message);
     } catch (err) {
-      logger.error('Something went wrong during travel import!');
+      logger.warn('Something went wrong during travel import!');
       logger.error(err);
       resolve({
         error: err,

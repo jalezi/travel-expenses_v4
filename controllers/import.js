@@ -54,18 +54,20 @@ exports.postImport = async (req, res, next) => {
   logger.debug('Middleware postImport');
   let message = '';
   const { myFile } = req.files;
-  const { myFilePath } = req.files.myFile;
+  // const { myFilePath } = req.files.myFile;
   let combinedCurrencies = [];
 
   try {
     const dataArray = await postImport
       .readCheckFileAndGetData(myFile, req.body.option)
       .catch(err => {
-        logger.error(`Catching error: ${err.message}`);
+        logger.warn('readCheckFileAndGetData catching error!');
+        logger.silly(`Error message: ${err.message}`);
         throw err;
       });
     if (dataArray instanceof Error) {
-      logger.error(`dataArray is error: ${dataArray.message}`);
+      logger.warn('dataArray is error');
+      logger.silly(`${dataArray.message}`);
       throw dataArray;
     }
 
@@ -76,7 +78,8 @@ exports.postImport = async (req, res, next) => {
       message = await postImport.travelImport(dataArray, req.user._id);
       if (message.error) {
         let { msg, error } = message;
-        logger.error(`Importing travels error: ${msg}`);
+        logger.warn('Importing travels error');
+        logger.silly(`${msg}`);
         throw error;
       }
     } else {
@@ -92,7 +95,7 @@ exports.postImport = async (req, res, next) => {
       message = getCurrenciesArray; // do not change!
       if (err) {
         logger.warn(`Experiment error message: ${message}`);
-        logger.error(`getCurrenciesArray error: ${err.message}`);
+        logger.warn(`getCurrenciesArray error: ${err.message}`);
         throw err;
       }
 
@@ -151,25 +154,27 @@ exports.postImport = async (req, res, next) => {
       throw error;
     }
 
-    postImport.deleteFile(myFilePath, 'File deleted after processed!');
+    logger.silly(`${myFile.path} should be deleted!`);
+    postImport.deleteFile(myFile.path, 'File deleted after processed!');
     req.flash('success', {
       msg: message
     });
     res.redirect('/travels');
   } catch (err) {
-    postImport.deleteFile(myFilePath, 'File deleted after error!');
-    logger.error(`Catching error: ${err.message}`);
+    logger.silly(`${myFile.path} should be deleted!`);
+    postImport.deleteFile(myFile.path, 'File deleted after error!');
+    logger.warn(`Catching error: ${err.message}`);
     let condition = !(err instanceof myErrors.ImportFileError)
       && !(err instanceof myErrors.SaveToDbError);
     if (condition) {
-      logger.warn('Error is not instance of ImportFileError or SaveToDbError');
-      console.log(error);
-      logger.error(error.message);
+      logger.warn('Not myError!');
+      logger.error(err.message);
       next(err);
     } else {
       res.status(500);
       let { message } = err;
-      logger.warn('Error is instance of ImportFIleError');
+      logger.error(`Error: ${err.name}`);
+      logger.silly(err);
       req.flash('errors', {
         msg: message
       });

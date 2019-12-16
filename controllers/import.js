@@ -54,6 +54,8 @@ exports.postImport = async (req, res, next) => {
   logger.debug('Middleware postImport');
   let message = '';
   const { myFile } = req.files;
+  let fileNameSplit = myFile.path.split('\\');
+  let fileName = fileNameSplit[fileNameSplit.length - 1];
   // const { myFilePath } = req.files.myFile;
   let combinedCurrencies = [];
 
@@ -138,7 +140,7 @@ exports.postImport = async (req, res, next) => {
       // Check if imported file has no data
       if (dataArray.length === 0) {
         throw new myErrors.ImportFileError(
-          'Nothing to import! File has wrong data!'
+          `No expense belongs to travel. ${message.message}`
         );
       }
       message = await postImport.expenseImport(dataArray).catch(err => {
@@ -154,18 +156,19 @@ exports.postImport = async (req, res, next) => {
       throw error;
     }
 
-    logger.silly(`${myFile.path} should be deleted!`);
+    logger.silly(`${fileName} should be deleted!`);
     postImport.deleteFile(myFile.path, 'File deleted after processed!');
     req.flash('success', {
       msg: message
     });
     res.redirect('/travels');
   } catch (err) {
-    logger.silly(`${myFile.path} should be deleted!`);
+    logger.silly(`${fileName} should be deleted!`);
     postImport.deleteFile(myFile.path, 'File deleted after error!');
     logger.warn(`Catching error: ${err.message}`);
-    let condition = !(err instanceof myErrors.ImportFileError)
-      && !(err instanceof myErrors.SaveToDbError);
+    let condition =
+      !(err instanceof myErrors.ImportFileError) &&
+      !(err instanceof myErrors.SaveToDbError);
     if (condition) {
       logger.warn('Not myError!');
       logger.error(err.message);

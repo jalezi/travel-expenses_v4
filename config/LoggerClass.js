@@ -78,7 +78,7 @@ const logDevFormat = format.printf(info => {
   label = label.padStart(23); // timestamp, level.verbose and requestID are 23 chars long
   level = level.padStart(17); // timestamp, level.verbose are 17 chars long
   requestId = requestId.toString().padStart(3, '0'); // adds zeros in front of number
-  let msg = `${timestamp} ${level} [${requestId}] [${label}]: ${message} [${ms}] in ${short} [${line}:${column}]`;
+  let msg = `${timestamp} ${level} [${requestId}] [${label}]: ${message} [${ms}] in \\${short}:${line}:${column}`;
   // console.log(stripAnsi(msg).length + 4, process.stdout.columns);
   // msg = (stripAnsi(msg).length + 4 > process.stdout.columns) ? `${msg}\n` : msg;
   return msg;
@@ -91,6 +91,7 @@ const logDevFormat = format.printf(info => {
  * of message.
  *
  * Adds new properties from trace object to info object: line, column and short.
+ * If object is passed as info.message converts info.message to info.metadata
  * @private
  * @memberof module:config/LoggerClass
  * @function specialFormat
@@ -105,17 +106,53 @@ const specialFormat = format(info => {
 
   // Gets trace object and sets line, column and short info properties.
   let { stack, trace } = getTrace();
+  info.stack = stack;
   info.line = !info.line ? trace.line : info.line;
   info.column = !info.column ? trace.column : info.column;
   info.short = !info.short ? trace.short : info.short;
 
   // Removes ANSI code in string
-  const http = stripAnsi(info.message.substring(0, info.message.indexOf(' ')));
-  // Checks if message is from morgan logger. If true, sets label to 'http'.
-  if (HTTP.includes(http)) {
-    info.label = 'http';
-    info.message = info.message.replace(/\n/g, '');
+  let http;
+  try {
+    http = stripAnsi(info.message.substring(0, info.message.indexOf(' ')));
+    // Checks if message is from morgan logger. If true, sets label to 'http'.
+    if (HTTP.includes(http)) {
+      info.label = 'http';
+      info.message = info.message.replace(/\n/g, '');
+    }
+  } catch (error) {
+    http = '';
+    // console.dir(info.message);
+    Object.keys(info.message).forEach(key => {
+      info.metadata[key] = info.message[key];
+    });
+    info.message = '';
   }
+
+  // TODO Set message if all special metadata is present
+  if (info.metadata.travel) {
+    let { travel } = info.metadata;
+    info.message += `travel: ${travel.travelName}, date: ${travel.date}, currency: ${travel.currency} rate:: ${travel.rate}`;
+  }
+
+  if (info.metadata.expense) {
+    let { expense } = info.metadata;
+    info.message += `expense: ${expense.type}`;
+  }
+
+  if (info.metadata.user) {
+    let { user } = info.metadata;
+    info.message += `user: ${user.fullName}`;
+  }
+
+  if (info.metadata.currency) {
+    let { currency } = info.metadata;
+    let rateKey = Object.keys(currency.rate)[0];
+    info.message += `currency: ${rateKey}, rate: ${currency.rate[rateKey]}, base: ${currency.base}, date: ${currency.date}`;
+  }
+
+  // console.dir(info.stack);
+
   return info;
 });
 
@@ -146,6 +183,7 @@ switch (process.env.NODE_ENV) {
       format: format.combine(
         format.align(),
         format.colorize({ all: true }),
+        format.metadata({ fillWith: ['currency', 'travel', 'expense', 'user'] }),
         logDevFormat
       )
     });

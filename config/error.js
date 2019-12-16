@@ -40,9 +40,9 @@ module.exports = app => {
             err instanceof ImportFileError ||
             err instanceof mongoose.CastError
           ) {
-            console.log(str);
+            logger.log(str);
           } else {
-            console.log(err);
+            logger.log(err);
           }
         }
       })
@@ -50,15 +50,15 @@ module.exports = app => {
   } else {
     app.use((err, req, res, next) => {
       if (err instanceof ImportFileError) {
-        console.log(err.stack);
+        logger.log(err.stack);
         res.status(400);
         res.redirect(req.path);
       } else if (err instanceof mongoose.CastError) {
-        console.log(err.stack);
+        logger.log(err.stack);
         res.status(400);
         res.redirect('/travels');
       } else {
-        console.log(err);
+        logger.log(err);
         res.status(500).render('error', {
           layout: 'errorLayout',
           title: 'Error'

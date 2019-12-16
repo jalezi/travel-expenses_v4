@@ -35,8 +35,10 @@ const { ObjectId } = mongoose.Types;
 
 // Reads and parses CSV file
 async function readAndParseFile(filePath, enc = 'utf8') {
+  const fileNameSplit = filePath.split('\\');
+  const fileName = fileNameSplit[fileNameSplit.length - 1];
   logger.debug(
-    `Reading and parsing CSV file\npath: ${filePath}\nencoding: ${enc}`
+    `Reading and parsing CSV file: ${fileName}, encoding: ${enc}`
   );
   try {
     const myFile = fs.readFileSync(filePath, enc);
@@ -56,7 +58,6 @@ async function readAndParseFile(filePath, enc = 'utf8') {
     throw err;
   }
 }
-
 
 // Returns Error with message on condition is true
 async function checkFileFor(condition, message) {
@@ -121,17 +122,17 @@ const checkFile = myFile =>
       });
   });
 
-
 // Creates currency object
 function createCurrency(value) {
-  logger.debug(`Creating currency from: ${value}`);
+  logger.debug('Creating currency', { value });
   const currency = {};
   const curRate = {};
   currency.base = value.base;
   currency.date = new Date(value.date);
   curRate[value.currency] = Number(value.rate);
   currency.rate = curRate;
-  logger.silly(`Create currency: ${currency}\nfrom value: ${value}`);
+  logger.silly({ currency });
+  logger.silly({ travel: value });
   return currency;
 }
 
@@ -148,7 +149,6 @@ const getOnlyNewCurrency = (currency, value) =>
     }
     return resolve();
   });
-
 
 /*
  Updates traves after with imported expenses
@@ -190,14 +190,16 @@ const updateTravels = async (uniqueTravelObjectIds, expenses) =>
     }
   });
 
-
 /*
  Reads, checks file and returns data or error
  Returns array with expenses data.
  Throws custom error ImportFileError
  */
 async function readCheckFileAndGetData(myFile, option) {
-  logger.debug('Check file and get data if no error in file or data');
+  let fileNameSplit = myFile.path.split('\\');
+  let fileName = fileNameSplit[fileNameSplit.length - 1];
+  logger.debug(`Check file and get data: ${myFile.name}`);
+  logger.silly(`${myFile.name} aka ${fileName}`);
   let error = null;
   const myFilePath = myFile.path;
   let headerToBe;
@@ -213,8 +215,8 @@ async function readCheckFileAndGetData(myFile, option) {
 
   try {
     // check if file is CSV, not empty or not even selected
-    logger.debug('Checking if file is CSV, not empty or not even selected');
-    logger.silly(myFile.path);
+    logger.debug('Checking if file is CSV, not empty or not even selected:');
+    logger.silly(fileName);
     error = await checkFile(myFile).catch(err => {
       logger.warn('checkFile inside error');
       logger.silly(err.message);
@@ -257,10 +259,11 @@ async function readCheckFileAndGetData(myFile, option) {
   }
 }
 
-
 // Deletes uploaded file from server
 function deleteFile(filePath, message = '') {
-  logger.silly(`Deleteing: ${filePath}`);
+  let fileNameSplit = filePath.split('\\');
+  let fileName = fileNameSplit[fileNameSplit.length - 1];
+  logger.silly(`Deleteing: ${fileName}`);
   try {
     if (fs.existsSync(filePath)) {
       fs.unlink(filePath, err => {
@@ -276,7 +279,6 @@ function deleteFile(filePath, message = '') {
     throw err;
   }
 }
-
 
 /*
  Gets and prepares currencies from imported file.
@@ -368,7 +370,6 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
     return { err, message };
   }
 }
-
 
 /*
  Prepares new currencies which will save later.
@@ -478,21 +479,13 @@ async function travelImport(dataArray, userId) {
         // TODO check mongoose model validation
         // [ 'message', 'name', 'stringValue', 'kind', 'value', 'path', 'reason' ]
         let errMsg = `${err.name}: `;
-        Object.entries(err.errors).forEach(([key, value]) => {
-          // console.log(key);
-          // console.log(value.name);
-          // console.log(value.stringValue);
-          // console.log(value.kind);
-          // console.log(value.value);
-          // console.log(value.path);
-          let msg = `${value.path} {${value.kind} ${value.value}}`
-          errMsg += ` ${value.path}: ${value.value},`
+        Object.values(err.errors).forEach(value => {
+          let msg = `${value.path} {${value.kind} ${value.value}}`;
+          errMsg += ` ${value.path}: ${value.value},`;
           logger.debug(msg);
         });
         logger.error(err);
-        throw new myErrors.SaveToDbError(
-          errMsg
-        );
+        throw new myErrors.SaveToDbError(errMsg);
       });
 
       if (!travels) {
@@ -527,7 +520,6 @@ async function travelImport(dataArray, userId) {
     }
   });
 }
-
 
 module.exports = {
   readCheckFileAndGetData,

@@ -5,11 +5,11 @@ const { createElement } = require('../utils');
 const { createTwoCardElements } = require('../utils');
 const { expenseTypes } = require('../../lib/globals');
 
-const { addLogger } = require('../../config/logger');
+const LoggerClass = require('../../config/LoggerClass');
 
-// Logger
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
+const Logger = new LoggerClass('yearsAccordion');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('utils\\hbsHelpers\\yearsAccordion INITIALIZING!');
 
 
 /*
@@ -19,7 +19,7 @@ const Logger = addLogger(__filename, pathDepth);
  Travel Object has new array with unique curRate objects.
  */
 const findCurRate = (travel, expense) => {
-  Logger.debug('findCurRate');
+  logger.debug('findCurRate');
   let curRate;
   if (expense.type !== 'Mileage') {
     curRate = travel.curRates.find(cr => cr._id.toString() === expense.curRate.toString());
@@ -33,7 +33,7 @@ const findCurRate = (travel, expense) => {
  Creates HTML 'option' elements
  */
 const createSelectOptions = (options, selected, elemAttrs = {}, valueToLowerCase = false) => {
-  Logger.debug('createSelectOptions');
+  logger.debug('createSelectOptions');
   let result = '';
   selected = (!selected) ? '' : selected;
   options.forEach(val => {
@@ -63,7 +63,7 @@ const createSelectOptions = (options, selected, elemAttrs = {}, valueToLowerCase
  */
 // eslint-disable-next-line no-unused-vars
 const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMethod = method, csrf = '', expenseTypes = {}) => {
-  Logger.debug('createExpenseForm');
+  logger.debug('createExpenseForm');
   if (!travel || !expense) {
     return;
   }
@@ -503,7 +503,7 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
  More in Travel Schema /models/Travel.js Travel.byYear_byMonth
  */
 expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
-  Logger.debug('yearsAccordionWithForm');
+  logger.debug('yearsAccordionWithForm');
   const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   // HTML Accordion - RESULT
   const yearObjectsArray = [];
@@ -681,7 +681,7 @@ expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
  More in Travel Schema /models/Travel.js Travel.byYear_byMonth
  */
 expressHbs.registerHelper('yearsAccordion', (value, csrf) => {
-  Logger.debug('yearsAccordion');
+  logger.debug('yearsAccordion');
   const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   // HTML Accordion - RESULT
   const yearObjectsArray = [];

@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
-// const { addLogger } = require('../config/logger');
+const LoggerClass = require('../config/LoggerClass');
 
-// Logger
-// const pathDepth = module.paths.length - 6;
-// const Logger = addLogger(__filename, pathDepth);
+const Logger = new LoggerClass('Currency');
+const { mainLogger } = Logger;
+mainLogger.debug('models\\Currency INITIALIZING!');
 
 // Represent Currency mongoose document
 const currencySchemaObject = {

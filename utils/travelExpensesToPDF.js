@@ -6,14 +6,16 @@ const moment = require('moment');
 const mongoose = require('mongoose');
 const fs = require('fs');
 
+const LoggerClass = require('../config/LoggerClass');
+
+const Logger = new LoggerClass('travelExpensesToPDF');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('utils\\travelExpensesToPDF INITIALIZING!');
+
 const { ObjectId } = mongoose.Types;
 
 const { FONTS } = require('../lib/constants');
 const { toCurrencyFormat } = require('./utils');
-const { addLogger } = require('../config/logger');
-
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
 
 const printer = new PdfPrinter(FONTS);
 
@@ -60,7 +62,7 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
     style: totalRowStyle
   }];
   body.push(totalRow);
-  Logger.debug(`Build table body => ${body}`);
+  logger.debug(`Build table body => ${body}`);
   return body;
 }
 
@@ -115,7 +117,7 @@ function createTravelExpensesTableData (travel) {
 
 // Returns travel pdfmake stream
 module.exports = (travel, user, idx) => {
-  Logger.debug('Creating pdf Travel');
+  logger.debug('Creating pdf Travel');
   if (!user.profile.name) {
     user.profile.name = 'Unknown';
   }
@@ -254,6 +256,6 @@ module.exports = (travel, user, idx) => {
   const pdfDocPath = `./pdf/TReport_${user._id}_${travel._id}-${idx}.pdf`;
   pdfDoc.pipe(fs.createWriteStream(pdfDocPath));
   pdfDoc.end();
-  Logger.debug('Returning pdfDoc');
+  logger.debug('Returning pdfDoc');
   return pdfDoc;
 };

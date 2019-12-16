@@ -2,11 +2,11 @@
 /* eslint-disable quote-props */
 const mongoose = require('mongoose');
 
-const { addLogger } = require('../config/logger');
+const LoggerClass = require('../config/LoggerClass');
 
-// Logger
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
+const Logger = new LoggerClass('Currency');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('models\\Currency INITIALIZING!');
 
 // Represents Rate mongoose document
 const rateSchemaObject = {
@@ -30,17 +30,18 @@ const RateSchema = new mongoose.Schema(
  Returns Array with partial (date and rates properties)
  */
 RateSchema.statics.findRatesOnDate = function(travel) {
-  Logger.debug('findRatesOnDate');
+  logger.debug('findRatesOnDate');
   return this.find({
     $and: [
       { date: { $gte: travel.dateFrom } }, { date: { $lte: travel.dateTo } }
     ]
   }, (err, doc) => {
     if (err) {
-      Logger.error(err.message);
+      logger.error(err.message);
     } else {
-      Logger.debug(`Find rates for date range from ${travel.dateFrom} to ${travel.dateTo}.`);
-      Logger.debug(`Find rates for ${doc.length} day(s)`);
+      logger.silly({ travel });
+      logger.debug(`Find rates for date range from ${travel.dateFrom} to ${travel.dateTo}.`);
+      logger.debug(`Find rates for ${doc.length} day(s)`);
     }
   }).select({ 'rates': 1, 'date': 1, '_id': 0 });
 };

@@ -142,7 +142,7 @@ const specialFormat = format(info => {
 
   if (info.metadata.user) {
     let { user } = info.metadata;
-    info.message += `user: ${user.fullName}`;
+    info.message += `user: ${user._id}`;
   }
 
   if (info.metadata.currency) {

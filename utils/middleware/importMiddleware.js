@@ -1,6 +1,6 @@
 const LoggerClass = require('../../config/LoggerClass');
 
-const Logger = new LoggerClass('import');
+const Logger = new LoggerClass('importMiddleware');
 const { mainLogger, logger } = Logger;
 
 const Travel = require('../../models/Travel');

@@ -1,54 +1,37 @@
 const LoggerClass = require('../../config/LoggerClass');
 
-const Logger = new LoggerClass('travelMiddleware');
+const Logger = new LoggerClass('travelIdMiddleware');
 const { mainLogger, logger } = Logger;
-mainLogger.debug('utils\\middleware\\redirectAfterLogin INITIALIZING!');
+mainLogger.debug('utils\\middleware\\travelIdMiddleware INITIALIZING!');
 
-const Travel = require('../../models/Travel');
-const Rate = require('../../models/Rate');
+const { populateTravel, findRates } = require('./populateModels');
 
 
 module.exports = async (req, res, next) => {
-  logger.silly('travelIdMiddleware');
+  logger.debug('travelIdMiddleware');
   if (
     (!res.locals.travel || res.locals.travel._id !== req.params.id) &&
     req.params.id !== 'new' &&
     req.params.id !== 'total_pdf'
   ) {
     try {
-      const travel = await Travel.findById(req.params.id).populate({
-        path: 'expenses',
-        populate: { path: 'curRate' }
-      });
-      let rates = await Rate.findRatesOnDate(travel, err => {
-        if (err) {
-          throw err;
-        }
-      });
-
-      if (rates.length === 0) {
-        rates = await Rate.findRateBeforeOrAfterDate(travel, err => {
-          if (err) {
-            throw new Error(err);
-          }
-        });
-      }
+      const travel = await populateTravel(req.params.id);
+      let rates = await findRates(travel);
       res.locals.travel = travel;
       res.locals.rates = rates;
       logger.silly({ travel });
-      logger.silly(`rates.length: ${rates.length}`);
       logger.silly('next()');
-      logger.silly('travelIdMiddleware END');
+      logger.debug('travelIdMiddleware END');
       next();
     } catch (err) {
       logger.error(err);
       logger.silly('next(err)');
-      logger.silly('travelIdMiddleware END');
+      logger.debug('travelIdMiddleware END');
       next(err);
     }
   } else {
     logger.silly('next()');
-    logger.silly('travelIdMiddleware END');
+    logger.debug('travelIdMiddleware END');
     next();
   }
 };

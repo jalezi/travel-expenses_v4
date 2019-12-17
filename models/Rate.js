@@ -30,7 +30,7 @@ const RateSchema = new mongoose.Schema(
  It has to be unnamed function! Otherwise we have to use bind.
  Returns Array with partial (date and rates properties)
  */
-RateSchema.statics.findRatesOnDate = function(travel) {
+RateSchema.statics.findRatesOnDate = function (travel) {
   logger.debug('findRatesOnDate');
   return this.find({
     $and: [
@@ -57,15 +57,15 @@ RateSchema.statics.findRatesOnDate = function(travel) {
  Returns Array with one partial (date and rate property)
  */
 RateSchema.statics.findRateBeforeOrAfterDate = function (travel) {
-  Logger.debug('findRateBeforeOrAfterDate');
+  logger.debug('findRateBeforeOrAfterDate');
   return this.find({
     $or: [{ date: { $gte: travel.dateFrom } }, { date: { $lte: travel.dateFrom } }]
   }, (err, doc) => {
     if (err) {
-      Logger.error(err.message);
+      logger.error(err.message);
     } else {
-      Logger.debug(`Find rates for date range from ${travel.dateFrom} to ${travel.dateTo}.`);
-      Logger.debug(`Find rates for ${doc.length} day(s)`);
+      logger.debug(`Find rates for date range from ${travel.dateFrom} to ${travel.dateTo}.`);
+      logger.debug(`Find rates for ${doc.length} day(s)`);
     }
   })
     .sort({ 'date': 1 })

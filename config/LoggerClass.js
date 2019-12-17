@@ -75,12 +75,22 @@ const logDevFormat = format.printf(info => {
   let { level, message, timestamp, ms } = info;
   let { label, requestId } = info;
   let { line, column, short } = info;
+  let { dataMessage, stackMessage } = info;
   label = label.padStart(23); // timestamp, level.verbose and requestID are 23 chars long
   level = level.padStart(17); // timestamp, level.verbose are 17 chars long
   requestId = requestId.toString().padStart(3, '0'); // adds zeros in front of number
-  let msg = `${timestamp} ${level} [${requestId}] [${label}]: ${message} [${ms}] in \\${short}:${line}:${column}`;
-  // console.log(stripAnsi(msg).length + 4, process.stdout.columns);
-  // msg = (stripAnsi(msg).length + 4 > process.stdout.columns) ? `${msg}\n` : msg;
+
+  let msg = '';
+  if (dataMessage) {
+    msg = `${timestamp} ${level} [${requestId}] [${label}]: ${message} ${dataMessage} [${ms}] in \\${short}:${line}:${column}\n`;
+  } else {
+    msg = `${timestamp} ${level} [${requestId}] [${label}]: ${message} [${ms}] in \\${short}:${line}:${column}`;
+  }
+
+  if (info.stackTrace) {
+    msg += stackMessage;
+  }
+
   return msg;
 });
 
@@ -99,6 +109,7 @@ const logDevFormat = format.printf(info => {
  * @returns {object} Winston info object.
  */
 const specialFormat = format(info => {
+  let { metadata } = info;
   let label = info.label || info.metadata.label;
   let requestId = info.requestId || info.metadata.requestId;
   info.label = !label ? 'main' : label;
@@ -126,32 +137,42 @@ const specialFormat = format(info => {
     Object.keys(info.message).forEach(key => {
       info.metadata[key] = info.message[key];
     });
-    info.message = '';
+    info.message = 'Data:';
+    info.dataMessage = '\n';
   }
 
   // TODO Set message if all special metadata is present
   if (info.metadata.travel) {
     let { travel } = info.metadata;
-    info.message += `travel: ${travel.travelName}, date: ${travel.date}, currency: ${travel.currency} rate:: ${travel.rate}`;
+    info.dataMessage += `\t\ttravel: ${travel._id}, user: ${travel._user}`;
   }
 
   if (info.metadata.expense) {
     let { expense } = info.metadata;
-    info.message += `expense: ${expense.type}`;
+    info.dataMessage += `\t\texpense: ${expense.type}`;
   }
 
   if (info.metadata.user) {
     let { user } = info.metadata;
-    info.message += `user: ${user._id}`;
+    info.dataMessage += `\t\tuser: ${user._id}`;
   }
 
   if (info.metadata.currency) {
     let { currency } = info.metadata;
     let rateKey = Object.keys(currency.rate)[0];
-    info.message += `currency: ${rateKey}, rate: ${currency.rate[rateKey]}, base: ${currency.base}, date: ${currency.date}`;
+    info.dataMessage += `\t\tcurrency: ${rateKey}, rate: ${currency.rate[rateKey]}, base: ${currency.base}, date: ${currency.date}`;
   }
 
-  // console.dir(info.stack);
+  info.stackMessage = '\n\tTrace:\n';
+  for (let index = 0; index < stack.length; index++) {
+    const element = stack[index];
+    let {
+      func, method, line, column, type, short
+    } = element;
+    let stackMessage = `\t\tat ${func} in \\${short}:${line}:${column}, method: ${method}, type: ${type}\n`;
+    stackMessage = stripAnsi(stackMessage);
+    info.stackMessage += stackMessage;
+  }
 
   return info;
 });
@@ -185,7 +206,7 @@ switch (process.env.NODE_ENV) {
         format.colorize({ all: true }),
         format.metadata({ fillWith: ['currency', 'travel', 'expense', 'user'] }),
         logDevFormat
-      )
+      ),
     });
     break;
   default:
@@ -211,12 +232,12 @@ const logger = createLogger({
     format.timestamp({ format: 'HH:mm:ss' }),
     format.ms(),
     format.metadata({
-      fillExcept: ['message', 'level', 'ms', 'timestamp'],
+      fillExcept: ['message', 'level', 'ms', 'timestamp', 'service', 'stackTrace'],
       fillwith: ['label', 'requestId']
     }),
     specialFormat()
   ),
-  defaultMeta: { service: 'user-service' },
+  defaultMeta: { service: 'user-service', stackTrace: logs.trace },
   transports: wTransports,
   exitOnError: false
 });

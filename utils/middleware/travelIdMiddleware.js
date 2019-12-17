@@ -37,13 +37,18 @@ module.exports = async (req, res, next) => {
       res.locals.rates = rates;
       logger.silly({ travel });
       logger.silly(`rates.length: ${rates.length}`);
+      logger.silly('next()');
+      logger.silly('travelIdMiddleware END');
       next();
     } catch (err) {
       logger.error(err);
+      logger.silly('next(err)');
+      logger.silly('travelIdMiddleware END');
       next(err);
     }
   } else {
     logger.silly('next()');
+    logger.silly('travelIdMiddleware END');
     next();
   }
 };

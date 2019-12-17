@@ -27,6 +27,8 @@ const path = require('path');
  * @property {traceObject} trace Last element from stack.
  */
 
+
+// TODO skip getTrace and LoggerClass stack
 /**
  * Creates trace information until internal modules.
  * @memberof module:utils/getTrace

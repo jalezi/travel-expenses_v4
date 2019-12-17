@@ -1,6 +1,7 @@
 /* eslint-disable func-names */
 /* eslint-disable quote-props */
 const mongoose = require('mongoose');
+const moment = require('moment');
 
 const LoggerClass = require('../config/LoggerClass');
 
@@ -39,8 +40,10 @@ RateSchema.statics.findRatesOnDate = function(travel) {
     if (err) {
       logger.error(err.message);
     } else {
+      const dateFrom = moment(travel.dateFrom).format('YYYY-MM-DD');
+      const dateTo = moment(travel.dateTo).format('YYYY-MM-DD');
       logger.silly({ travel });
-      logger.debug(`Find rates for date range from ${travel.dateFrom} to ${travel.dateTo}.`);
+      logger.debug(`Find rates for date range: ${dateFrom} - ${dateTo}.`);
       logger.debug(`Find rates for ${doc.length} day(s)`);
     }
   }).select({ 'rates': 1, 'date': 1, '_id': 0 });

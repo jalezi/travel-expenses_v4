@@ -1,12 +1,15 @@
-const { addLogger } = require('../../config/logger');
+const LoggerClass = require('../../config/LoggerClass');
+
+const Logger = new LoggerClass('travelMiddleware');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('utils\\middleware\\redirectAfterLogin INITIALIZING!');
+
 const Travel = require('../../models/Travel');
 const Rate = require('../../models/Rate');
 
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
 
 module.exports = async (req, res, next) => {
-  Logger.silly('travelIdMiddleware');
+  logger.silly('travelIdMiddleware');
   if (
     (!res.locals.travel || res.locals.travel._id !== req.params.id) &&
     req.params.id !== 'new' &&
@@ -32,11 +35,20 @@ module.exports = async (req, res, next) => {
       }
       res.locals.travel = travel;
       res.locals.rates = rates;
+      logger.silly({ travel });
+      logger.silly(`rates.length: ${rates.length}`);
+      logger.silly('next()');
+      logger.silly('travelIdMiddleware END');
       next();
     } catch (err) {
+      logger.error(err);
+      logger.silly('next(err)');
+      logger.silly('travelIdMiddleware END');
       next(err);
     }
   } else {
+    logger.silly('next()');
+    logger.silly('travelIdMiddleware END');
     next();
   }
 };

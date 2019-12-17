@@ -1,13 +1,16 @@
-const { addLogger } = require('../../config/logger');
+const LoggerClass = require('../../config/LoggerClass');
+
+const Logger = new LoggerClass('expensesMiddleware');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('utils\\middleware\\expenseMiddleware INITIALIZING!');
+
 const Travel = require('../../models/Travel');
 const Expense = require('../../models/Expense');
 const Rate = require('../../models/Rate');
 
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
-
+// TODO add documentation
 module.exports = async (req, res, next) => {
-  Logger.silly('expenseIdMiddleware');
+  logger.silly('expenseIdMiddleware');
   if (
     (!res.locals.expense || res.locals.expense._id !== req.params.id) &&
     req.params.id !== 'new'
@@ -15,6 +18,7 @@ module.exports = async (req, res, next) => {
     try {
       const baseUrl = req.baseUrl.split('/');
       const travelId = baseUrl[2];
+      logger.silly(`travelId: ${travelId}`);
       const travel = await Travel.findById(travelId).populate({
         path: 'expenses',
         populate: { path: 'curRate' }
@@ -37,11 +41,15 @@ module.exports = async (req, res, next) => {
       }
       res.locals.expense = expense;
       res.locals.rates = rates;
+      logger.silly({ expense });
+      logger.silly(`rates.length: ${rates.length}`);
       next();
     } catch (err) {
+      logger.err(err);
       next(err);
     }
   } else {
+    logger.silly('next()');
     next();
   }
 };

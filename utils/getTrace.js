@@ -27,6 +27,8 @@ const path = require('path');
  * @property {traceObject} trace Last element from stack.
  */
 
+
+// TODO skip getTrace and LoggerClass stack
 /**
  * Creates trace information until internal modules.
  * @memberof module:utils/getTrace
@@ -48,7 +50,7 @@ const getTrace = () => {
     const line = element.getLineNumber();
     const column = element.getColumnNumber();
     const type = element.getTypeName();
-    const short = file ? file.replace(`${dirname}\\`, '') : 'unknown';
+    const short = file.replace(`${dirname}\\`, '');
     if (file.includes('node_modules')) {
       continue;
     }

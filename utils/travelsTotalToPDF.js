@@ -1,13 +1,14 @@
 const PdfPrinter = require('pdfmake');
 const moment = require('moment');
 const fs = require('fs');
+const LoggerClass = require('../config/LoggerClass');
+
+const Logger = new LoggerClass('travelsTotalToPDF');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('utils\\travelsTotalToPDF INITIALIZING!');
 
 const { FONTS } = require('../lib/constants');
 const { toCurrencyFormat } = require('./utils');
-const { addLogger } = require('../config/logger');
-
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
 
 const printer = new PdfPrinter(FONTS);
 
@@ -67,7 +68,7 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
     style: totalRowStyle
   }];
   body.push(totalRow);
-  Logger.debug(`Build table body => ${body}`);
+  logger.debug(`Build table body => ${body}`);
   return body;
 }
 
@@ -115,8 +116,8 @@ function createTravelsTotalTableData(travels, indexes) {
 
 // Returns TOTAL pdfmake stream
 module.exports = (travels, user, dateRange, sum, indexes) => {
-  Logger.debug('Creating pdf Total');
-  Logger.debug(`Travel indexes: ${indexes}`);
+  logger.debug('Creating pdf Total');
+  logger.debug(`Travel indexes: ${indexes}`);
   const titlePdf = 'TOTAL';
   const authorPdf = `${user.profile.name}`;
   const subjectPdf = 'Travel expenses';
@@ -125,7 +126,7 @@ module.exports = (travels, user, dateRange, sum, indexes) => {
   const { dt } = dateRange;
   const dateFrom = moment(df).format('ddd, MMM Do YYYY');
   const dateTo = moment(dt).format('ddd, MMM Do YYYY');
-  Logger.debug(`dateFrom: ${dateFrom}, dateTo: ${dateTo}`);
+  logger.debug(`dateFrom: ${dateFrom}, dateTo: ${dateTo}`);
 
   const tableData = createTravelsTotalTableData(travels, indexes);
 
@@ -258,6 +259,6 @@ module.exports = (travels, user, dateRange, sum, indexes) => {
   const pdfDocPath = `./pdf/TOTAL_${user._id}_${df}_${dt}.pdf`;
   pdfDoc.pipe(fs.createWriteStream(pdfDocPath));
   pdfDoc.end();
-  Logger.debug('Returning pdfDoc');
+  logger.debug('Returning pdfDoc');
   return pdfDoc;
 };

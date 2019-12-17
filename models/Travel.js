@@ -1,11 +1,11 @@
 /* eslint-disable func-names */
 
 const mongoose = require('mongoose');
-const { addLogger } = require('../config/logger');
+const LoggerClass = require('../config/LoggerClass');
 
-// Logger
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
+const Logger = new LoggerClass('Travel');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('models\\Travel INITIALIZING!');
 
 const { ObjectId } = mongoose.Schema.Types;
 
@@ -57,6 +57,7 @@ const TravelSchema = new mongoose.Schema(travelSchemaObject, {
  It's Travel document method.
  Returns same document for which the total is calculated.
  Before use you have to find document with populate expenses
+ Can not be arrow function
  EXAMPLE:
  Travel
  .findOne({_id: doc._id, _user: req.user.id})
@@ -64,7 +65,7 @@ const TravelSchema = new mongoose.Schema(travelSchemaObject, {
  .then((doc) => {doc.updateTotal()}
  */
 TravelSchema.methods.updateTotal = function() {
-  Logger.debug('updateTravel Schema methods');
+  logger.debug('updateTravel Schema methods');
   this.total = 0;
   this.expenses.forEach(expense => {
     this.total = Number(this.total) + Number(expense.amountConverted);
@@ -79,7 +80,8 @@ TravelSchema.methods.updateTotal = function() {
  Returns Travel model aggregation Travel.aggregate(Object[])
  */
 TravelSchema.statics.byYear_byMonth = function (user) {
-  Logger.debug('byYear_byMonth Schema statics');
+  logger.silly({ user });
+  logger.debug('byYear_byMonth Schema statics');
   return this.aggregate([
     {
       $match: {
@@ -160,7 +162,8 @@ TravelSchema.statics.byYear_byMonth = function (user) {
  Returns Travel model aggregation Travel.aggregate(Object[])
  */
 TravelSchema.statics.byMonth = function (user) {
-  Logger.debug('byMonth Schema statics');
+  logger.silly({ user });
+  logger.debug('byMonth Schema statics');
   return this.aggregate([
     {
       $match: {

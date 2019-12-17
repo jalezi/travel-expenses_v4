@@ -21,9 +21,9 @@ const logDevFormat = winston.format.printf(info => {
   let { level, label, message, pathDepth } = info;
   const { timestamp, ms } = info;
   message = deleteNewLine(label, message);
-  label = info.label.padStart(27);
-  level = info.level.padStart(15);
-  pathDepth = info.pathDepth.toString().padStart(3);
+  label = label.padStart(27);
+  level = level.padStart(15);
+  pathDepth = pathDepth.toString().padStart(3);
   return `${timestamp} ${level} [${pathDepth}] [${label}]: ${message} [${ms}]`;
 });
 

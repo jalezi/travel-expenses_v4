@@ -221,8 +221,8 @@ exports.getTravelExpensesPDF = async function (req, res) {
  */
 exports.getTravels = async function (req, res, next) {
   logger.debug('Getting travels');
-  let filter;
-  let sortBy;
+  // let filter;
+  // let sortBy;
   let searchMinDate;
   let searchMaxDate;
   let minDate;
@@ -230,11 +230,11 @@ exports.getTravels = async function (req, res, next) {
   let yearMin;
   let yearMax;
   let years = [];
-  filter = req.query.filter;
+  let { filter } = req.query;
   if (!filter) {
     filter = 'All';
   }
-  sortBy = req.query.sortBy;
+  let { sortBy } = req.query;
   if (!sortBy) {
     sortBy = '-dateFrom';
   }
@@ -573,7 +573,7 @@ exports.updateTravel = async function (req, res, next) {
      * Calculate travel total. New expenses date, new rate.
      * Rates for same currency are not the same for different dates.
      */
-    updateExpensesToMatchTravelRangeDates(travel, res.locals.rates).then(() => {
+    updateExpensesToMatchTravelRangeDates(travel).then(() => {
       travel.save().then(doc => {
         Travel.findOne({ _id: doc._id, _user: req.user.id })
           .populate({ path: 'expenses', populate: { path: 'curRate' } })

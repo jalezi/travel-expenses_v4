@@ -1,18 +1,20 @@
 const Expense = require('../models/Expense');
 const Currency = require('../models/Currency');
 
+const LoggerClass = require('../config/LoggerClass');
+
+const Logger = new LoggerClass('updateExpensesToMatchTravelRangeDates');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('utils\\updateExpensesToMatchTravelRangeDates INITIALIZING!');
+
 const { findRatesByExactOrClosestDate } = require('./utils');
 const { convertRateToHomeCurrencyRate } = require('./utils');
 
-const { addLogger } = require('../config/logger');
-
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
 
 // Returns true if expense date is not in travel's dates range
 function checkExpenseDate(expDate, travelDateFrom, travelDateTo) {
   const condition = expDate < travelDateFrom || expDate > travelDateTo;
-  Logger.debug(`Cheking expense date. Date in travel's dates: ${!condition}`);
+  logger.debug(`Cheking expense date. Date in travel's dates: ${!condition}`);
   if (condition) {
     return true;
   }
@@ -22,11 +24,11 @@ function checkExpenseDate(expDate, travelDateFrom, travelDateTo) {
 // Returns new expense, based on travel dates range.
 function setNewExpenseDate(expDate, travelDateFrom, travelDateTo) {
   if (expDate < travelDateFrom) {
-    Logger.debug(`Expense date is lower than travel date from: ${expDate} < ${travelDateFrom}`);
+    logger.debug(`Expense date is lower than travel date from: ${expDate} < ${travelDateFrom}`);
     return travelDateFrom;
   }
   if (expDate > travelDateTo) {
-    Logger.debug(`Expense date is greater than travel date to: ${expDate} > ${travelDateTo}`);
+    logger.debug(`Expense date is greater than travel date to: ${expDate} > ${travelDateTo}`);
     return travelDateTo;
   }
 }
@@ -37,11 +39,11 @@ Returns new currency object based on user default currency.
 Throws Error if something goes wrong
 */
 async function createNewCurrency(expenseDate, homeCurrency, invoiceCurrency) {
-  Logger.debug('Creating new currency');
+  logger.debug('Creating new currency');
   try {
     let cur = {};
     const dateRates = await findRatesByExactOrClosestDate(expenseDate);
-    const convertedRate = await convertRateToHomeCurrencyRate(
+    const convertedRate = convertRateToHomeCurrencyRate(
       dateRates.rates,
       homeCurrency,
       invoiceCurrency
@@ -52,7 +54,7 @@ async function createNewCurrency(expenseDate, homeCurrency, invoiceCurrency) {
       date: expenseDate,
       rate: cur
     });
-    Logger.debug(`New currency: {base: ${curRate.base}, date: ${curRate.date}, rate: ${cur.toString()}}`);
+    logger.debug(`New currency: {base: ${curRate.base}, date: ${curRate.date}, rate: ${cur.toString()}}`);
     return { curRate, convertedRate };
   } catch (err) {
     throw new Error(err);

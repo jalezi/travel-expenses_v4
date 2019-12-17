@@ -20,6 +20,8 @@ const Travel = require('../models/Travel');
 const Expense = require('../models/Expense');
 const { toTitleCase } = require('../utils/utils');
 
+const { reqAssertion } = require('./userMiddleware');
+
 const randomBytesAsync = promisify(crypto.randomBytes);
 
 /**
@@ -133,18 +135,17 @@ exports.getSignup = (req, res) => {
  */
 exports.postSignup = (req, res, next) => {
   logger.debug('Posting signup form');
-  req.assert('email', 'Email is not valid').isEmail();
+  // req.assert('email', 'Please enter a valid email address.').isEmail();
   req.assert('password', 'Password must be at least 4 characters long').len(4);
   req
     .assert('confirmPassword', 'Passwords do not match')
     .equals(req.body.password);
-  req.assert('fName', 'First name should not be empty').notEmpty();
-  req.assert('lName', 'Last name should not be empty').notEmpty();
-  req.assert('team', 'Team should not be empty').notEmpty();
-  req.assert('jobPosition', 'Position should not be empty').notEmpty();
+  let errors = reqAssertion(req);
   req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
 
-  const errors = req.validationErrors();
+  if (!errors) {
+    errors = req.validationErrors();
+  }
 
   if (errors) {
     req.flash('errors', errors);
@@ -215,18 +216,16 @@ exports.getAccount = (req, res) => {
  */
 exports.postUpdateProfile = (req, res, next) => {
   logger.debug('Updating account profile');
-  req.assert('email', 'Please enter a valid email address.').isEmail();
+  // req.assert('email', 'Please enter a valid email address.').isEmail();
   req
     .assert('homeCurrency', 'Home currency should have exactly 3 characters')
     .isLength({ min: 3, max: 3 });
-  req.assert('perMileAmount', 'Per mile amount should be number').isNumeric();
-  req.assert('fName', 'First name should not be empty').notEmpty();
-  req.assert('lName', 'Last name should not be empty').notEmpty();
-  req.assert('team', 'Team should not be empty').notEmpty();
-  req.assert('jobPosition', 'Position should not be empty').notEmpty();
+  let errors = reqAssertion(req);
   req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
 
-  const errors = req.validationErrors();
+  if (!errors) {
+    errors = req.validationErrors();
+  }
 
   if (errors) {
     req.flash('errors', errors);

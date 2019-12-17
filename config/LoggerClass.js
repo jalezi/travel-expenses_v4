@@ -1,7 +1,5 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-classes-per-file */
-
-// path
 const path = require('path');
 const { createLogger, config, transports, format } = require('winston');
 const stripAnsi = require('strip-ansi');
@@ -64,7 +62,7 @@ const logTestFormat = format.printf(info => {
 
 /**
  * Winston format.printf function for development mode.
- * If label for Logger.mainLogger is not provided then sets label as 'main.
+ * If label for Logger.mainLogger is not provided then sets label as 'main'.
  * @private
  * @memberof module:config/LoggerClass
  * @function logDevFormat
@@ -81,12 +79,14 @@ const logDevFormat = format.printf(info => {
   requestId = requestId.toString().padStart(3, '0'); // adds zeros in front of number
 
   let msg = '';
+  // include data message
   if (dataMessage) {
     msg = `${timestamp} ${level} [${requestId}] [${label}]: ${message} ${dataMessage} [${ms}] in \\${short}:${line}:${column}\n`;
   } else {
     msg = `${timestamp} ${level} [${requestId}] [${label}]: ${message} [${ms}] in \\${short}:${line}:${column}`;
   }
 
+  // include stack message
   if (info.stackTrace) {
     msg += stackMessage;
   }
@@ -101,7 +101,7 @@ const logDevFormat = format.printf(info => {
  * of message.
  *
  * Adds new properties from trace object to info object: line, column and short.
- * If object is passed as info.message converts info.message to info.metadata
+ * If object is passed as first argument instead of string then converts object to message.
  * @private
  * @memberof module:config/LoggerClass
  * @function specialFormat
@@ -122,9 +122,10 @@ const specialFormat = format(info => {
   info.column = !info.column ? trace.column : info.column;
   info.short = !info.short ? trace.short : info.short;
 
-  // Removes ANSI code in string
+  // Checks if message comes from morgan logger, sets label and removes newline from message
   let http;
   try {
+    // Removes ANSI code in string
     http = stripAnsi(info.message.substring(0, info.message.indexOf(' ')));
     // Checks if message is from morgan logger. If true, sets label to 'http'.
     if (HTTP.includes(http)) {
@@ -133,7 +134,8 @@ const specialFormat = format(info => {
     }
   } catch (error) {
     http = '';
-    // console.dir(info.message);
+    // Message is not string but object.
+    // Create metadata properties, prepare message and dataMessage.
     Object.keys(info.message).forEach(key => {
       info.metadata[key] = info.message[key];
     });
@@ -141,7 +143,12 @@ const specialFormat = format(info => {
     info.dataMessage = '\n';
   }
 
-  // TODO Set message if all special metadata is present
+  // Check for specific metadata and add special message to dataMessage.
+  if (info.metadata.user) {
+    let { user } = info.metadata;
+    info.dataMessage += `\t\tuser: ${user._id}`;
+  }
+
   if (info.metadata.travel) {
     let { travel } = info.metadata;
     info.dataMessage += `\t\ttravel: ${travel._id}, user: ${travel._user}`;
@@ -152,23 +159,18 @@ const specialFormat = format(info => {
     info.dataMessage += `\t\texpense: ${expense.type}`;
   }
 
-  if (info.metadata.user) {
-    let { user } = info.metadata;
-    info.dataMessage += `\t\tuser: ${user._id}`;
-  }
-
   if (info.metadata.currency) {
     let { currency } = info.metadata;
     let rateKey = Object.keys(currency.rate)[0];
     info.dataMessage += `\t\tcurrency: ${rateKey}, rate: ${currency.rate[rateKey]}, base: ${currency.base}, date: ${currency.date}`;
   }
 
+  // Create stackMessage - loop through trace stack.
   info.stackMessage = '\n\tTrace:\n';
   for (let index = 0; index < stack.length; index++) {
     const element = stack[index];
-    let {
-      func, method, line, column, type, short
-    } = element;
+    let { func, method, line } = element;
+    let { column, type, short } = element;
     let stackMessage = `\t\tat ${func} in \\${short}:${line}:${column}, method: ${method}, type: ${type}\n`;
     stackMessage = stripAnsi(stackMessage);
     info.stackMessage += stackMessage;
@@ -193,6 +195,7 @@ const wTransports = [];
  * @type {transports.Console}
  */
 let consoleTransport;
+// Set console depend on environment mode
 switch (process.env.NODE_ENV) {
   case (envNode.match(/^test/) || {}).input:
     consoleTransport = new transports.Console({
@@ -204,9 +207,11 @@ switch (process.env.NODE_ENV) {
       format: format.combine(
         format.align(),
         format.colorize({ all: true }),
-        format.metadata({ fillWith: ['currency', 'travel', 'expense', 'user'] }),
+        format.metadata({
+          fillWith: ['currency', 'travel', 'expense', 'user']
+        }),
         logDevFormat
-      ),
+      )
     });
     break;
   default:
@@ -232,7 +237,14 @@ const logger = createLogger({
     format.timestamp({ format: 'HH:mm:ss' }),
     format.ms(),
     format.metadata({
-      fillExcept: ['message', 'level', 'ms', 'timestamp', 'service', 'stackTrace'],
+      fillExcept: [
+        'message',
+        'level',
+        'ms',
+        'timestamp',
+        'service',
+        'stackTrace'
+      ],
       fillwith: ['label', 'requestId']
     }),
     specialFormat()
@@ -262,7 +274,9 @@ const stream = {
  * @alias Logger
  * @class
  * @classdesc Uses predefined {@link module:config/LoggerClass.logger winston logger}.
- * At the moment only console transport.
+ * Created logger uses specificFormat.
+ * Logger has at the moment only one transport - Console.
+ * Console transport depends on environment mode uses logDevFormat or logTestFormat.
  * @see {@link module:config/LoggerClass.logger winston logger}
  * @see {@link https://www.npmjs.com/package/winston NPM:winston}
  *
@@ -273,11 +287,36 @@ const stream = {
  * @property logger Winston child logger
  * @property {loggerTraceObject} traceObject Files informations
  * @property {number} count Number of class instances
- * @example Example
+ * @example Example 1
  * const LoggerClass = require('./config/LoggerClass');
  *
  * const Logger = new LoggerClass();
  * const { mainLogger, logger } = Logger;
+ *
+ * mainLogger.info('This is main logger info message');
+ * // returns 13:45:12 [info] [000] [main] This is info message in \config\LoggerClass:294:14
+ *
+ * logger.info('This is child logger info message');
+ * // returns 13:45:12 [info] [999] [child] This is info message in \config\LoggerClass:296:11
+ *
+ * @example Example 2
+ * const LoggerClass = require('./config/LoggerClass');
+ *
+ * const Logger = new LoggerClass('myLabel');
+ * const { mainLogger, logger } = Logger;
+ *
+ * mainLogger.info('This is main logger info message');
+ * // returns 13:45:12 [info] [000] [main] This is info message in \config\LoggerClass:304:14
+ *
+ * mainLogger.info('This is main logger info message', { label: 'new Label'});
+ * // returns 13:45:12 [info] [000] [new Label] This is info message in \config\LoggerClass:304:14
+ *
+ * logger.info('This is child logger info message');
+ * // returns 13:45:12 [info] [999] [myLabel] This is info message in \config\LoggerClass:306:11
+ *
+ * logger.info('This is child logger info message', { label: 'new Label'});
+ * // returns 13:45:12 [info] [999] [new Label] This is info message in \config\LoggerClass:306:11
+ *
  * @todo Define param requestId description
  *
  */

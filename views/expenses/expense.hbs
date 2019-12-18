@@ -83,13 +83,13 @@
     invoiceCurrency.value = "{{expense.currency}}";
     let r = JSON.parse(`{{{expenseCurRate}}}`);
     rate.value = r.rate[invoiceCurrency.value];
-    amount.value = {{expense.amount}};
-    amountConverted.value = {{expense.amountConverted}};
+    amount.value = "{{expense.amount}}";
+    amountConverted.value = "{{expense.amountConverted}}";
     document.getElementById('invoiceCurrency').required = true;
   } else {
     invoiceUnit.value = "{{expense.unit}}";
     travelPerMileAmount.value = "{{travel.perMileAmount}}";
-    amountDistance.value = {{expense.amount}};
+    amountDistance.value = "{{expense.amount}}";
     amountConverted2.value = "{{expense.amountConverted}}";
     document.getElementById('invoiceCurrency').required = false;
   }

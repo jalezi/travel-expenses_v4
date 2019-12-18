@@ -65,7 +65,7 @@ exports.getLogin = (req, res) => {
 exports.postLogin = (req, res, next) => {
   logger.debug('Posting login form');
   req.assert('email', 'Please enter a valid email address.').isEmail();
-  req.assert('password', 'Password cannot be blank').notEmpty();
+  req.assert('password', 'Password cannot be blank.').notEmpty();
   req.sanitize('email').normalizeEmail({
     gmail_remove_dots: false
   });
@@ -135,17 +135,9 @@ exports.getSignup = (req, res) => {
  */
 exports.postSignup = (req, res, next) => {
   logger.debug('Posting signup form');
-  req.assert('email', 'Please enter a valid email address.').isEmail();
-  req.assert('password', 'Password must be at least 4 characters long.').len(4);
-  req
-    .assert('confirmPassword', 'Passwords do not match')
-    .equals(req.body.password);
-  let errors = reqAssertion(req);
+  let assertObject = { email: true, password: true, cPassword: true, profile: true };
+  let errors = reqAssertion(req, assertObject);
   req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
-
-  if (!errors) {
-    errors = req.validationErrors();
-  }
 
   if (errors) {
     req.flash('errors', errors);
@@ -216,11 +208,8 @@ exports.getAccount = (req, res) => {
  */
 exports.postUpdateProfile = (req, res, next) => {
   logger.debug('Updating account profile');
-  req.assert('email', 'Please enter a valid email address.').isEmail();
-  req
-    .assert('homeCurrency', 'Home currency should have exactly 3 characters')
-    .isLength({ min: 3, max: 3 });
-  let errors = reqAssertion(req);
+  let assertObject = { email: true, hCurrency: true, profile: true };
+  let errors = reqAssertion(req, assertObject);
   req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
 
   if (!errors) {
@@ -236,7 +225,6 @@ exports.postUpdateProfile = (req, res, next) => {
     if (err) {
       return next(err);
     }
-
     user.email = req.body.email || '';
     user.profile.name = req.body.name || '';
     user.profile.fName = req.body.fName || '';
@@ -275,12 +263,9 @@ exports.postUpdateProfile = (req, res, next) => {
 exports.postUpdatePassword = (req, res, next) => {
   logger.debug('Updating account password');
   logger.debug('Update account password');
-  req.assert('password', 'Password must be at least 4 characters long').len(4);
-  req
-    .assert('confirmPassword', 'Passwords do not match')
-    .equals(req.body.password);
+  let assertObject = { password: true, cPassword: true };
 
-  const errors = req.validationErrors();
+  const errors = reqAssertion(req, assertObject);
 
   if (errors) {
     req.flash('errors', errors);
@@ -307,25 +292,29 @@ exports.postUpdatePassword = (req, res, next) => {
  *
  * Delete user account.
  */
-exports.postDeleteAccount = (req, res, next) => {
+exports.postDeleteAccount = async(req, res, next) => {
   logger.debug('Deleting account');
   const travelsIds = req.user.travels;
-  Expense.deleteMany({ travel: { $in: travelsIds } }, err => {
+  await Expense.deleteMany({ travel: { $in: travelsIds } }, err => {
     if (err) {
+      logger.error('Deleting account END - Expense - next err');
       next(err);
     }
   });
-  Travel.deleteMany({ _user: req.user._id }, err => {
+  await Travel.deleteMany({ _user: req.user._id }, err => {
     if (err) {
+      logger.error('Deleting account END - Travel - next err');
       next(err);
     }
   });
-  User.deleteOne({ _id: req.user.id }, err => {
+  await User.deleteOne({ _id: req.user.id }, err => {
     if (err) {
+      logger.error('Deleting account END - User - return next err');
       return next(err);
     }
     req.logout();
     req.flash('info', { msg: 'Your account has been deleted.' });
+    logger.debug('Deleteing account END');
     res.redirect('/');
   });
 };
@@ -411,9 +400,9 @@ exports.getReset = (req, res, next) => {
  */
 exports.postReset = (req, res, next) => {
   logger.debug('Reseting password');
-  req.assert('password', 'Password must be at least 4 characters long.').len(4);
-  req.assert('confirm', 'Passwords must match.').equals(req.body.password);
-  const errors = req.validationErrors();
+  let assertObject = { password: true, rPassword: true };
+  const errors = reqAssertion(req, assertObject);
+
   if (errors) {
     req.flash('errors', errors);
     return res.redirect('back');

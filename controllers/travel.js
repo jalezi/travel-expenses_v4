@@ -11,9 +11,7 @@ const Logger = new LoggerClass('travel');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('controllers\\travel INITIALIZING!');
 
-const User = require('../models/User');
-const Travel = require('../models/Travel');
-const Expense = require('../models/Expense');
+const { Expense, Travel, User } = require('../models');
 
 const { ObjectId } = mongoose.Types;
 
@@ -24,6 +22,8 @@ const updateExpensesToMatchTravelRangeDates = require('../utils/updateExpensesTo
 
 const travelExpensesToPDF = require('../utils/travelExpensesToPDF');
 const travelsTotalToPDF = require('../utils/travelsTotalToPDF');
+
+const { currencyOptions } = require('./utils');
 
 /**
  * Travel routes.
@@ -503,16 +503,7 @@ exports.deleteTravel = async function (req, res, next) {
  */
 exports.updateTravel = async function (req, res, next) {
   logger.debug('Updating(PATCH) single travel');
-  const currencyOptions = {
-    allow_negatives: false,
-    allow_negative_sign_placeholder: true,
-    thousands_separator: ',',
-    decimal_separator: '.',
-    allow_decimal: true,
-    require_decimal: false,
-    digits_after_decimal: [2],
-    allow_space_after_digits: false
-  };
+
   req
     .assert(
       'description',

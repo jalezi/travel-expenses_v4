@@ -8,8 +8,7 @@ const Logger = new LoggerClass('expense');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('controllers\\expense INITIALIZING!');
 
-const Travel = require('../models/Travel');
-const Expense = require('../models/Expense');
+const { Expense, Travel } = require('../models');
 
 const { ObjectId } = mongoose.Types;
 

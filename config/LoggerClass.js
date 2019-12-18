@@ -156,7 +156,7 @@ const specialFormat = format(info => {
 
   if (info.metadata.expense) {
     let { expense } = info.metadata;
-    info.dataMessage += `\t\texpense: ${expense._id}, travel: ${expense._travel}`;
+    info.dataMessage += `\t\texpense: ${expense._id}, travel: ${expense.travel}`;
   }
 
   if (info.metadata.currency) {

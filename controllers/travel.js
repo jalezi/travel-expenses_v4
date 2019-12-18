@@ -410,6 +410,10 @@ exports.getTravel = async function (req, res, next) {
   }
   const { travel } = res.locals;
 
+  if (!travel) {
+    return next(new Error('Travel not found'));
+  }
+
   try {
     const { expenses } = travel;
 
@@ -422,9 +426,6 @@ exports.getTravel = async function (req, res, next) {
       }
     });
 
-    if (!travel) {
-      return next(new Error('Travel not found'));
-    }
 
     res.render('travels/travel', {
       title: 'Travel',

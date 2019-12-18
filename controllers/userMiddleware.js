@@ -5,10 +5,13 @@ const { mainLogger, logger } = Logger;
 mainLogger.debug('controllers\\userMiddleware INITIALIZING');
 
 exports.reqAssertion = (
-  req, { email = false, password = false, cPassword = false, rPassword = false, hCurrency = false, profile = false }
+  req, {
+    email = false, password = false, cPassword = false,
+    rPassword = false, hCurrency = false, profile = false
+  }
 ) => {
   logger.debug('reqAssertion');
-  logger.debug(`email: ${email}, password: ${password}, cPassoword: ${cPassword}, hCurrency: ${hCurrency}`);
+  logger.silly(`e: ${email}, p: ${password}, cP: ${cPassword}, hC: ${hCurrency}, pr:${profile}`);
   if (email) {
     req.assert('email', 'Please enter a valid email address.').isEmail();
   }

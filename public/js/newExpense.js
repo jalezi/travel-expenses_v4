@@ -13,6 +13,20 @@ function calcAmount(rate, amount, currency = true) {
   return result;
 }
 
+function setAmountConvert() {
+  if (amount.value !== '' && rate.value !== '' && rate.value !== 0) {
+    amountConverted.value = amount.value / rate.value;
+    amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
+  }
+}
+
+function setAmountConvert2() {
+  if (amountDistance.value !== '' && travelPerMileAmount.value !== '') {
+    amountConverted2.value = amountDistance.value * travelPerMileAmount.value;
+    amountConverted2.value = parseFloat($('#amountConverted2').val()).toFixed(2);
+  }
+}
+
 $(document).ready(() => {
   // Place JavaScript code here...
 
@@ -57,10 +71,7 @@ $(document).ready(() => {
   };
 
   amount.onchange = function() {
-    if (amount.value !== '' && rate.value !== '' && rate.value !== 0) {
-      amountConverted.value = amount.value / rate.value;
-      amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
-    }
+    setAmountConvert();
   };
 
   rate.onfocusout = function () {
@@ -70,10 +81,7 @@ $(document).ready(() => {
   };
 
   rate.onchange = function () {
-    if (amount.value !== '' && rate.value !== '' && rate.value !== 0) {
-      amountConverted.value = amount.value / rate.value;
-      amountConverted.value = parseFloat($('#amountConverted').val()).toFixed(2);
-    }
+    setAmountConvert();
   };
 
   amountDistance.onfocusout = function () {
@@ -83,10 +91,7 @@ $(document).ready(() => {
   };
 
   amountDistance.onchange = function () {
-    if (amountDistance.value !== '' && travelPerMileAmount.value !== '') {
-      amountConverted2.value = amountDistance.value * travelPerMileAmount.value;
-      amountConverted2.value = parseFloat($('#amountConverted2').val()).toFixed(2);
-    }
+    setAmountConvert2();
   };
 
 
@@ -98,10 +103,7 @@ $(document).ready(() => {
   };
 
   travelPerMileAmount.onchange = function () {
-    if (amountDistance.value !== '' && travelPerMileAmount.value !== '') {
-      amountConverted2.value = amountDistance.value * travelPerMileAmount.value;
-      amountConverted2.value = parseFloat($('#amountConverted2').val()).toFixed(2);
-    }
+    setAmountConvert2();
   };
 
   amountDistance2.onfocusout = function () {

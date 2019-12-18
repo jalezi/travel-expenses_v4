@@ -64,7 +64,7 @@ exports.getLogin = (req, res) => {
  */
 exports.postLogin = (req, res, next) => {
   logger.debug('Posting login form');
-  req.assert('email', 'Email is not valid').isEmail();
+  req.assert('email', 'Please enter a valid email address.').isEmail();
   req.assert('password', 'Password cannot be blank').notEmpty();
   req.sanitize('email').normalizeEmail({
     gmail_remove_dots: false
@@ -135,8 +135,8 @@ exports.getSignup = (req, res) => {
  */
 exports.postSignup = (req, res, next) => {
   logger.debug('Posting signup form');
-  // req.assert('email', 'Please enter a valid email address.').isEmail();
-  req.assert('password', 'Password must be at least 4 characters long').len(4);
+  req.assert('email', 'Please enter a valid email address.').isEmail();
+  req.assert('password', 'Password must be at least 4 characters long.').len(4);
   req
     .assert('confirmPassword', 'Passwords do not match')
     .equals(req.body.password);
@@ -216,7 +216,7 @@ exports.getAccount = (req, res) => {
  */
 exports.postUpdateProfile = (req, res, next) => {
   logger.debug('Updating account profile');
-  // req.assert('email', 'Please enter a valid email address.').isEmail();
+  req.assert('email', 'Please enter a valid email address.').isEmail();
   req
     .assert('homeCurrency', 'Home currency should have exactly 3 characters')
     .isLength({ min: 3, max: 3 });

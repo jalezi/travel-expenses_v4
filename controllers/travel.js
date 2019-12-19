@@ -20,8 +20,8 @@ const constants = require('../lib/constants');
 
 const updateExpensesToMatchTravelRangeDates = require('../utils/updateExpensesToMatchTravelRangeDates');
 
-const travelExpensesToPDF = require('../utils/travelExpensesToPDF');
-const travelsTotalToPDF = require('../utils/travelsTotalToPDF');
+const travelExpensesToPDF = require('../utils/toPDF/travelExpensesToPDF');
+const travelsTotalToPDF = require('../utils/toPDF/travelsTotalToPDF');
 
 const { currencyOptions } = require('./utils');
 

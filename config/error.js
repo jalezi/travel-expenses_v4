@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const LoggerClass = require('../config/LoggerClass');
 
-const Logger = new LoggerClass('passport');
+const Logger = new LoggerClass('error');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('config\\error INITIALIZING!');
 

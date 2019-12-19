@@ -1,14 +1,17 @@
 const PdfPrinter = require('pdfmake');
 const moment = require('moment');
 const fs = require('fs');
-const LoggerClass = require('../config/LoggerClass');
+const LoggerClass = require('../../config/LoggerClass');
 
 const Logger = new LoggerClass('travelsTotalToPDF');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('utils\\travelsTotalToPDF INITIALIZING!');
 
-const { FONTS } = require('../lib/constants');
-const { toCurrencyFormat } = require('./utils');
+const { FONTS } = require('../../lib/constants');
+const { toCurrencyFormat } = require('../utils');
+const {
+  createInfo, footer, header, createContent, styles
+} = require('./');
 
 const printer = new PdfPrinter(FONTS);
 
@@ -118,12 +121,8 @@ function createTravelsTotalTableData(travels, indexes) {
 module.exports = (travels, user, dateRange, sum, indexes) => {
   logger.debug('Creating pdf Total');
   logger.debug(`Travel indexes: ${indexes}`);
-  const titlePdf = 'TOTAL';
-  const authorPdf = `${user.profile.name}`;
-  const subjectPdf = 'Travel expenses';
-  const keywordsPdf = 'travel report expense';
-  const { df } = dateRange;
-  const { dt } = dateRange;
+
+  const { df, dt } = dateRange;
   const dateFrom = moment(df).format('ddd, MMM Do YYYY');
   const dateTo = moment(dt).format('ddd, MMM Do YYYY');
   logger.debug(`dateFrom: ${dateFrom}, dateTo: ${dateTo}`);
@@ -131,127 +130,34 @@ module.exports = (travels, user, dateRange, sum, indexes) => {
   const tableData = createTravelsTotalTableData(travels, indexes);
 
   const dataProperties = ['dateFrom', 'dateTo', 'description', 'currency', 'perMile', 'amount'];
-  let homeDistance;
-  if (user.homeDistance === 'mi') {
-    homeDistance = 'MILE';
-  } else if (user.homeDistance === 'km') {
-    homeDistance = 'KM';
-  } else {
-    homeDistance = 'X';
-  }
+  let homeDistance = (user.homeDistance === 'mi') ? 'MILE' : 'KM';
+
+  const subjectPdf = `Total sum of expenses from ${dateFrom} to ${dateTo}`;
+  const info = createInfo('Travels total', user.profile.name, subjectPdf, 'total report travel expense ');
+
   const tableHeader = ['FROM', 'TO', 'DESCRIPTION', 'CUR', `PER ${homeDistance}`, 'AMOUNT'];
   const tableStyle = { alignment: 'center', fontSize: 10, margin: [20, 0, 20, 0], width: '*' };
-
   const travelsTable = table(tableData, dataProperties, tableHeader, tableStyle, sum);
+
   sum = toCurrencyFormat(sum);
+  const information = {};
+  information.title = 'TRAVELS TOTAL';
+  information.description = 'TOTAL';
+  information.user = user;
+  information.dateRange = dateRange;
+  information.sum = sum;
+  information.currency = user.homeCurrency;
+  information.table = travelsTable;
+  const content = createContent(information);
 
   const docDefinition = {
     // ...
     // pageSize: 'A4',
-    footer: (currentPage, pageCount) => [
-
-      {
-        canvas: [
-          {
-            type: 'line', x1: 30, y1: 15, x2: 559.28, y2: 15, lineWidth: 1, lineCap: 'square'
-          }
-        ]
-      },
-
-      { text: `${currentPage.toString()} of ${pageCount}`, alignment: 'center', fontSize: 10, margin: [0, 10] }
-    ],
-    header: (currentPage, pageCount, pageSize) =>
-      // you can apply any logic and return any valid pdfmake element
-      [
-        {
-          columns: [
-            { text: 'Created with TExpApp', alignment: (currentPage % 2) ? 'left' : 'right', fontSize: 10 },
-            { text: moment().format('YYYY-MM-DD'), alignment: (currentPage % 2) ? 'right' : 'left', fontSize: 10 }
-          ]
-        },
-        {
-          canvas: [{
-            type: 'rect', x: 170, y: 32, w: pageSize.width - 170, h: 100, fillColor: 'red'
-          }]
-        }
-      ],
-    info: {
-      producer: 'myApp',
-      title: titlePdf,
-      author: authorPdf,
-      subject: subjectPdf,
-      keywords: keywordsPdf,
-    },
-    content: [
-      {
-        stack: [
-          { text: 'TOTAL REPORT' }
-        ],
-        style: 'title'
-      },
-      {
-        stack: [
-          {
-            style: 'personInfo',
-            layout: 'noBorders',
-            table: {
-              style: 'personInfo',
-              widths: ['auto', 'auto'],
-              body: [
-                ['Team:', user.team],
-                ['Name:', user.fullName()],
-                ['Position:', user.jobPosition]
-              ]
-            }
-          }
-        ]
-      },
-      {
-        stack: [
-          { text: 'TOTAL', style: 'description' },
-          {
-            layout: 'noBorders',
-            table: {
-              style: 'travelDate',
-              widths: ['*', 'auto'],
-              body: [
-                ['From:', dateFrom],
-                ['To:', dateTo]
-              ]
-
-            }
-          }
-        ],
-        style: 'travelInfo'
-      },
-      { text: `Total: ${user.homeCurrency} ${sum}`, margin: [0, 0, 0, 20], color: '#696969' },
-      travelsTable
-    ],
-    styles: {
-      title: {
-        fontSize: 14,
-        bold: true,
-        margin: [0, 20, 0, 10]
-      },
-      personInfo: {
-        fontSize: 12,
-        margin: [0, 0, 0, 30],
-        alignment: 'left',
-        color: '#696969'
-      },
-      travelInfo: {
-        margin: [0, 20, 0, 30],
-        alignment: 'right'
-      },
-      description: {
-        fontSize: 18,
-        bold: true
-      },
-      travelDate: {
-        fontSize: 12,
-        bold: false
-      }
-    }
+    footer,
+    header,
+    info,
+    content,
+    styles
   };
 
   const pdfDoc = printer.createPdfKitDocument(docDefinition);

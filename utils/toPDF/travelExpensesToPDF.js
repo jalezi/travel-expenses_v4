@@ -18,7 +18,7 @@ const { FONTS } = require('../../lib/constants');
 const { toCurrencyFormat } = require('../utils');
 
 const {
-  createInfo, footer, header, createContent, styles
+  createInfo, footer, header, createContent, styles, createTableObject
 } = require('./');
 
 const printer = new PdfPrinter(FONTS);
@@ -53,25 +53,15 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
 
     body.push(dataRow);
   });
-  const totalRowStyle = {
-    alignment: 'right',
-    bold: true,
-    fontSize: 12
-  };
   const totalRow = [
     {
       colSpan: 6,
       text: 'TOTAL',
-      style: totalRowStyle
-    },
-    {},
-    {},
-    {},
-    {},
-    {},
+      style: styles.totalRowStyle
+    }, {}, {}, {}, {}, {},
     {
       text: toCurrencyFormat(total),
-      style: totalRowStyle
+      style: styles.totalRowStyle
     }
   ];
   body.push(totalRow);
@@ -81,27 +71,23 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
 
 // Returns pdfmake table
 function table(data, columns, tableHeader, style = {}, travelTotal = 0) {
-  return {
-    style,
-    layout: 'lightHorizontalLines',
-    alignment: 'center',
-    table: {
-      widths: ['auto', 'auto', '*', 'auto', 'auto', 'auto', 'auto'],
-      heights(row) {
-        switch (row) {
-          case 0:
-            return 10;
+  logger.debug('table');
+  const heights = row => {
+    switch (row) {
+      case 0:
+        return 10;
 
-          case data.length + 1:
-            return 5;
-          default:
-            return 20;
-        }
-      },
-      headerRows: 1,
-      body: buildTableBody(data, columns, tableHeader, travelTotal)
+      case data.length + 1:
+        return 5;
+      default:
+        return 20;
     }
   };
+  const widths = ['auto', 'auto', '*', 'auto', 'auto', 'auto', 'auto'];
+  const body = buildTableBody(data, columns, tableHeader, travelTotal);
+  const tableObject = createTableObject({ style, heights, table: { widths, body } });
+  logger.debug('table END');
+  return tableObject;
 }
 
 // Returns data for table data

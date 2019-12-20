@@ -1,8 +1,3 @@
-// exports.getInfo = async (producer, title, author, subject, keywords) => {
-//   const info = { producer, title, author, subject, keywords };
-//   return info;
-// };
-
 const moment = require('moment');
 
 const LoggerClass = require('../../config/LoggerClass');
@@ -157,6 +152,19 @@ exports.createContent = info => {
   return content;
 };
 
+exports.createTableObject = ({ ...args }) => {
+  logger.debug('createTableObject');
+  let basicObject = {};
+  basicObject.layout = 'lightHorizontalLines';
+  basicObject.alignment = 'center';
+  basicObject.table = {};
+  basicObject.table.headerRows = 1;
+
+  const tableObject = { ...basicObject, ...args };
+  logger.debug('createTableObject END');
+  return tableObject;
+};
+
 exports.styles = {
   title: {
     fontSize: 14,
@@ -180,5 +188,15 @@ exports.styles = {
   travelDate: {
     fontSize: 12,
     bold: false
+  },
+  totalRowStyle: {
+    alignment: 'right',
+    bold: true,
+    fontSize: 12
+  },
+  invoiceNumberStyle: {
+    alignment: 'left',
+    bold: true,
+    fontSize: 8
   }
 };

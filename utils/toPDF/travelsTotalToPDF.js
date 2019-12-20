@@ -10,7 +10,7 @@ mainLogger.debug('utils\\travelsTotalToPDF INITIALIZING!');
 const { FONTS } = require('../../lib/constants');
 const { toCurrencyFormat } = require('../utils');
 const {
-  createInfo, footer, header, createContent, styles
+  createInfo, footer, header, createContent, styles, createTableObject
 } = require('./');
 
 const printer = new PdfPrinter(FONTS);
@@ -40,64 +40,51 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
       }
       dataRow.push(dataRowObject);
     });
-    const invoiceNumberStyle = {
-      alignment: 'left',
-      bold: true,
-      fontSize: 8
-    };
     let idRow = [{
       colSpan: 1,
       text: 'invoice:',
-      style: invoiceNumberStyle
+      style: styles.invoiceNumberStyle
     }, {
       colSpan: 1,
       text: row._id,
-      style: invoiceNumberStyle
+      style: styles.invoiceNumberStyle
     }, {}, {}, {}, {}];
     body.push(idRow);
     body.push(dataRow);
   });
-  const totalRowStyle = {
-    alignment: 'right',
-    bold: true,
-    fontSize: 12
-  };
   const totalRow = [{
     colSpan: 5,
     text: 'TOTAL',
-    style: totalRowStyle
+    style: styles.totalRowStyle
   }, {}, {}, {}, {}, {
     text: totalInCurrencyFormat,
-    style: totalRowStyle
+    style: styles.totalRowStyle
   }];
   body.push(totalRow);
   logger.debug(`Build table body => ${body}`);
   return body;
 }
 
+
 // Returns pdfmake table
 function table(data, columns, tableHeader, style = {}, sum = 0) {
-  return {
-    style,
-    layout: 'lightHorizontalLines',
-    alignment: 'center',
-    table: {
-      widths: ['auto', 'auto', 'auto', 'auto', '*', 'auto'],
-      heights: row => {
-        switch (row) {
-          case 0:
-            return 10;
-          case data.length * 2 + 1:
-            return 5;
-          default:
-        }
-        let h = row % 2 === 0 ? 20 : 10;
-        return h;
-      },
-      headerRows: 1,
-      body: buildTableBody(data, columns, tableHeader, sum)
+  logger.debug('table');
+  const widths = ['auto', 'auto', 'auto', 'auto', '*', 'auto'];
+  const heights = row => {
+    switch (row) {
+      case 0:
+        return 10;
+      case data.length * 2 + 1:
+        return 5;
+      default:
     }
+    let h = row % 2 === 0 ? 20 : 10;
+    return h;
   };
+  const body = buildTableBody(data, columns, tableHeader, sum);
+  const tableObject = createTableObject({ style, heights, table: { widths, body } });
+  logger.debug('table END');
+  return tableObject;
 }
 
 // Retruns data for total table

@@ -1,10 +1,19 @@
 const moment = require('moment');
+const mongoose = require('mongoose');
 
 const LoggerClass = require('../../config/LoggerClass');
 
 const Logger = new LoggerClass('toPDF');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('utils\\toPDF INITIALIZING!');
+
+const { ObjectId } = mongoose.Types;
+const { FONTS } = require('../../lib/constants');
+const { toCurrencyFormat } = require('../utils');
+
+const utils = { ObjectId, FONTS, toCurrencyFormat };
+
+exports.utils = utils;
 
 exports.createInfo = (title, author, subject, keywords) => {
   logger.debug('createInfo');
@@ -165,7 +174,19 @@ exports.createTableObject = ({ ...args }) => {
   return tableObject;
 };
 
+const totalRowStyle = {
+  alignment: 'right',
+  bold: true,
+  fontSize: 12
+};
+
 exports.styles = {
+  tableStyle: {
+    alignment: 'center',
+    fontSize: 10,
+    margin: [20, 0, 20, 0],
+    width: '*'
+  },
   title: {
     fontSize: 14,
     bold: true,
@@ -189,14 +210,31 @@ exports.styles = {
     fontSize: 12,
     bold: false
   },
-  totalRowStyle: {
-    alignment: 'right',
-    bold: true,
-    fontSize: 12
-  },
+  totalRowStyle,
   invoiceNumberStyle: {
     alignment: 'left',
     bold: true,
     fontSize: 8
   }
 };
+
+const totalRow = (object = { colSpan: 1 }, n = 1, total = 0) => {
+  const first = {
+    text: 'TOTAL',
+    style: totalRowStyle
+  };
+  const firstObject = { ...first, ...object };
+  const tRow = [firstObject];
+  for (let index = 1; index <= n; index++) {
+    tRow.push({});
+  }
+  const last = {
+    text: toCurrencyFormat(total),
+    style: totalRowStyle
+  };
+  tRow.push(last);
+
+  return tRow;
+};
+
+exports.bTableBody = { totalRow };

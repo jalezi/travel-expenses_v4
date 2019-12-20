@@ -1,9 +1,6 @@
 /* eslint-disable prefer-destructuring */
-// test change gitflow again
-
 const PdfPrinter = require('pdfmake');
 const moment = require('moment');
-const mongoose = require('mongoose');
 const fs = require('fs');
 
 const LoggerClass = require('../../config/LoggerClass');
@@ -12,19 +9,25 @@ const Logger = new LoggerClass('travelExpensesToPDF');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('utils\\travelExpensesToPDF INITIALIZING!');
 
-const { ObjectId } = mongoose.Types;
-
-const { FONTS } = require('../../lib/constants');
-const { toCurrencyFormat } = require('../utils');
-
 const {
-  createInfo, footer, header, createContent, styles, createTableObject
+  utils,
+  createInfo,
+  footer,
+  header,
+  createContent,
+  styles,
+  createTableObject,
+  bTableBody
 } = require('./');
+
+const { ObjectId, FONTS, toCurrencyFormat } = utils;
+const { totalRow: tRow } = bTableBody;
 
 const printer = new PdfPrinter(FONTS);
 
 // Returns pdfmake table body
 function buildTableBody(data, columns, tableHeader, total = 0) {
+  logger.debug('buildTableBody');
   let body = [];
   if (!tableHeader) {
     tableHeader = columns;
@@ -53,19 +56,10 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
 
     body.push(dataRow);
   });
-  const totalRow = [
-    {
-      colSpan: 6,
-      text: 'TOTAL',
-      style: styles.totalRowStyle
-    }, {}, {}, {}, {}, {},
-    {
-      text: toCurrencyFormat(total),
-      style: styles.totalRowStyle
-    }
-  ];
+  const totalRow = tRow({ colSpan: 6 }, 5, total);
   body.push(totalRow);
   logger.debug(`Build table body => ${body}`);
+  logger.debug('buildTableBody END');
   return body;
 }
 
@@ -85,7 +79,11 @@ function table(data, columns, tableHeader, style = {}, travelTotal = 0) {
   };
   const widths = ['auto', 'auto', '*', 'auto', 'auto', 'auto', 'auto'];
   const body = buildTableBody(data, columns, tableHeader, travelTotal);
-  const tableObject = createTableObject({ style, heights, table: { widths, body } });
+  const tableObject = createTableObject({
+    style,
+    heights,
+    table: { widths, body }
+  });
   logger.debug('table END');
   return tableObject;
 }
@@ -101,8 +99,10 @@ function createTravelExpensesTableData(travel) {
     newObject.description = expense.description;
     newObject.amount = toCurrencyFormat(expense.amount);
     if (expense.type !== 'Mileage') {
-      newObject.currency = Object.keys(expense.curRate.rate)[0];
-      newObject.rate = Object.values(expense.curRate.rate)[0];
+      const entries = Object.entries(expense.curRate.rate);
+      const entry = entries[0];
+      newObject.currency = entry[0];
+      newObject.rate = entry[1];
     } else {
       newObject.currency = expense.unit;
       newObject.rate = travel.perMileAmount;
@@ -147,12 +147,6 @@ module.exports = (travel, user, idx) => {
     'RATE',
     travel.homeCurrency
   ];
-  const tableStyle = {
-    alignment: 'center',
-    fontSize: 10,
-    margin: [20, 0, 20, 0],
-    width: '*'
-  };
 
   const titlePdf = travel.description;
   const authorPdf = user.profile.name;
@@ -164,7 +158,7 @@ module.exports = (travel, user, idx) => {
     tableData,
     dataProperties,
     tableHeader,
-    tableStyle,
+    styles.tableStyle,
     travel.total
   );
 

@@ -7,18 +7,24 @@ const Logger = new LoggerClass('travelsTotalToPDF');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('utils\\travelsTotalToPDF INITIALIZING!');
 
-const { FONTS } = require('../../lib/constants');
-const { toCurrencyFormat } = require('../utils');
 const {
-  createInfo, footer, header, createContent, styles, createTableObject
+  utils,
+  createInfo,
+  footer,
+  header,
+  createContent,
+  styles,
+  createTableObject,
+  bTableBody
 } = require('./');
+
+const { FONTS, toCurrencyFormat } = utils;
+const { totalRow: tRow } = bTableBody;
 
 const printer = new PdfPrinter(FONTS);
 
-
 // Returns pdfmake table body
 function buildTableBody(data, columns, tableHeader, total = 0) {
-  const totalInCurrencyFormat = toCurrencyFormat(total);
   let body = [];
   if (!tableHeader) {
     tableHeader = columns;
@@ -31,7 +37,11 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
     columns.forEach(column => {
       const dataRowObject = {};
       dataRowObject.text = row[column].toString();
-      if (['amount', 'perMile', tableHeader[tableHeader.length - 1]].includes(column)) {
+      if (
+        ['amount', 'perMile', tableHeader[tableHeader.length - 1]].includes(
+          column
+        )
+      ) {
         dataRowObject.alignment = 'right';
       } else if (column === 'description') {
         dataRowObject.alignment = 'left';
@@ -40,31 +50,26 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
       }
       dataRow.push(dataRowObject);
     });
-    let idRow = [{
-      colSpan: 1,
-      text: 'invoice:',
-      style: styles.invoiceNumberStyle
-    }, {
-      colSpan: 1,
-      text: row._id,
-      style: styles.invoiceNumberStyle
-    }, {}, {}, {}, {}];
+    let idRow = [
+      {
+        colSpan: 1,
+        text: 'invoice:',
+        style: styles.invoiceNumberStyle
+      },
+      {
+        colSpan: 5,
+        text: row._id,
+        style: styles.invoiceNumberStyle
+      }
+    ];
     body.push(idRow);
     body.push(dataRow);
   });
-  const totalRow = [{
-    colSpan: 5,
-    text: 'TOTAL',
-    style: styles.totalRowStyle
-  }, {}, {}, {}, {}, {
-    text: totalInCurrencyFormat,
-    style: styles.totalRowStyle
-  }];
+  const totalRow = tRow({ colSpan: 5 }, 4, total);
   body.push(totalRow);
   logger.debug(`Build table body => ${body}`);
   return body;
 }
-
 
 // Returns pdfmake table
 function table(data, columns, tableHeader, style = {}, sum = 0) {
@@ -82,7 +87,11 @@ function table(data, columns, tableHeader, style = {}, sum = 0) {
     return h;
   };
   const body = buildTableBody(data, columns, tableHeader, sum);
-  const tableObject = createTableObject({ style, heights, table: { widths, body } });
+  const tableObject = createTableObject({
+    style,
+    heights,
+    table: { widths, body }
+  });
   logger.debug('table END');
   return tableObject;
 }
@@ -116,15 +125,40 @@ module.exports = (travels, user, dateRange, sum, indexes) => {
 
   const tableData = createTravelsTotalTableData(travels, indexes);
 
-  const dataProperties = ['dateFrom', 'dateTo', 'description', 'currency', 'perMile', 'amount'];
-  let homeDistance = (user.homeDistance === 'mi') ? 'MILE' : 'KM';
+  const dataProperties = [
+    'dateFrom',
+    'dateTo',
+    'description',
+    'currency',
+    'perMile',
+    'amount'
+  ];
+  let homeDistance = user.homeDistance === 'mi' ? 'MILE' : 'KM';
 
   const subjectPdf = `Total sum of expenses from ${dateFrom} to ${dateTo}`;
-  const info = createInfo('Travels total', user.profile.name, subjectPdf, 'total report travel expense ');
+  const info = createInfo(
+    'Travels total',
+    user.profile.name,
+    subjectPdf,
+    'total report travel expense '
+  );
 
-  const tableHeader = ['FROM', 'TO', 'DESCRIPTION', 'CUR', `PER ${homeDistance}`, 'AMOUNT'];
-  const tableStyle = { alignment: 'center', fontSize: 10, margin: [20, 0, 20, 0], width: '*' };
-  const travelsTable = table(tableData, dataProperties, tableHeader, tableStyle, sum);
+  const tableHeader = [
+    'FROM',
+    'TO',
+    'DESCRIPTION',
+    'CUR',
+    `PER ${homeDistance}`,
+    'AMOUNT'
+  ];
+
+  const travelsTable = table(
+    tableData,
+    dataProperties,
+    tableHeader,
+    styles.tableStyle,
+    sum
+  );
 
   sum = toCurrencyFormat(sum);
   const information = {};

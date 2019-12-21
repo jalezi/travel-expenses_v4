@@ -2,7 +2,7 @@ const expressHbs = require('express-hbs');
 const moment = require('moment');
 
 const { createElement } = require('../utils');
-const { createTwoCardElements } = require('../utils');
+const { createTwoCardElements, createOptions } = require('../utils');
 const { expenseTypes } = require('../../lib/globals');
 
 const LoggerClass = require('../../config/LoggerClass');
@@ -10,7 +10,6 @@ const LoggerClass = require('../../config/LoggerClass');
 const Logger = new LoggerClass('yearsAccordion');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('utils\\hbsHelpers\\yearsAccordion INITIALIZING!');
-
 
 /*
  Returns expense curRate object
@@ -22,37 +21,15 @@ const findCurRate = (travel, expense) => {
   logger.silly('findCurRate');
   let curRate;
   if (expense.type !== 'Mileage') {
-    curRate = travel.curRates.find(cr => cr._id.toString() === expense.curRate.toString());
+    curRate = travel.curRates.find(
+      cr => cr._id.toString() === expense.curRate.toString()
+    );
   } else {
     curRate = false;
   }
   return curRate;
 };
 
-/*
- Creates HTML 'option' elements
- */
-const createSelectOptions = (options, selected, elemAttrs = {}, valueToLowerCase = false) => {
-  logger.silly('createSelectOptions');
-  let result = '';
-  selected = (!selected) ? '' : selected;
-  options.forEach(val => {
-    // console.log(val);
-    const optionVal = (valueToLowerCase) ? val.toLowerCase() : val;
-    // console.log(optionVal, val, selected);
-    elemAttrs.value = optionVal;
-    if (optionVal.toLowerCase() === selected.toLowerCase()) {
-      elemAttrs.selected = 'selected';
-    }
-    const htmlElem = createElement('option', elemAttrs, val);
-    if (elemAttrs.selected) {
-      delete elemAttrs.selected;
-    }
-    result += htmlElem;
-  });
-  delete elemAttrs.value;
-  return result;
-};
 
 // const createFormRow = () => {
 
@@ -62,24 +39,37 @@ const createSelectOptions = (options, selected, elemAttrs = {}, valueToLowerCase
  creates Expense Form
  */
 // eslint-disable-next-line no-unused-vars
-const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMethod = method, csrf = '', expenseTypes = {}) => {
+const createExpenseForm = (
+  travel,
+  expense,
+  formatter,
+  method = 'POST',
+  hiddenMethod = method,
+  csrf = '',
+  expenseTypes = {}
+) => {
   logger.silly('createExpenseForm');
   if (!travel || !expense) {
     return;
   }
 
   const curRate = findCurRate(travel, expense);
-  const mileage = (expense.type === 'Mileage');
+  const mileage = expense.type === 'Mileage';
 
   method = method.toUpperCase();
   hiddenMethod = hiddenMethod.toUpperCase();
-
 
   // hidden INPUT OPTIONS
   const hiddenInputOptions = {
     type: 'hidden',
     name: '_csrf',
     value: csrf
+  };
+
+  const hiddenInputOptions2 = {
+    type: 'hidden',
+    name: '_method',
+    value: hiddenMethod
   };
 
   // div row OPTIONS
@@ -96,7 +86,7 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
     autofocus: 'autofocus',
     required: 'required',
     style: '',
-    readonly: 'readonly',
+    readonly: 'readonly'
   };
 
   // ALWAYS SHOW
@@ -113,8 +103,11 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   const htmlOptionsArr = htmlLabelOptionsArr.concat([elemOptions]);
 
   // expense type INPUT ELEMENT
-  const typeOptionElem = createSelectOptions(expenseTypes, expense.type);
-  const typeElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Type', typeOptionElem]);
+  const typeOptionElem = createOptions(expenseTypes, expense.type);
+  const typeElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, [
+    'Type',
+    typeOptionElem
+  ]);
   const typeElemDiv = createElement('div', divElemOptions, typeElem);
   const typeElemRow = createElement('div', divRowOptions, typeElemDiv);
   delete elemOptions.autocomplete;
@@ -135,9 +128,22 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   const descriptionClosingTags = [true, true, false];
 
   // expense description INPUT ELEMENT
-  const descriptionElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Description', ''], descriptionClosingTags);
-  const descriptionElemDiv = createElement('div', divElemOptions, descriptionElem);
-  const descriptionElemRow = createElement('div', divRowOptions, descriptionElemDiv);
+  const descriptionElem = createTwoCardElements(
+    htmlTagsArr,
+    htmlOptionsArr,
+    ['Description', ''],
+    descriptionClosingTags
+  );
+  const descriptionElemDiv = createElement(
+    'div',
+    divElemOptions,
+    descriptionElem
+  );
+  const descriptionElemRow = createElement(
+    'div',
+    divRowOptions,
+    descriptionElemDiv
+  );
   delete elemOptions.value;
   delete elemOptions.type;
 
@@ -160,7 +166,12 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   const dateClosingTags = [true, true, false];
 
   // expense date INPUT ELEMENT
-  const dateElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Date', ''], dateClosingTags);
+  const dateElem = createTwoCardElements(
+    htmlTagsArr,
+    htmlOptionsArr,
+    ['Date', ''],
+    dateClosingTags
+  );
   const dateElemDiv = createElement('div', divElemOptions, dateElem);
   const dateElemRow = createElement('div', divRowOptions, dateElemDiv);
   delete elemOptions.value;
@@ -182,8 +193,8 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   elemOptions.placeholder = 'USD';
   elemOptions.minLength = '3';
   elemOptions.maxlength = '3';
-  elemOptions.value = (!mileage) ? expense.currency : '';
-  elemOptions.required = (!mileage) ? 'required' : '';
+  elemOptions.value = !mileage ? expense.currency : '';
+  elemOptions.required = !mileage ? 'required' : '';
 
   // expense currency INPUT TAGS & OPTONS
   htmlTagsArr[2] = 'input';
@@ -191,9 +202,22 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   htmlOptionsArr[2] = elemOptions;
   const currencyClosingTags = [true, true, false];
 
-  const currencyOptionElem = createSelectOptions(['USD', 'EUR', 'RSD', 'HRK', 'BAM'], elemOptions.value, { class: 'currency' });
-  const currencyDatalistElem = createElement('datalist', { class: 'currencies', id: `currencies${expense._id}` }, currencyOptionElem);
-  const currencyElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Currency', currencyDatalistElem], currencyClosingTags);
+  const currencyOptionElem = createOptions(
+    ['USD', 'EUR', 'RSD', 'HRK', 'BAM'],
+    elemOptions.value,
+    { class: 'currency' }
+  );
+  const currencyDatalistElem = createElement(
+    'datalist',
+    { class: 'currencies', id: `currencies${expense._id}` },
+    currencyOptionElem
+  );
+  const currencyElem = createTwoCardElements(
+    htmlTagsArr,
+    htmlOptionsArr,
+    ['Currency', currencyDatalistElem],
+    currencyClosingTags
+  );
   const currencyElemDiv = createElement('div', divElemOptions, currencyElem);
   const currencyElemRow = createElement('div', divRowOptions, currencyElemDiv);
   elemOptions.class.pop();
@@ -212,7 +236,7 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   elemOptions.autocomplete = 'rate';
   elemOptions.step = '0.01';
   elemOptions.placeholder = '0.00';
-  elemOptions.value = (!mileage) ? curRate.rate[expense.currency].toString() : '';
+  elemOptions.value = !mileage ? curRate.rate[expense.currency].toString() : '';
   elemOptions.min = 0;
   // divRowOptions.style = `display: ${(mileage) ? 'none' : 'initial'}`;
 
@@ -222,7 +246,12 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   htmlOptionsArr[2] = elemOptions;
   const rateClosingTags = [true, true, false];
 
-  const rateElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Rate', ''], rateClosingTags);
+  const rateElem = createTwoCardElements(
+    htmlTagsArr,
+    htmlOptionsArr,
+    ['Rate', ''],
+    rateClosingTags
+  );
   const rateElemDiv = createElement('div', divElemOptions, rateElem);
   const rateElemRow = createElement('div', divRowOptions, rateElemDiv);
   delete elemOptions.placeholder;
@@ -240,7 +269,7 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   elemOptions.autocomplete = 'amount';
   elemOptions.step = '0.01';
   elemOptions.placeholder = '0.00';
-  elemOptions.value = (!mileage) ? Number(expense.amount).toFixed(2) : '';
+  elemOptions.value = !mileage ? Number(expense.amount).toFixed(2) : '';
   elemOptions.min = 0;
 
   // expense amount INPUT TAGS & OPTONS
@@ -249,7 +278,12 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   htmlOptionsArr[2] = elemOptions;
   const amountClosingTags = [true, true, false];
 
-  const amountElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Amount', ''], amountClosingTags);
+  const amountElem = createTwoCardElements(
+    htmlTagsArr,
+    htmlOptionsArr,
+    ['Amount', ''],
+    amountClosingTags
+  );
   const amountElemDiv = createElement('div', divElemOptions, amountElem);
   const amountElemRow = createElement('div', divRowOptions, amountElemDiv);
   delete elemOptions.placeholder;
@@ -266,7 +300,9 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   elemOptions.name = 'amountConverted';
   elemOptions.autocomplete = 'amountConverted';
   elemOptions.placeholder = '0.00';
-  elemOptions.value = (!mileage) ? Number(expense.amountConverted).toFixed(2) : '';
+  elemOptions.value = !mileage
+    ? Number(expense.amountConverted).toFixed(2)
+    : '';
   elemOptions.min = 0;
   elemOptions.class.push('input-group');
   elemOptions.readonly = 'readonly';
@@ -277,12 +313,37 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   htmlLabelOptionsArr[1] = labelOptions;
   htmlOptionsArr[2] = elemOptions;
   const amountConvertedClosingTags = [true, true, false];
-  const prependElemSpan = createElement('span', { class: 'input-group-text mb-1 text-white bg-secondary', id: `currency-addon${expense._id}` }, travel.homeCurrency);
-  const prependElemDiv = createElement('div', { class: 'input-group-prepend' }, prependElemSpan);
+  const prependElemSpan = createElement(
+    'span',
+    {
+      class: 'input-group-text mb-1 text-white bg-secondary',
+      id: `currency-addon${expense._id}`
+    },
+    travel.homeCurrency
+  );
+  const prependElemDiv = createElement(
+    'div',
+    { class: 'input-group-prepend' },
+    prependElemSpan
+  );
 
-  const amountConvertedElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Amount Converted', ''], amountConvertedClosingTags, prependElemDiv);
-  const amountConvertedElemDiv = createElement('div', divElemOptions, amountConvertedElem);
-  const amountConvertedElemRow = createElement('div', divRowOptions, amountConvertedElemDiv);
+  const amountConvertedElem = createTwoCardElements(
+    htmlTagsArr,
+    htmlOptionsArr,
+    ['Amount Converted', ''],
+    amountConvertedClosingTags,
+    prependElemDiv
+  );
+  const amountConvertedElemDiv = createElement(
+    'div',
+    divElemOptions,
+    amountConvertedElem
+  );
+  const amountConvertedElemRow = createElement(
+    'div',
+    divRowOptions,
+    amountConvertedElemDiv
+  );
   delete elemOptions.placeholder;
   delete elemOptions.min;
   delete elemOptions.value;
@@ -293,7 +354,7 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   const notMileageDivOptions = {
     class: '',
     id: `notMileage${expense._id}`,
-    style: `display: ${(mileage) ? 'none' : 'initial'}`
+    style: `display: ${mileage ? 'none' : 'initial'}`
   };
 
   // MILEAGE
@@ -311,20 +372,21 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   elemOptions.autocomplete = 'invoiceUnit';
   elemOptions.onchange = 'invoiceUnitChange(event)';
 
-
   // expense type INPUT TAGS & OPTONS
   htmlTagsArr[2] = 'select';
   htmlLabelOptionsArr[1] = labelOptions;
   htmlOptionsArr[2] = elemOptions;
 
   // expense type INPUT ELEMENT
-  const unitOptionElem = createSelectOptions(['mi', 'km'], expense.unit);
-  const unitElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Unit', unitOptionElem]);
+  const unitOptionElem = createOptions(['mi', 'km'], expense.unit);
+  const unitElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, [
+    'Unit',
+    unitOptionElem
+  ]);
   const unitElemDiv = createElement('div', divElemOptions, unitElem);
   const unitElemRow = createElement('div', divRowOptions, unitElemDiv);
   delete elemOptions.autocomplete;
   delete elemOptions.onchange;
-
 
   // EXPENSE.PERMILEAMOUNT - HTML INPUT number
   labelOptions.for = `travelPerMileAmount${expense._id}`;
@@ -332,12 +394,11 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   elemOptions.name = 'travelPerMileAmount';
   elemOptions.autocomplete = 'travelPerMileAmount';
   elemOptions.type = 'number';
-  elemOptions.value = (mileage) ? Number(travel.perMileAmount).toFixed(2) : '';
+  elemOptions.value = mileage ? Number(travel.perMileAmount).toFixed(2) : '';
   elemOptions.step = '0.01';
   elemOptions.min = 0;
   elemOptions.placeholder = '0.00';
   elemOptions.readonly = 'readonly';
-
 
   // expense type INPUT TAGS & OPTONS
   htmlTagsArr[2] = 'input';
@@ -348,9 +409,20 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   // TODO link userHomeDistance to user model
   const userHomeDistance = 'mi';
   const labelPerMileAmountText = `${travel.homeCurrency}/${userHomeDistance}`;
-  const perMileAmountElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, [labelPerMileAmountText, '']);
-  const perMileAmountElemDiv = createElement('div', divElemOptions, perMileAmountElem);
-  const perMileAmountElemRow = createElement('div', divRowOptions, perMileAmountElemDiv);
+  const perMileAmountElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, [
+    labelPerMileAmountText,
+    ''
+  ]);
+  const perMileAmountElemDiv = createElement(
+    'div',
+    divElemOptions,
+    perMileAmountElem
+  );
+  const perMileAmountElemRow = createElement(
+    'div',
+    divRowOptions,
+    perMileAmountElemDiv
+  );
   delete elemOptions.autocomplete;
   delete elemOptions.type;
   delete elemOptions.value;
@@ -365,7 +437,7 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   elemOptions.name = 'amountDistance';
   elemOptions.autocomplete = 'amountDistance';
   elemOptions.type = 'number';
-  elemOptions.value = (mileage) ? Number(expense.amount).toFixed(2) : '';
+  elemOptions.value = mileage ? Number(expense.amount).toFixed(2) : '';
   elemOptions.step = '0.01';
   elemOptions.min = 0;
   elemOptions.placeholder = '0.00';
@@ -378,9 +450,21 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
 
   // expense type INPUT ELEMENT
   const labelAmountDistanceText = `Distance[${userHomeDistance}]`;
-  const amountDistanceElem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, [labelAmountDistanceText, '']);
-  const amountDistanceElemDiv = createElement('div', divElemOptions, amountDistanceElem);
-  const amountDistanceElemRow = createElement('div', divRowOptions, amountDistanceElemDiv);
+  const amountDistanceElem = createTwoCardElements(
+    htmlTagsArr,
+    htmlOptionsArr,
+    [labelAmountDistanceText, '']
+  );
+  const amountDistanceElemDiv = createElement(
+    'div',
+    divElemOptions,
+    amountDistanceElem
+  );
+  const amountDistanceElemRow = createElement(
+    'div',
+    divRowOptions,
+    amountDistanceElemDiv
+  );
   delete elemOptions.autocomplete;
   delete elemOptions.type;
   delete elemOptions.value;
@@ -398,7 +482,7 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   elemOptions.name = 'amountConverted2';
   elemOptions.autocomplete = 'amountConverted2';
   elemOptions.placeholder = '0.00';
-  elemOptions.value = (mileage) ? Number(expense.amountConverted).toFixed(2) : '';
+  elemOptions.value = mileage ? Number(expense.amountConverted).toFixed(2) : '';
   elemOptions.min = 0;
   elemOptions.class.push('input-group');
   elemOptions.readonly = 'readonly';
@@ -409,12 +493,37 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   htmlLabelOptionsArr[1] = labelOptions;
   htmlOptionsArr[2] = elemOptions;
   const amountConverted2ClosingTags = [true, true, false];
-  const prependElemSpan2 = createElement('span', { class: 'input-group-text mb-1 text-white bg-secondary', id: `currency-addon2${expense._id}` }, travel.homeCurrency);
-  const prependElemDiv2 = createElement('div', { class: 'input-group-prepend' }, prependElemSpan2);
+  const prependElemSpan2 = createElement(
+    'span',
+    {
+      class: 'input-group-text mb-1 text-white bg-secondary',
+      id: `currency-addon2${expense._id}`
+    },
+    travel.homeCurrency
+  );
+  const prependElemDiv2 = createElement(
+    'div',
+    { class: 'input-group-prepend' },
+    prependElemSpan2
+  );
 
-  const amountConverted2Elem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, ['Amount Converted', ''], amountConverted2ClosingTags, prependElemDiv2);
-  const amountConverted2ElemDiv = createElement('div', divElemOptions, amountConverted2Elem);
-  const amountConverted2ElemRow = createElement('div', divRowOptions, amountConverted2ElemDiv);
+  const amountConverted2Elem = createTwoCardElements(
+    htmlTagsArr,
+    htmlOptionsArr,
+    ['Amount Converted', ''],
+    amountConverted2ClosingTags,
+    prependElemDiv2
+  );
+  const amountConverted2ElemDiv = createElement(
+    'div',
+    divElemOptions,
+    amountConverted2Elem
+  );
+  const amountConverted2ElemRow = createElement(
+    'div',
+    divRowOptions,
+    amountConverted2ElemDiv
+  );
   delete elemOptions.placeholder;
   delete elemOptions.min;
   delete elemOptions.value;
@@ -423,7 +532,7 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   delete divElemOptions.class;
 
   // EXPENSE.AMOUNTDISTANCE2 - HTML INPUT number
-  const userHomeDistance2 = (userHomeDistance === 'mi') ? 'km' : 'mi';
+  const userHomeDistance2 = userHomeDistance === 'mi' ? 'km' : 'mi';
   labelOptions.for = `amountDistance2${expense._id}`;
   elemOptions.id = `amountDistance2${expense._id}`;
   elemOptions.name = 'amountDistance2';
@@ -437,7 +546,6 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
   divRowOptions.style += 'display: none;';
   divRowOptions.id = aDistanceRow2Id;
 
-
   // expense type INPUT TAGS & OPTONS
   htmlTagsArr[2] = 'input';
   htmlLabelOptionsArr[1] = labelOptions;
@@ -445,9 +553,21 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
 
   // expense type INPUT ELEMENT
   const labelAmountDistance2Text = `Distance[${userHomeDistance2}]`;
-  const amountDistance2Elem = createTwoCardElements(htmlTagsArr, htmlOptionsArr, [labelAmountDistance2Text, '']);
-  const amountDistance2ElemDiv = createElement('div', divElemOptions, amountDistance2Elem);
-  const amountDistance2ElemRow = createElement('div', divRowOptions, amountDistance2ElemDiv);
+  const amountDistance2Elem = createTwoCardElements(
+    htmlTagsArr,
+    htmlOptionsArr,
+    [labelAmountDistance2Text, '']
+  );
+  const amountDistance2ElemDiv = createElement(
+    'div',
+    divElemOptions,
+    amountDistance2Elem
+  );
+  const amountDistance2ElemRow = createElement(
+    'div',
+    divRowOptions,
+    amountDistance2ElemDiv
+  );
   delete elemOptions.autocomplete;
   delete elemOptions.type;
   // delete elemOptions.value;
@@ -464,16 +584,22 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
     onclick: 'editExpense(event)'
   };
   const expenseButtonElemOptions = { class: 'mb-0 d-inline mx-1' };
-  const expenseButtonEditText = createElement('button', expenseButtonEditOptions, 'edit');
-  const expenseButtonEditElem = createElement('h6', expenseButtonElemOptions, expenseButtonEditText);
-
+  const expenseButtonEditText = createElement(
+    'button',
+    expenseButtonEditOptions,
+    'edit'
+  );
+  const expenseButtonEditElem = createElement(
+    'h6',
+    expenseButtonElemOptions,
+    expenseButtonEditText
+  );
 
   const mileageDivOptions = {
     class: '',
     id: `mileage${expense._id}`,
-    style: `display: ${(mileage) ? 'initial' : 'none'}`
+    style: `display: ${mileage ? 'initial' : 'none'}`
   };
-
 
   const formOptions = {
     action: `/travels/${travel._id}/expenses/${expense._id}`,
@@ -481,16 +607,39 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
     id: `expenseForm${expense._id}`
   };
 
-  const hiddenInput = createElement('input', hiddenInputOptions, '', false);
+  const hiddenInputCsrf = createElement('input', hiddenInputOptions, '', false);
+  const hiddenInputMethod = createElement('input', hiddenInputOptions2, '', false);
   const alwaysShowElem = typeElemRow + descriptionElemRow + dateElemRow;
-  const formAlwaysShowDiv = createElement('div', { class: '', id: `alwaysShow${expense._id}` }, alwaysShowElem);
-  const formNotMIleageElem = currencyElemRow + rateElemRow + amountElemRow + amountConvertedElemRow;
-  const formNotMileageDiv = createElement('div', notMileageDivOptions, formNotMIleageElem);
-  const formMileageElem = unitElemRow + perMileAmountElemRow + amountDistanceElemRow +
-  amountDistance2ElemRow + amountConverted2ElemRow;
-  const formMileageDiv = createElement('div', mileageDivOptions, formMileageElem);
-  const formElements = hiddenInput + formAlwaysShowDiv + formNotMileageDiv +
-  formMileageDiv + expenseButtonEditElem;
+  const formAlwaysShowDiv = createElement(
+    'div',
+    { class: '', id: `alwaysShow${expense._id}` },
+    alwaysShowElem
+  );
+  const formNotMIleageElem =
+    currencyElemRow + rateElemRow + amountElemRow + amountConvertedElemRow;
+  const formNotMileageDiv = createElement(
+    'div',
+    notMileageDivOptions,
+    formNotMIleageElem
+  );
+  const formMileageElem =
+    unitElemRow +
+    perMileAmountElemRow +
+    amountDistanceElemRow +
+    amountDistance2ElemRow +
+    amountConverted2ElemRow;
+  const formMileageDiv = createElement(
+    'div',
+    mileageDivOptions,
+    formMileageElem
+  );
+  const formElements =
+    hiddenInputCsrf +
+    hiddenInputMethod +
+    formAlwaysShowDiv +
+    formNotMileageDiv +
+    formMileageDiv +
+    expenseButtonEditElem;
   const form = createElement('form', formOptions, formElements);
   return form;
 };
@@ -504,7 +653,10 @@ const createExpenseForm = (travel, expense, formatter, method = 'POST', hiddenMe
  */
 expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
   logger.debug('yearsAccordionWithForm');
-  const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const formatter = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
   // HTML Accordion - RESULT
   const yearObjectsArray = [];
   value.forEach(yearObject => {
@@ -513,29 +665,63 @@ expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
     const monthObjectsArray = [];
     yearObject.byYear.forEach(monthObject => {
       const monthValue = monthObject._id.month - 1;
-      const monthString = moment().month(monthValue).format('MMMM');
+      const monthString = moment()
+        .month(monthValue)
+        .format('MMMM');
       const travelObjectsArray = [];
       // HTML Month Card COLLAPSE - BODY
       monthObject.byMonth.forEach(travelObject => {
-        const dateFromString = moment(travelObject.dateFrom).format('YYYY-MM-DD');
+        const dateFromString = moment(travelObject.dateFrom).format(
+          'YYYY-MM-DD'
+        );
         const travelId = travelObject._id;
         const expensesCount = travelObject.expenses.length;
         const hrefTravel = `/travels/${travelId}`;
         const { homeCurrency } = travelObject;
-        const totalString = `${formatter.format(travelObject.total)} ${homeCurrency}`;
+        const totalString = `${formatter.format(
+          travelObject.total
+        )} ${homeCurrency}`;
         const travelHeaderTextString = `${dateFromString} ${travelObject.description} ${totalString}`;
         // HTML Travel Card COLLAPSE - BODY
         const expenseObjectsArray = [];
         travelObject.expenses.forEach(expenseObject => {
           const expenseId = expenseObject._id;
 
-          const expenseCardBodyOptions = { class: 'card-body', id: `heading${expenseId}_CardBody` };
-          const expenseCardOptions = { class: ['card', 'text-white', 'bg-secondary', 'mx-2', 'my-2', 'border-warning'], id: `expense_${expenseId}_Card` };
+          const expenseCardBodyOptions = {
+            class: 'card-body',
+            id: `heading${expenseId}_CardBody`
+          };
+          const expenseCardOptions = {
+            class: [
+              'card',
+              'text-white',
+              'bg-secondary',
+              'mx-2',
+              'my-2',
+              'border-warning'
+            ],
+            id: `expense_${expenseId}_Card`
+          };
 
-
-          const form = createExpenseForm(travelObject, expenseObject, formatter, 'post', 'patch', csrf, expenseTypes);
-          const expenseCardBody = createElement('div', expenseCardBodyOptions, form);
-          const expenseCard = createElement('div', expenseCardOptions, expenseCardBody);
+          const form = createExpenseForm(
+            travelObject,
+            expenseObject,
+            formatter,
+            'post',
+            'patch',
+            csrf,
+            expenseTypes
+          );
+          const expenseCardBody = createElement(
+            'div',
+            expenseCardBodyOptions,
+            form
+          );
+          const expenseCard = createElement(
+            'div',
+            expenseCardOptions,
+            expenseCardBody
+          );
           expenseObjectsArray.push(expenseCard);
         });
         const expenses = expenseObjectsArray.join('');
@@ -570,7 +756,7 @@ expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
         const travelCollapseOptions = {
           id: `collapse${travelId}`,
           class: 'collapse',
-          aria_labelledby: `heading${travelId}_CardHeader`,
+          aria_labelledby: `heading${travelId}_CardHeader`
           // data_parent: `#travel_${travelId}Accordion`
         };
         const travelCardOptions = {
@@ -578,18 +764,66 @@ expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
           id: `travel_${travelId}_Card`
         };
         // HTML Travel ELEMENTS
-        const travelButtonBadgeSr = createElement('span', { class: 'sr-only' }, 'expenses count');
-        const travelButtonBadge = createElement('span', travelButtonBadgeOptions, expensesCount);
-        const travelButtonShowText = createElement('button', travelButtonShowOptions, `show${travelButtonBadge}${travelButtonBadgeSr}`);
-        const travelButtonShowElem = createElement('h6', travelButtonElemOptions, travelButtonShowText);
-        const travelButtonEditText = createElement('button', travelButtonEditOptions, 'edit');
-        const travelButtonEditElem = createElement('h6', travelButtonElemOptions, travelButtonEditText);
-        const travelHeaderText = createElement('h6', travelHeaderTextOptions, travelHeaderTextString);
-        const travelHeaderElem = createElement('div', { class: '' }, travelHeaderText + travelButtonShowElem + travelButtonEditElem);
-        const travelCardHeader = createElement('div', { class: 'card-header py-2' }, travelHeaderElem);
-        const travelCardBody = createElement('div', { class: 'card-body' }, expenses);
-        const travelCollapse = createElement('div', travelCollapseOptions, travelCardBody);
-        const travelCard = createElement('div', travelCardOptions, travelCardHeader + travelCollapse);
+        const travelButtonBadgeSr = createElement(
+          'span',
+          { class: 'sr-only' },
+          'expenses count'
+        );
+        const travelButtonBadge = createElement(
+          'span',
+          travelButtonBadgeOptions,
+          expensesCount
+        );
+        const travelButtonShowText = createElement(
+          'button',
+          travelButtonShowOptions,
+          `show${travelButtonBadge}${travelButtonBadgeSr}`
+        );
+        const travelButtonShowElem = createElement(
+          'h6',
+          travelButtonElemOptions,
+          travelButtonShowText
+        );
+        const travelButtonEditText = createElement(
+          'button',
+          travelButtonEditOptions,
+          'edit'
+        );
+        const travelButtonEditElem = createElement(
+          'h6',
+          travelButtonElemOptions,
+          travelButtonEditText
+        );
+        const travelHeaderText = createElement(
+          'h6',
+          travelHeaderTextOptions,
+          travelHeaderTextString
+        );
+        const travelHeaderElem = createElement(
+          'div',
+          { class: '' },
+          travelHeaderText + travelButtonShowElem + travelButtonEditElem
+        );
+        const travelCardHeader = createElement(
+          'div',
+          { class: 'card-header py-2' },
+          travelHeaderElem
+        );
+        const travelCardBody = createElement(
+          'div',
+          { class: 'card-body' },
+          expenses
+        );
+        const travelCollapse = createElement(
+          'div',
+          travelCollapseOptions,
+          travelCardBody
+        );
+        const travelCard = createElement(
+          'div',
+          travelCardOptions,
+          travelCardHeader + travelCollapse
+        );
         travelObjectsArray.push(travelCard);
       });
       const travels = travelObjectsArray.join('');
@@ -620,14 +854,46 @@ expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
         aria_labelledby: `heading${yearString}_${monthValue}_CardHeader`
       };
       // HTML Month ELEMENTS
-      const monthButtonBadgeSr = createElement('span', { class: 'sr-only' }, 'expenses count');
-      const monthButtonBadge = createElement('span', monthButtonBadgeOptions, monthObject.count);
-      const monthButtonShowText = createElement('button', monthButtonShowOptions, `show${monthButtonBadge}${monthButtonBadgeSr}`);
-      const monthButtonShowElem = createElement('h6', { class: 'mb-0 mx-1 d-inline float-right' }, monthButtonShowText);
-      const monthCardHeader = createElement('div', { class: 'card-header py-2' }, monthString + monthButtonShowElem);
-      const monthCardBody = createElement('div', { class: 'card-body' }, travels);
-      const monthCollapse = createElement('div', monthCollapseOptions, monthCardBody);
-      const monthCard = createElement('div', { class: 'card', style: 'border: none' }, monthCardHeader + monthCollapse);
+      const monthButtonBadgeSr = createElement(
+        'span',
+        { class: 'sr-only' },
+        'expenses count'
+      );
+      const monthButtonBadge = createElement(
+        'span',
+        monthButtonBadgeOptions,
+        monthObject.count
+      );
+      const monthButtonShowText = createElement(
+        'button',
+        monthButtonShowOptions,
+        `show${monthButtonBadge}${monthButtonBadgeSr}`
+      );
+      const monthButtonShowElem = createElement(
+        'h6',
+        { class: 'mb-0 mx-1 d-inline float-right' },
+        monthButtonShowText
+      );
+      const monthCardHeader = createElement(
+        'div',
+        { class: 'card-header py-2' },
+        monthString + monthButtonShowElem
+      );
+      const monthCardBody = createElement(
+        'div',
+        { class: 'card-body' },
+        travels
+      );
+      const monthCollapse = createElement(
+        'div',
+        monthCollapseOptions,
+        monthCardBody
+      );
+      const monthCard = createElement(
+        'div',
+        { class: 'card', style: 'border: none' },
+        monthCardHeader + monthCollapse
+      );
       monthObjectsArray.push(monthCard);
     });
     const months = monthObjectsArray.join('');
@@ -658,17 +924,53 @@ expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
       aria_labelledby: `heading${yearString}_CardHeader`
     };
     // HTML Year ELEMENTS
-    const yearButtonBadgeSr = createElement('span', { class: 'sr-only' }, 'expenses count');
-    const yearButtonBadge = createElement('span', yearButtonBadgeOptions, yearObject.countTotal);
-    const yearButtonShowText = createElement('button', yearButtonShowOptions, `show${yearButtonBadge}${yearButtonBadgeSr}`);
-    const yearButtonShowElem = createElement('h6', { class: 'mb-0 mx-1 d-inline float-right' }, yearButtonShowText);
-    const yearCardHeader = createElement('div', { class: 'card-header py-2', id: `heading${yearString}_CardHeader` }, yearString + yearButtonShowElem);
-    const yearCardBody = createElement('div', { class: 'card-body p-0' }, months);
-    const yearCollapse = createElement('div', monthsCollapseOptions, yearCardBody);
-    const yearCard = createElement('div', { class: 'card' }, yearCardHeader + yearCollapse);
+    const yearButtonBadgeSr = createElement(
+      'span',
+      { class: 'sr-only' },
+      'expenses count'
+    );
+    const yearButtonBadge = createElement(
+      'span',
+      yearButtonBadgeOptions,
+      yearObject.countTotal
+    );
+    const yearButtonShowText = createElement(
+      'button',
+      yearButtonShowOptions,
+      `show${yearButtonBadge}${yearButtonBadgeSr}`
+    );
+    const yearButtonShowElem = createElement(
+      'h6',
+      { class: 'mb-0 mx-1 d-inline float-right' },
+      yearButtonShowText
+    );
+    const yearCardHeader = createElement(
+      'div',
+      { class: 'card-header py-2', id: `heading${yearString}_CardHeader` },
+      yearString + yearButtonShowElem
+    );
+    const yearCardBody = createElement(
+      'div',
+      { class: 'card-body p-0' },
+      months
+    );
+    const yearCollapse = createElement(
+      'div',
+      monthsCollapseOptions,
+      yearCardBody
+    );
+    const yearCard = createElement(
+      'div',
+      { class: 'card' },
+      yearCardHeader + yearCollapse
+    );
     yearObjectsArray.push(yearCard);
   });
-  const result = createElement('div', { id: 'yearsAccordion' }, yearObjectsArray.join('\n'));
+  const result = createElement(
+    'div',
+    { id: 'yearsAccordion' },
+    yearObjectsArray.join('\n')
+  );
   logger.debug('yearsAccordionWithForm END');
   return result;
 });

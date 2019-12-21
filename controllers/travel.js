@@ -151,9 +151,6 @@ exports.getTravelsTotalPDF = async function (req, res, next) {
           } else {
             sum = Number(result[0].sum);
           }
-          // console.log(typeof x);
-          // console.log(travelIndexes);
-          // console.log(typeof travelIndexes[63]);
           travels.forEach(item => {
             travelIndexes.forEach((item, idx, object) => {
               object[idx] = item.toString();

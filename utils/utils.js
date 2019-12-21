@@ -182,19 +182,18 @@ const createTwoCardElements = (
   return labelElem + insert + expenseElem;
 };
 
-// Not used yet
+// Creates HTML options element, second param option to select
 const createOptions = (
   options,
   selected,
   elemAttrs = {},
   valueToLowerCase = false
 ) => {
+  logger.silly('createOptions');
   let result = '';
   selected = !selected ? '' : selected;
   options.forEach(val => {
-    // console.log(val);
     const optionVal = valueToLowerCase ? val.toLowerCase() : val;
-    // console.log(optionVal, val, selected);
     elemAttrs.value = optionVal;
     if (optionVal.toLowerCase() === selected.toLowerCase()) {
       elemAttrs.selected = 'selected';
@@ -206,6 +205,7 @@ const createOptions = (
     result += htmlElem;
   });
   delete elemAttrs.value;
+  logger.silly('createOptions END');
   return result;
 };
 

@@ -1,11 +1,12 @@
-const { addLogger } = require('../../config/logger');
+const LoggerClass = require('../../config/LoggerClass');
 
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
+const Logger = new LoggerClass('redirectAfterLogin');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('utils\\middleware\\redirectAfterLogin INITIALIZING!');
 
 module.exports = (req, res, next) => {
   // After successful login, redirect back to the intended page
-  Logger.silly('redirectAfterLogin');
+  logger.silly('redirectAfterLogin');
   if (
     !req.user &&
     req.path !== '/login' &&
@@ -13,12 +14,15 @@ module.exports = (req, res, next) => {
     !req.path.match(/^\/auth/) &&
     !req.path.match(/\./)
   ) {
+    logger.debug(`Returning to: ${res.originalUrl}`);
     req.session.returnTo = req.originalUrl;
   } else if (
     req.user &&
     (req.path === '/account' || req.path.match(/^\/api/))
   ) {
+    logger.debug(`Returning to: ${res.originalUrl}`);
     req.session.returnTo = req.originalUrl;
   }
+  logger.silly('next()');
   next();
 };

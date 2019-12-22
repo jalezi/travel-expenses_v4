@@ -1,13 +1,14 @@
-const { addLogger } = require('../../config/logger');
-const Travel = require('../../models/Travel');
-const Expense = require('../../models/Expense');
-const Rate = require('../../models/Rate');
+const LoggerClass = require('../../config/LoggerClass');
 
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
+const Logger = new LoggerClass('expenseIdMiddleware');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('utils\\middleware\\expenseIdMiddleware INITIALIZING!');
 
+const { populateTravel, populateExpense, findRates } = require('./populateModels');
+
+// TODO add documentation
 module.exports = async (req, res, next) => {
-  Logger.silly('expenseIdMiddleware');
+  logger.debug('expenseIdMiddleware');
   if (
     (!res.locals.expense || res.locals.expense._id !== req.params.id) &&
     req.params.id !== 'new'
@@ -15,33 +16,25 @@ module.exports = async (req, res, next) => {
     try {
       const baseUrl = req.baseUrl.split('/');
       const travelId = baseUrl[2];
-      const travel = await Travel.findById(travelId).populate({
-        path: 'expenses',
-        populate: { path: 'curRate' }
-      });
-      const expense = await Expense.findById(req.params.id).populate({
-        path: 'curRate'
-      });
-      let rates = await Rate.findRatesOnDate(travel, err => {
-        if (err) {
-          throw err;
-        }
-      });
-
-      if (rates.length === 0) {
-        rates = await Rate.findRateBeforeOrAfterDate(travel, err => {
-          if (err) {
-            throw new Error(err);
-          }
-        });
-      }
+      logger.silly(`travelId: ${travelId}`);
+      const travel = await populateTravel(travelId);
+      const expense = await populateExpense(req.params.id);
+      let rates = await findRates(travel);
       res.locals.expense = expense;
       res.locals.rates = rates;
+      logger.silly({ expense });
+      logger.silly('next()');
+      logger.debug('expenseIdMiddleware END');
       next();
     } catch (err) {
+      logger.err(err);
+      logger.silly('next(err)');
+      logger.debug('expenseIdMiddleware END');
       next(err);
     }
   } else {
+    logger.silly('next()');
+    logger.debug('expenseIdMiddleware END');
     next();
   }
 };

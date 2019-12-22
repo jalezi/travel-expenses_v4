@@ -1,14 +1,17 @@
-const { addLogger } = require('../../config/logger');
+const LoggerClass = require('../../config/LoggerClass');
+
+const Logger = new LoggerClass('importMiddleware');
+const { mainLogger, logger } = Logger;
+
 const Travel = require('../../models/Travel');
 
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
+mainLogger.debug('utils/middleware/importMiddleware INITIALIZING!');
 
 /**
  * Save to res.locals.travels all user travel, sorted by dateFrom ascending
  */
 module.exports = async (req, res, next) => {
-  Logger.silly('importMIddleware');
+  logger.silly('importMiddleware');
   try {
     const travels = await Travel.find({
       _user: req.user._id,
@@ -20,8 +23,10 @@ module.exports = async (req, res, next) => {
       })
       .sort({ dateFrom: 1 });
     res.locals.travels = travels;
+    logger.debug(`res.locals.travel.length: ${travels.length}`);
     next();
   } catch (err) {
+    logger.err(err);
     next(err);
   }
 };

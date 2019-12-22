@@ -1,11 +1,11 @@
 /* eslint-disable max-len */
 const mongoose = require('mongoose');
 
-// const { addLogger } = require('../config/logger');
+const LoggerClass = require('../config/LoggerClass');
 
-// Logger
-// const pathDepth = module.paths.length - 6;
-// const Logger = addLogger(__filename, pathDepth);
+const Logger = new LoggerClass('Expense');
+const { mainLogger } = Logger;
+mainLogger.debug('models\\Expense INITIALIZING!');
 
 const { ObjectId } = mongoose.Schema.Types;
 

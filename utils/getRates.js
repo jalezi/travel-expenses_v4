@@ -2,12 +2,13 @@ const axios = require('axios');
 const schedule = require('node-schedule');
 const moment = require('moment');
 
-const Rate = require('../models/Rate');
-const { addLogger } = require('../config/logger');
+const LoggerClass = require('../config/LoggerClass');
 
-// Logger
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
+const Logger = new LoggerClass('getRates');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('utils\\getRates INITIALIZING!');
+
+const Rate = require('../models/Rate');
 
 /*
  Get rates from data.fixer.io. Save them to DB.
@@ -24,17 +25,17 @@ const dataFixier = async () => {
     if (response.data.success && responseDate === today) {
       const data = new Rate(response.data);
       await data.save().then(rates => {
-        Logger.info(`Rates for ${moment(rates.date)}.`);
-        Logger.info(`Collected on ${new Date(rates.timestamp * 1000)}.`);
-        Logger.info(`Created on ${moment(rates.createdAt)}.`);
+        logger.info(`Rates for ${moment(rates.date)}.`);
+        logger.info(`Collected on ${new Date(rates.timestamp * 1000)}.`);
+        logger.info(`Created on ${moment(rates.createdAt)}.`);
       });
     } else if (responseDate !== today) {
-      Logger.warn(
+      logger.warn(
         `Wrong response data date: ${responseDate} - Should be ${today}`
       );
     } else {
-      Logger.warn("Couldn't get rates from data.fixer.io");
-      Logger.warn(response.data);
+      logger.warn("Couldn't get rates from data.fixer.io");
+      logger.warn(response.data);
     }
   } catch (err) {
     throw new Error(err);
@@ -65,18 +66,18 @@ module.exports = async () => {
   await checkDbForTodayRates
     .then(async rates => {
       if (rates.length === 0) {
-        Logger.info(
+        logger.info(
           `${moment(
             new Date()
           )} - Rates for ${today} not yet in DB. Retrieving rates...`
         );
         await dataFixier();
       } else {
-        Logger.info(`${moment(new Date())} - Rates for ${today} already in DB`);
+        logger.info(`${moment(new Date())} - Rates for ${today} already in DB`);
       }
     })
     .catch(err => {
-      Logger.error(err);
+      logger.error(err);
     });
 
   const rule = new schedule.RecurrenceRule();
@@ -87,17 +88,17 @@ module.exports = async () => {
     try {
       const rates = checkDbForTodayRates;
       if (rates.length === 0) {
-        Logger.info(
+        logger.info(
           `${moment(
             new Date()
           )} - Rates for ${today} not yet in DB. Retrieving rates...`
         );
         dataFixier();
       } else {
-        Logger.info(`${moment(new Date())} - Rates for ${today} already in DB`);
+        logger.info(`${moment(new Date())} - Rates for ${today} already in DB`);
       }
     } catch (err) {
-      Logger.error(err);
+      logger.error(err);
     }
   });
   return job;

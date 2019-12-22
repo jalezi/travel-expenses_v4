@@ -1,17 +1,18 @@
 /* eslint-disable func-names */
 const expressHbs = require('express-hbs');
 const moment = require('moment');
+
+const LoggerClass = require('../../config/LoggerClass');
+
+const Logger = new LoggerClass('hbsHelpers');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('utils\\hbsHelpers\\hbsHelpers INITIALIZING!');
+
 // eslint-disable-next-line no-unused-vars
 const { createElement } = require('../utils');
 
-const { addLogger } = require('../../config/logger');
-
-// Logger
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
-
 expressHbs.registerHelper('flash', message => {
-  Logger.debug('flash helper');
+  logger.debug('flash helper');
   if (message.error) {
     return message.error;
   }
@@ -28,8 +29,9 @@ expressHbs.registerHelper('flash', message => {
 // })
 
 // eslint-disable-next-line prefer-arrow-callback
-expressHbs.registerHelper('debug', function(data, breakpoint) {
-  Logger.debug(data);
+expressHbs.registerHelper('debug', function (data, breakpoint) {
+  // TODO if data is string
+  logger.debug(data);
   if (breakpoint === true) {
     // eslint-disable-next-line no-debugger
     debugger;
@@ -38,13 +40,13 @@ expressHbs.registerHelper('debug', function(data, breakpoint) {
 });
 
 expressHbs.registerHelper('gender', (userGender, radioButtonGender) => {
-  Logger.debug('gender helper');
+  logger.debug('gender helper');
   return userGender === radioButtonGender;
 });
 
 // eslint-disable-next-line prefer-arrow-callback
 expressHbs.registerHelper('setChecked', function(value, currentValue) {
-  Logger.debug('setChecked helper');
+  logger.debug('setChecked helper');
   if (value === currentValue) {
     return 'checked';
   }
@@ -52,7 +54,7 @@ expressHbs.registerHelper('setChecked', function(value, currentValue) {
 });
 
 expressHbs.registerHelper('setOption', (value, currentValue) => {
-  Logger.debug('setOption helper');
+  logger.debug('setOption helper');
   if (value === currentValue) {
     return "selected='selected'";
   }
@@ -61,17 +63,17 @@ expressHbs.registerHelper('setOption', (value, currentValue) => {
 });
 
 expressHbs.registerHelper('setValue', value => {
-  Logger.debug('setValue helper');
+  logger.debug('setValue helper');
   return `value=${value}`;
 });
 
 expressHbs.registerHelper('countList', value => {
-  Logger.debug('countList helper');
+  logger.debug('countList helper');
   return value + 1;
 });
 
 expressHbs.registerHelper('formatDate', date => {
-  Logger.debug('formatDate helper');
+  logger.debug('formatDate helper');
   if (!date) {
     const today = moment().format('YYYY-MM-DD');
     return today;
@@ -81,7 +83,7 @@ expressHbs.registerHelper('formatDate', date => {
 });
 
 expressHbs.registerHelper('formatMonth', date => {
-  Logger.debug('formatMonth helper');
+  logger.debug('formatMonth helper');
   if (!date) {
     const today = moment().format('MMMM, YYYY');
     return today;
@@ -93,7 +95,7 @@ expressHbs.registerHelper('formatMonth', date => {
 
 // eslint-disable-next-line prefer-arrow-callback
 expressHbs.registerHelper('travelsList', function(items, options) {
-  Logger.debug('travelList helper');
+  logger.debug('travelList helper');
   let out = '<ul>';
 
   for (let i = 0, { length } = items; i < length; i++) {
@@ -104,38 +106,40 @@ expressHbs.registerHelper('travelsList', function(items, options) {
 });
 
 expressHbs.registerHelper('setUnit', homeDistance => {
-  Logger.debug('setUnit helper');
+  logger.debug('setUnit helper');
   if (homeDistance === 'mi') {
     return 'mile';
-  } if (homeDistance === 'km') {
+  }
+  if (homeDistance === 'km') {
     return 'km';
   }
   return '';
 });
 
 expressHbs.registerHelper('setUnit2', homeDistance => {
-  Logger.debug('setUnit2 helper');
-  if (homeDistance !== 'mi') {
-    return 'mile';
-  } if (homeDistance !== 'km') {
+  logger.debug('setUnit2 helper');
+  if (homeDistance === 'mi') {
     return 'km';
+  }
+  if (homeDistance === 'km') {
+    return 'mile';
   }
   return '';
 });
 
 expressHbs.registerHelper('toNumber', valueAsString => {
-  Logger.debug('toNumber helper');
+  logger.debug('toNumber helper');
   return parseFloat(valueAsString);
 });
 
 expressHbs.registerHelper('getRate', (travelCurrencies, currency) => {
-  Logger.debug('getRate helper');
+  logger.debug('getRate helper');
   const item = travelCurrencies.find(item => item.currency.name === currency);
   return item.value;
 });
 
 expressHbs.registerHelper('toCurrency', number => {
-  Logger.debug('toCurrency helper');
+  logger.debug('toCurrency helper');
   const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   let numberString = formatter.format(number);
   return numberString;

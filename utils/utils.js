@@ -26,10 +26,9 @@ const convertRateToHomeCurrencyRate = (
   logger.debug('Convert rate to home currency rate');
   homeCurrency = homeCurrency.toUpperCase();
   invoiceCurrency = invoiceCurrency.toUpperCase();
-  // eslint-disable-next-line security/detect-object-injection
+
   const homeCurrencyRate = rates[homeCurrency];
   const convertedRate = 1 / homeCurrencyRate;
-  // eslint-disable-next-line security/detect-object-injection
   const baseRate = rates[invoiceCurrency];
   const invoiceRate = Number((baseRate * convertedRate).toFixed(2));
   return invoiceRate;

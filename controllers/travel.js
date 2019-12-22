@@ -11,9 +11,7 @@ const Logger = new LoggerClass('travel');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('controllers\\travel INITIALIZING!');
 
-const User = require('../models/User');
-const Travel = require('../models/Travel');
-const Expense = require('../models/Expense');
+const { Expense, Travel, User } = require('../models');
 
 const { ObjectId } = mongoose.Types;
 
@@ -22,8 +20,10 @@ const constants = require('../lib/constants');
 
 const updateExpensesToMatchTravelRangeDates = require('../utils/updateExpensesToMatchTravelRangeDates');
 
-const travelExpensesToPDF = require('../utils/travelExpensesToPDF');
-const travelsTotalToPDF = require('../utils/travelsTotalToPDF');
+const travelExpensesToPDF = require('../utils/toPDF/travelExpensesToPDF');
+const travelsTotalToPDF = require('../utils/toPDF/travelsTotalToPDF');
+
+const { currencyOptions } = require('./utils');
 
 /**
  * Travel routes.
@@ -151,9 +151,6 @@ exports.getTravelsTotalPDF = async function (req, res, next) {
           } else {
             sum = Number(result[0].sum);
           }
-          // console.log(typeof x);
-          // console.log(travelIndexes);
-          // console.log(typeof travelIndexes[63]);
           travels.forEach(item => {
             travelIndexes.forEach((item, idx, object) => {
               object[idx] = item.toString();
@@ -221,8 +218,8 @@ exports.getTravelExpensesPDF = async function (req, res) {
  */
 exports.getTravels = async function (req, res, next) {
   logger.debug('Getting travels');
-  let filter;
-  let sortBy;
+  // let filter;
+  // let sortBy;
   let searchMinDate;
   let searchMaxDate;
   let minDate;
@@ -230,11 +227,11 @@ exports.getTravels = async function (req, res, next) {
   let yearMin;
   let yearMax;
   let years = [];
-  filter = req.query.filter;
+  let { filter } = req.query;
   if (!filter) {
     filter = 'All';
   }
-  sortBy = req.query.sortBy;
+  let { sortBy } = req.query;
   if (!sortBy) {
     sortBy = '-dateFrom';
   }
@@ -410,6 +407,10 @@ exports.getTravel = async function (req, res, next) {
   }
   const { travel } = res.locals;
 
+  if (!travel) {
+    return next(new Error('Travel not found'));
+  }
+
   try {
     const { expenses } = travel;
 
@@ -422,9 +423,6 @@ exports.getTravel = async function (req, res, next) {
       }
     });
 
-    if (!travel) {
-      return next(new Error('Travel not found'));
-    }
 
     res.render('travels/travel', {
       title: 'Travel',
@@ -502,16 +500,7 @@ exports.deleteTravel = async function (req, res, next) {
  */
 exports.updateTravel = async function (req, res, next) {
   logger.debug('Updating(PATCH) single travel');
-  const currencyOptions = {
-    allow_negatives: false,
-    allow_negative_sign_placeholder: true,
-    thousands_separator: ',',
-    decimal_separator: '.',
-    allow_decimal: true,
-    require_decimal: false,
-    digits_after_decimal: [2],
-    allow_space_after_digits: false
-  };
+
   req
     .assert(
       'description',
@@ -573,7 +562,7 @@ exports.updateTravel = async function (req, res, next) {
      * Calculate travel total. New expenses date, new rate.
      * Rates for same currency are not the same for different dates.
      */
-    updateExpensesToMatchTravelRangeDates(travel, res.locals.rates).then(() => {
+    updateExpensesToMatchTravelRangeDates(travel).then(() => {
       travel.save().then(doc => {
         Travel.findOne({ _id: doc._id, _user: req.user.id })
           .populate({ path: 'expenses', populate: { path: 'curRate' } })

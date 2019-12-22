@@ -54,18 +54,22 @@ exports.postImport = async (req, res, next) => {
   logger.debug('Middleware postImport');
   let message = '';
   const { myFile } = req.files;
-  const myFilePath = req.files.myFile.path;
+  let fileNameSplit = myFile.path.split('\\');
+  let fileName = fileNameSplit[fileNameSplit.length - 1];
+  // const { myFilePath } = req.files.myFile;
   let combinedCurrencies = [];
 
   try {
     const dataArray = await postImport
       .readCheckFileAndGetData(myFile, req.body.option)
       .catch(err => {
-        logger.error(`Catching error: ${err.message}`);
+        logger.warn('readCheckFileAndGetData catching error!');
+        logger.silly(`Error message: ${err.message}`);
         throw err;
       });
     if (dataArray instanceof Error) {
-      logger.error(`dataArray is error: ${dataArray.message}`);
+      logger.warn('dataArray is error');
+      logger.silly(`${dataArray.message}`);
       throw dataArray;
     }
 
@@ -75,9 +79,9 @@ exports.postImport = async (req, res, next) => {
       logger.debug('Importing travels');
       message = await postImport.travelImport(dataArray, req.user._id);
       if (message.error) {
-        let { error } = message;
-        message = message.msg;
-        logger.error(`Importing travels error: ${message}`);
+        let { msg, error } = message;
+        logger.warn('Importing travels error');
+        logger.silly(`${msg}`);
         throw error;
       }
     } else {
@@ -89,11 +93,12 @@ exports.postImport = async (req, res, next) => {
         res.locals.travels
       );
       const { currenciesArray } = getCurrenciesArray;
-      message = getCurrenciesArray.message;
-      let error = getCurrenciesArray.err;
-      if (error) {
-        logger.error(`getCurrenciesArray error: ${error.message}`);
-        throw error;
+      let { err } = getCurrenciesArray;
+      message = getCurrenciesArray; // do not change!
+      if (err) {
+        logger.warn(`Experiment error message: ${message}`);
+        logger.warn(`getCurrenciesArray error: ${err.message}`);
+        throw err;
       }
 
       // Create new currencies
@@ -135,7 +140,7 @@ exports.postImport = async (req, res, next) => {
       // Check if imported file has no data
       if (dataArray.length === 0) {
         throw new myErrors.ImportFileError(
-          'Nothing to import! File has wrong data!'
+          `No expense belongs to travel. ${message.message}`
         );
       }
       message = await postImport.expenseImport(dataArray).catch(err => {
@@ -145,28 +150,34 @@ exports.postImport = async (req, res, next) => {
 
     // TODO this might be unnecessary
     if (message.error) {
-      logger.warn('This is usefull');
       let { error } = message;
       message = message.msg;
+      logger.warn(`This is useful error: ${message}`);
       throw error;
     }
 
-    postImport.deleteFile(myFilePath, 'File deleted after processed!');
+    logger.silly(`${fileName} should be deleted!`);
+    postImport.deleteFile(myFile.path, 'File deleted after processed!');
     req.flash('success', {
       msg: message
     });
     res.redirect('/travels');
   } catch (err) {
-    postImport.deleteFile(myFilePath, 'File deleted after error!');
-    logger.error(`Catching error: ${err.message}`);
-    if (!(err instanceof myErrors.ImportFileError)) {
-      message = err.message;
-      logger.warn('Error is not instance of ImportFileError');
+    logger.silly(`${fileName} should be deleted!`);
+    postImport.deleteFile(myFile.path, 'File deleted after error!');
+    logger.warn(`Catching error: ${err.message}`);
+    let condition =
+      !(err instanceof myErrors.ImportFileError) &&
+      !(err instanceof myErrors.SaveToDbError);
+    if (condition) {
+      logger.warn('Not myError!');
+      logger.error(err.message);
       next(err);
     } else {
       res.status(500);
-      message = err.message;
-      logger.warn('Error is instance of ImportFIleError');
+      let { message } = err;
+      logger.error(`Error: ${err.name}`);
+      logger.silly(err);
       req.flash('errors', {
         msg: message
       });

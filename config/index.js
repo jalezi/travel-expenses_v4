@@ -222,7 +222,8 @@ module.exports = {
 
   // winston logger level
   logs: {
-    level: process.env.LOG_LEVEL || 'silly'
+    level: process.env.LOG_LEVEL || 'silly',
+    trace: process.env.LOG_TRACE === 'true' || false
   },
 
   // Api routes configuration

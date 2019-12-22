@@ -2,11 +2,11 @@ const bcrypt = require('bcrypt-nodejs');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 
-const { addLogger } = require('../config/logger');
+const LoggerClass = require('../config/LoggerClass');
 
-// Logger
-const pathDepth = module.paths.length - 6;
-const Logger = addLogger(__filename, pathDepth);
+const Logger = new LoggerClass('User');
+const { mainLogger, logger } = Logger;
+mainLogger.debug('models\\User INITIALIZING!');
 
 // Represents User mongoose document
 const userSchemaObject = {
@@ -59,7 +59,7 @@ const UserSchema = new mongoose.Schema(
 
 // Password hash mongoose pre hook middleware function
 UserSchema.pre('save', function save(next) {
-  Logger.debug('UserSchema.pre save()');
+  logger.debug('UserSchema.pre save()');
   const user = this;
   if (!user.isModified('password')) { return next(); }
   bcrypt.genSalt(10, (err, salt) => {

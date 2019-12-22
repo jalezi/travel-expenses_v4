@@ -7,8 +7,8 @@
   "scripts": {
     "build": "webpack",
     "build:dev": "webpack --config webpack.config.js",
-    "generate:docs": "jsdoc -c conf.json",
-    "generate:docs2": "jsdoc -c jsdoc.json",
+    "generate:docs": "jsdoc -c conf.json -P package.json",
+    "generate:docs2": "jsdoc -c jsdoc.json -P package.json",
     "postinstall": "npm rebuild node-sass",
     "start": "node --icu-data-dir=node_modules\\full-icu app.js",
     "start:nodemon": "nodemon --icu-data-dir=node_modules\\full-icu app.js",

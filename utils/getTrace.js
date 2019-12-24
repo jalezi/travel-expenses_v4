@@ -1,7 +1,7 @@
 /* eslint-disable no-continue */
 const assert = require('assert');
 const stackTrace = require('stack-trace');
-const path = require('path');
+const appRoot = require('app-root-path');
 
 /**
  * This is basic trace information about caller.
@@ -38,7 +38,7 @@ const path = require('path');
  */
 const getTrace = () => {
   const trace = stackTrace.get();
-  const dirname = path.dirname(require.main.filename);
+  const dirname = appRoot.resolve('');
   assert.strictEqual(trace[0].getFileName(), __filename);
   let newTrace = { stack: [], length: 0, trace: {} };
   for (let index = 0; index < trace.length; index++) {

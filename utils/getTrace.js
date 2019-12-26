@@ -1,5 +1,5 @@
 /* eslint-disable no-continue */
-const assert = require('assert');
+// const assert = require('assert');
 const stackTrace = require('stack-trace');
 const appRoot = require('app-root-path');
 
@@ -39,7 +39,7 @@ const appRoot = require('app-root-path');
 const getTrace = () => {
   const trace = stackTrace.get();
   const dirname = appRoot.resolve('');
-  assert.strictEqual(trace[0].getFileName(), __filename);
+  // assert.strictEqual(trace[0].getFileName(), __filename);
   let newTrace = { stack: [], length: 0, trace: {} };
   for (let index = 0; index < trace.length; index++) {
     let element = trace[index];

@@ -1,6 +1,8 @@
+
 const PdfPrinter = require('pdfmake');
 const moment = require('moment');
 const fs = require('fs');
+
 const LoggerClass = require('../../config/LoggerClass');
 
 const Logger = new LoggerClass('travelsTotalToPDF');
@@ -15,7 +17,8 @@ const {
   createContent,
   styles,
   createTableObject,
-  bTableBody
+  bTableBody,
+  dataRowAlignment
 } = require('./');
 
 const { FONTS, toCurrencyFormat } = utils;
@@ -25,6 +28,7 @@ const printer = new PdfPrinter(FONTS);
 
 // Returns pdfmake table body
 function buildTableBody(data, columns, tableHeader, total = 0) {
+  logger.debug('buildTableBody');
   let body = [];
   if (!tableHeader) {
     tableHeader = columns;
@@ -37,17 +41,10 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
     columns.forEach(column => {
       const dataRowObject = {};
       dataRowObject.text = row[column].toString();
-      if (
-        ['amount', 'perMile', tableHeader[tableHeader.length - 1]].includes(
-          column
-        )
-      ) {
-        dataRowObject.alignment = 'right';
-      } else if (column === 'description') {
-        dataRowObject.alignment = 'left';
-      } else {
-        dataRowObject.alignment = 'center';
-      }
+      const cond = ['amount', tableHeader[tableHeader.length - 1]].includes(column);
+      logger.debug(cond.toString());
+      dataRowObject.alignment = dataRowAlignment(cond, column);
+      logger.debug(dataRowObject.alignment);
       dataRow.push(dataRowObject);
     });
     let idRow = [

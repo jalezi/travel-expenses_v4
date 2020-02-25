@@ -47,12 +47,21 @@ const dataFixier = async () => {
  Resolves as array of rates as mongoose documents
  Rejects as error
  */
-const checkDbForTodayRates = new Promise((resolve, reject) => {
+const checkDbForTodayRates = async () => new Promise((resolve, reject) => {
   const today = moment(new Date()).format('YYYY-MM-DD');
+  logger.debug(`checkDbForTodayRates STARTS - ${today}`);
   try {
-    const rates = Rate.find({ date: today });
-    resolve(rates);
+    Rate.find({ date: today }, (err, docs) => {
+      if (err) {
+        logger.error(err);
+        reject(err);
+      }
+      logger.debug(`Found ${docs.length} rates in DB.`);
+      logger.debug(`checkDbForTodayRates ENDS - ${today}`);
+      resolve(docs);
+    });
   } catch (err) {
+    logger.debug(`checkDbForTodayRates ERROR - ${today}`);
     reject(err);
   }
 });
@@ -63,43 +72,37 @@ const checkDbForTodayRates = new Promise((resolve, reject) => {
  */
 module.exports = async () => {
   const today = moment().format('YYYY-MM-DD');
-  await checkDbForTodayRates
-    .then(async rates => {
-      if (rates.length === 0) {
-        logger.info(
-          `${moment(
-            new Date()
-          )} - Rates for ${today} not yet in DB. Retrieving rates...`
-        );
-        await dataFixier();
-      } else {
-        logger.info(`${moment(new Date())} - Rates for ${today} already in DB`);
-      }
-    })
-    .catch(err => {
-      logger.error(err);
-    });
+  logger.debug(`getRates STARTS - ${today}`);
+  const rates = await checkDbForTodayRates();
+  logger.debug(`${rates.length} rates found!`);
+  if (rates.length === 0) {
+    logger.info(
+      `${moment(
+        new Date()
+      )} - Rates for ${today} not yet in DB. Retrieving rates...`
+    );
+    await dataFixier();
+  } else {
+    logger.info(`${moment(new Date())} - Rates for ${today} already in DB`);
+  }
+
 
   const rule = new schedule.RecurrenceRule();
-  rule.minute = 1;
-
-  const job = schedule.scheduleJob(rule, () => {
+  rule.second = 1;
+  const scheduleId = 'getRates job';
+  const job = schedule.scheduleJob(scheduleId, rule, async () => {
     const today = moment().format('YYYY-MM-DD');
-    try {
-      const rates = checkDbForTodayRates;
-      if (rates.length === 0) {
-        logger.info(
-          `${moment(
-            new Date()
-          )} - Rates for ${today} not yet in DB. Retrieving rates...`
-        );
-        dataFixier();
-      } else {
-        logger.info(`${moment(new Date())} - Rates for ${today} already in DB`);
-      }
-    } catch (err) {
-      logger.error(err);
+    logger.debug(`${scheduleId} - ${today}`);
+    const rates = await checkDbForTodayRates();
+    logger.debug(`${scheduleId} - ${rates.length} found!`);
+    if (rates.length === 0) {
+      logger.info(`${moment(new Date())} - Rates for ${today} not yet in DB. Retrieving rates...`);
+      dataFixier();
+    } else {
+      logger.info(`${moment(new Date())} - Rates for ${today} already in DB`);
     }
   });
+
+  logger.debug(`getRates returns ${job.name}`);
   return job;
 };

@@ -88,7 +88,7 @@ module.exports = async () => {
 
 
   const rule = new schedule.RecurrenceRule();
-  rule.second = 1;
+  rule.minute = 1;
   const scheduleId = 'getRates job';
   const job = schedule.scheduleJob(scheduleId, rule, async () => {
     const today = moment().format('YYYY-MM-DD');

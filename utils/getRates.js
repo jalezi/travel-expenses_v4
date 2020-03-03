@@ -56,7 +56,7 @@ const checkDbForTodayRates = async () => new Promise((resolve, reject) => {
         logger.error(err);
         reject(err);
       }
-      logger.debug(`Found ${docs.length} rates in DB.`);
+      logger.silly(`Found ${docs.length} rates for ${today} in DB.`);
       logger.debug(`checkDbForTodayRates ENDS - ${today}`);
       resolve(docs);
     });
@@ -74,7 +74,7 @@ module.exports = async () => {
   const today = moment().format('YYYY-MM-DD');
   logger.debug(`getRates STARTS - ${today}`);
   const rates = await checkDbForTodayRates();
-  logger.debug(`${rates.length} rates found!`);
+  logger.silly(`${rates.length} rates found!`);
   if (rates.length === 0) {
     logger.info(
       `${moment(
@@ -104,5 +104,6 @@ module.exports = async () => {
   });
 
   logger.debug(`getRates returns ${job.name}`);
+  logger.debug(`getRates ENDS - ${today}`);
   return job;
 };

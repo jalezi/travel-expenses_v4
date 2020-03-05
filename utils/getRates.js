@@ -207,7 +207,7 @@ module.exports = async () => {
     let responseData;
     const today = moment().format('YYYY-MM-DD');
     logger.debug(`${scheduleId} - STARTS`, { label: scheduleId });
-    const rates = await checkDbForTodayRates();
+    let rates = await checkDbForTodayRates();
     logger.debug(`${rates.length} rates for ${today} in DB!`, {
       label: scheduleId
     });
@@ -232,6 +232,17 @@ module.exports = async () => {
       logger.info('No need to get response from dataFixer', {
         label: scheduleId
       });
+    }
+
+    rates = await checkDbForTodayRates();
+    if (rates.length === 0) {
+      logger.info('Change job schedule to minute!');
+      job.reschedule('0 1 * * * *');
+    } else if (rates.length === 1) {
+      logger.info('Change job schedule for next day');
+      job.reschedule('0 1 0 * * *');
+    } else {
+      logger.warn(`There is more than 1 rate for ${today}: ${rates.length}`);
     }
 
     await getMissingRates();

@@ -169,7 +169,7 @@ const getMissingRates = async () => {
     logger.warn('Can not check Rates documents', { label });
   } else {
     const missingDateRanges = await loopRatesDates(allRatesDates);
-    if (loopRatesDates > 0) {
+    if (missingDateRanges.length > 0) {
       const missingDatesArr = await createMissingDatesArr(missingDateRanges);
       logger.debug(`Dates missing in DB: ${missingDatesArr.length}`, { label });
       for (let index = 0; index < missingDatesArr.length; index++) {

@@ -97,7 +97,7 @@ const checkDbForMissingRates = async () => new Promise((resolve, reject) => {
       logger.error(`${err.message}`, { label });
       reject(err);
     }
-    logger.debug(`Found rates for ${dates.length} dates`, { label });
+    logger.debug(`Found rates for ${dates.length} days.`, { label });
     logger.debug('checkDbForMissingRates ENDS', { label });
     const arr = dates.map(a => a.date);
     resolve(arr);
@@ -169,12 +169,14 @@ const getMissingRates = async () => {
     logger.warn('Can not check Rates documents', { label });
   } else {
     const missingDateRanges = await loopRatesDates(allRatesDates);
-    const missingDatesArr = await createMissingDatesArr(missingDateRanges);
-    logger.debug(`Dates missing in DB: ${missingDatesArr.length}`, { label });
-    for (let index = 0; index < missingDatesArr.length; index++) {
-      const element = missingDatesArr[index];
-      const date = moment(element).format('YYYY-MM-DD');
-      dataFixer(date);
+    if (loopRatesDates > 0) {
+      const missingDatesArr = await createMissingDatesArr(missingDateRanges);
+      logger.debug(`Dates missing in DB: ${missingDatesArr.length}`, { label });
+      for (let index = 0; index < missingDatesArr.length; index++) {
+        const element = missingDatesArr[index];
+        const date = moment(element).format('YYYY-MM-DD');
+        dataFixer(date);
+      }
     }
   }
   logger.debug('getMissingRates ENDS', { label });

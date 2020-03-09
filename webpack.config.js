@@ -3,9 +3,45 @@ const nodeExternals = require('webpack-node-externals');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const NodemonPlugin = require('nodemon-webpack-plugin');
 
+const dotenv = require('dotenv');
+
+const { DefinePlugin } = require('webpack');
+
+const environments = dotenv.config({ path: path.resolve(__dirname, './.env') });
+
 module.exports = {
   // context: path.resolve(__dirname),
   entry: ['@babel/polyfill', './app.js'],
+  plugins: [
+    new DefinePlugin({
+      'process.env': JSON.stringify(environments.parsed)
+    }),
+    new CleanWebpackPlugin(),
+    new NodemonPlugin({
+      // Arguments to pass to the script being watched.
+      // args: ['demo'],
+
+      // What to watch.
+      watch: path.resolve('./build'),
+
+      // Files to ignore.
+      ignore: ['*.js.map'],
+
+      // Detailed log.
+      verbose: true,
+
+      // Node arguments.
+      // nodeArgs: ['--inspect'],
+
+      // If using more than one entry, you can specify
+      // which output file will be restarted.
+      script: './build/main.js',
+
+      // Extensions to watch
+      ext: 'js,njk,json'
+    })
+
+  ],
   watch: true,
   output: {
     filename: '[name].js',
@@ -45,7 +81,11 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env']
+            presets: ['@babel/preset-env'],
+            plugins: [
+              // 'babel-plugin-transform-inline-environment-variables',
+              // 'babel-plugin-transform-node-env-inline',
+            ]
           }
         }
       },
@@ -70,31 +110,5 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.css', '.hbs']
   },
-  devtool: 'cheap-module-source-map',
-  plugins: [
-    new CleanWebpackPlugin(),
-    new NodemonPlugin({
-      // Arguments to pass to the script being watched.
-      // args: ['demo'],
-
-      // What to watch.
-      watch: path.resolve('./build'),
-
-      // Files to ignore.
-      ignore: ['*.js.map'],
-
-      // Detailed log.
-      verbose: true,
-
-      // Node arguments.
-      // nodeArgs: ['--inspect'],
-
-      // If using more than one entry, you can specify
-      // which output file will be restarted.
-      script: './build/main.js',
-
-      // Extensions to watch
-      ext: 'js,njk,json'
-    })
-  ]
+  devtool: 'cheap-module-source-map'
 };

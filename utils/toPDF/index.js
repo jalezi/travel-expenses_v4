@@ -238,3 +238,13 @@ const totalRow = (object = { colSpan: 1 }, n = 1, total = 0) => {
 };
 
 exports.bTableBody = { totalRow };
+
+exports.dataRowAlignment = (condition, column) => {
+  if (condition) {
+    return 'right';
+  }
+  if (column === 'description') {
+    return 'left';
+  }
+  return 'center';
+};

@@ -17,7 +17,8 @@ const {
   createContent,
   styles,
   createTableObject,
-  bTableBody
+  bTableBody,
+  dataRowAlignment
 } = require('./');
 
 const { ObjectId, FONTS, toCurrencyFormat } = utils;
@@ -37,20 +38,13 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
 
   data.forEach(row => {
     let dataRow = [];
-
     columns.forEach(column => {
       const dataRowObject = {};
       dataRowObject.text = row[column].toString();
-      if (
-        ['amount', 'rate', tableHeader[tableHeader.length - 1]].includes(column)
-      ) {
-        dataRowObject.alignment = 'right';
-      } else if (column === 'description') {
-        dataRowObject.alignment = 'left';
-      } else {
-        dataRowObject.alignment = 'center';
-      }
-      // dataRow.push(row[column].toString());
+      const cond = ['amount', 'rate', tableHeader[tableHeader.length - 1]].includes(column);
+      logger.debug(cond.toString());
+      dataRowObject.alignment = dataRowAlignment(cond, column);
+      logger.debug(dataRowObject.alignment);
       dataRow.push(dataRowObject);
     });
 

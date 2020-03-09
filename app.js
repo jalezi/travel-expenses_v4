@@ -4,9 +4,10 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const dotenvExpand = require('dotenv-expand');
+const path = require('path');
 
 // Load environment variables from .env file, where API keys and passwords are configured.
-const env = dotenv.config();
+const env = dotenv.config({ path: path.resolve(__dirname, '.env') });
 dotenvExpand(env);
 if (env.error) {
   throw env.error;
@@ -24,7 +25,7 @@ mainLogger.info("Let's get started!");
 const config = require('./config');
 
 // Set the NODE_ENV to 'development' by default
-process.env.NODE_ENV = process.env.NODE_ENV || config.NODE_ENV || 'development';
+// process.env.NODE_ENV = process.env.NODE_ENV || config.NODE_ENV || 'development';
 
 // Register express-hbs helpers
 require('./utils/hbsHelpers');
@@ -87,7 +88,6 @@ async function startServer() {
   });
   return app;
 }
-
 
 const app = startServer();
 

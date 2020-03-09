@@ -1,5 +1,15 @@
 {
-    "plugins": [
-        "transform-node-env-inline"
-    ]
+  // "presets": [
+  //   ["@babel/preset-env", {
+  //     "useBuiltIns": "entry"
+  //   }]
+  // ],
+  "plugins": [
+      // ["transform-inline-environment-variables", {
+      //     "include": [
+      //       "NODE_ENV"
+      //     ]
+      //   }], 
+      // "transform-node-env-inline"
+  ]
 }

@@ -15,7 +15,10 @@
     "es6": true
   },
   "rules": {
-    "arrow-parens": ["error", "as-needed"],
+    "arrow-parens": [
+      "error",
+      "as-needed"
+    ],
     "comma-dangle": 0,
     "consistent-return": 0,
     "function-paren-newline": [

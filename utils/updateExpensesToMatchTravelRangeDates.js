@@ -31,6 +31,7 @@ function setNewExpenseDate(expDate, travelDateFrom, travelDateTo) {
     logger.debug(`Expense date is greater than travel date to: ${expDate} > ${travelDateTo}`);
     return travelDateTo;
   }
+  return travelDateTo;
 }
 
 
@@ -41,7 +42,7 @@ Throws Error if something goes wrong
 async function createNewCurrency(expenseDate, homeCurrency, invoiceCurrency) {
   logger.debug('Creating new currency');
   try {
-    let cur = {};
+    const cur = {};
     const dateRates = await findRatesByExactOrClosestDate(expenseDate);
     const convertedRate = convertRateToHomeCurrencyRate(
       dateRates.rates,
@@ -71,7 +72,7 @@ async function updateExpense(
 ) {
   try {
     const amountConverted = Number((expenseAmount / convertedRate).toFixed(2));
-    let doc = await Expense.findByIdAndUpdate(expenseId, {
+    const doc = await Expense.findByIdAndUpdate(expenseId, {
       $set: {
         date: expenseDate,
         curRate: rateObjectId,

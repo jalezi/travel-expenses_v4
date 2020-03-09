@@ -64,6 +64,7 @@ $(document).ready(() => {
   };
 
   // row 2; expenseType != 'Mileage'
+  // eslint-disable-next-line func-names
   amount.onfocusout = function () {
     if (amount.value !== '') {
       amount.value = parseFloat($('#amount').val()).toFixed(2);

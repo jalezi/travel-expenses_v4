@@ -26,6 +26,7 @@ const convertRateToHomeCurrencyRate = (
   logger.debug('Convert rate to home currency rate');
   homeCurrency = homeCurrency.toUpperCase();
   invoiceCurrency = invoiceCurrency.toUpperCase();
+
   const homeCurrencyRate = rates[homeCurrency];
   const convertedRate = 1 / homeCurrencyRate;
   const baseRate = rates[invoiceCurrency];

@@ -10,7 +10,6 @@ class ImportFileError extends Error {
   }
 }
 
-
 class SaveToDbError extends Error {
   constructor(...args) {
     super(...args);
@@ -20,5 +19,4 @@ class SaveToDbError extends Error {
 }
 
 exports.ImportFileError = ImportFileError;
-
 exports.SaveToDbError = SaveToDbError;

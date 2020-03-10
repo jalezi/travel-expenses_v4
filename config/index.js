@@ -198,7 +198,8 @@ module.exports = {
   port: process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT,
 
   // MongoDB url
-  databaseURL: process.env.MONGODB_URI,
+  // databaseURL: process.env.MONGODB_URI,
+  databaseURL: process.env.MONGODB_ATLAS_URI,
 
   // Mongoose options
   mongooseOptions: {

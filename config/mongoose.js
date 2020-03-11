@@ -27,7 +27,8 @@ const config = require('../config');
  */
 module.exports = async () => {
   logger.debug('DB connecting');
-  const dbURL = config.databaseURL;
+  const { dbURL, db } = config;
+  console.log(db);
 
   // Mongoose connection events
   mongoose.connection.on('connecting', () => {

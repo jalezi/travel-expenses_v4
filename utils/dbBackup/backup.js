@@ -7,7 +7,7 @@ const LoggerClass = require('../../config/LoggerClass');
 
 const Logger = new LoggerClass('backup');
 const { mainLogger, logger } = Logger;
-mainLogger.debug('utils\\backup/backup INITIALIZING!');
+mainLogger.debug('utils\\backup\\backup INITIALIZING!');
 
 // Concatenate root directory path with our backup folder.
 const backupDirPath = path.join(__dirname, 'database-backup');

@@ -6,7 +6,7 @@ const LoggerClass = require('../../config/LoggerClass');
 
 const Logger = new LoggerClass('job');
 const { mainLogger, logger } = Logger;
-mainLogger.debug('utils\\backup/job INITIALIZING!');
+mainLogger.debug('utils\\backup\\job INITIALIZING!');
 
 module.exports = async () => {
   const label = 'backup/job';

@@ -152,7 +152,7 @@ const MongoStore = require('connect-mongo')(session);
  * @property {string} envNode                   Environment mode: development, test, production.
  * @property {string} envHost                   Environment host.
  * @property {string} port                      Server port.
- * @property {string} databaseURL               URL to database - MongoDB.
+ * @property {string} dbURL               URL to database - MongoDB.
  * @property {mongooseOptions} mongooseOptions  Some mongoose options to avoid warnings.
  * @property {string} jwtSecret                 JWT secret - not used at the moment.
  * @property {string} dataFixer {@link https://fixer.io/documentation Fixer} api key.
@@ -198,8 +198,16 @@ module.exports = {
   port: process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT,
 
   // MongoDB url
-  // databaseURL: process.env.MONGODB_URI,
-  databaseURL: process.env.MONGODB_ATLAS_URI,
+  dbURL: process.env.MONGODB_URL || process.env.MONGODB_SYNO_URL || process.env.MONGODB_ATLAS_URL,
+  db: {
+    dbSrv: process.env.MONGODB_SRV || process.env.MONGODB_SYNO_SRV || process.env.MONGODB_ATLAS_SRV,
+    dbUser: process.env.MONGODB_USER || process.env.MONGODB_SYNO_USER || process.env.MONGODB_ATLAS_USER,
+    dbPwd: process.env.MONGODB_PWD || process.env.MONGODB_SYNO_PWD || process.env.MONGODB_ATLAS_PWD,
+    dbHost: process.env.MONGODB_HOST || process.env.MONGODB_SYNO_HOST || process.env.MONGODB_ATLAS_HOST,
+    dbName: process.env.MONGODB_DB || process.env.MONGODB_SYNO_DB || process.env.MONGODB_ATLAS_DB,
+    dbPort: process.env.MONGODB_PORT || process.env.MONGODB_SYNO_PORT || process.env.MONGODB_ATLAS_PORT,
+    dbAuth: process.env.MONGODB_AUTH || process.env.MONGODB_SYNO_AUTH || process.env.MONGODB_ATLAS_AUTH,
+  },
 
   // Mongoose options
   mongooseOptions: {
@@ -271,7 +279,7 @@ module.exports = {
     secret: process.env.SESSION_SECRET,
     cookie: { maxAge: 1209600000 }, // two weeks in milliseconds
     store: new MongoStore({
-      url: process.env.MONGODB_URI,
+      url: process.env.MONGODB_URL || process.env.MONGODB_SYNO_URL || process.env.MONGODB_ATLAS_URL,
       autoReconnect: true
     })
   },

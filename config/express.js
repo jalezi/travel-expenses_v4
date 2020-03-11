@@ -131,6 +131,7 @@ module.exports = async app => {
   //  Using cookie-parser may result in issues if the secret
   //  is not the same between this module and cookie-parser.
   app.use(session(config.session));
+  logger.debug(`MongosStore session url === mongo connect url: ${config.session.store.options.url === config.dbURL}`);
   logger.silly('Use session middleware');
 
   //  Passport uses the concept of strategies to authenticate requests.

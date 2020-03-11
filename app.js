@@ -37,6 +37,7 @@ const mongoConnection = require('./config/mongoose');
 const expressConfiguration = require('./config/express');
 const errorHandler = require('./config/error');
 const getRates = require('./utils/getRates');
+const dbAutoBackUp = require('./utils/dbBackup/job');
 
 // Catch uncaught errors
 process.on('uncaughtException', err => {
@@ -69,6 +70,9 @@ async function startServer() {
   // Function to check for rates at data.fixer.io and save them to DB
   await getRates();
   logger.silly('Function getRates intialized!');
+
+  await dbAutoBackUp();
+  logger.silly('Function dbAutoBackUp initialized');
 
   // Error Handler.
   errorHandler(app);

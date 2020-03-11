@@ -77,3 +77,4 @@ app-new.js
 /docs/*
 /docs2/*
 /uploads/*
+/utils/dbBackup/database*

@@ -183,6 +183,14 @@ const MongoStore = require('connect-mongo')(session);
  * @see {@link https://www.npmjs.com/package/connect-mongo NPM:connect-mongo}
  */
 
+const srv = process.env.DB_SRV || process.env.DB_NAS_SRV || process.env.DB_ATLAS_SRV;
+const user = process.env.DB_USER || process.env.DB_NAS_USER || process.env.DB_ATLAS_USER;
+const pwd = process.env.DB_PWD || process.env.DB_NAS_PWD || process.env.DB_ATLAS_PWD;
+const host = process.env.DB_HOST || process.env.DB_NAS_HOST || process.env.DB_ATLAS_HOST;
+const name = process.env.DB_NAME || process.env.DB_NAS_NAME || process.env.DB_ATLAS_NAME;
+const port = process.env.DB_PORT || process.env.DB_NAS_PORT || process.env.DB_ATLAS_PORT;
+const auth = process.env.DB_AUTH || process.env.DB_NAS_AUTH || process.env.DB_ATLAS_AUTH;
+
 /**
  * Config object.
  * @type {configObject}
@@ -198,15 +206,15 @@ module.exports = {
   port: process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT,
 
   // MongoDB url
-  dbURL: process.env.MONGODB_URL || process.env.MONGODB_SYNO_URL || process.env.MONGODB_ATLAS_URL,
+  dbURL: process.env.DB_URL || process.env.DB_NAS_URL || process.env.DB_ATLAS_URL,
   db: {
-    srv: process.env.MONGODB_SRV || process.env.MONGODB_SYNO_SRV || process.env.MONGODB_ATLAS_SRV,
-    user: process.env.MONGODB_USER || process.env.MONGODB_SYNO_USER || process.env.MONGODB_ATLAS_USER,
-    pwd: process.env.MONGODB_PWD || process.env.MONGODB_SYNO_PWD || process.env.MONGODB_ATLAS_PWD,
-    host: process.env.MONGODB_HOST || process.env.MONGODB_SYNO_HOST || process.env.MONGODB_ATLAS_HOST,
-    name: process.env.MONGODB_DB || process.env.MONGODB_SYNO_DB || process.env.MONGODB_ATLAS_DB,
-    port: process.env.MONGODB_PORT || process.env.MONGODB_SYNO_PORT || process.env.MONGODB_ATLAS_PORT,
-    auth: process.env.MONGODB_AUTH || process.env.MONGODB_SYNO_AUTH || process.env.MONGODB_ATLAS_AUTH,
+    srv,
+    user,
+    pwd,
+    host,
+    name,
+    port,
+    auth
   },
 
   // Mongoose options
@@ -279,7 +287,7 @@ module.exports = {
     secret: process.env.SESSION_SECRET,
     cookie: { maxAge: 1209600000 }, // two weeks in milliseconds
     store: new MongoStore({
-      url: process.env.MONGODB_URL || process.env.MONGODB_SYNO_URL || process.env.MONGODB_ATLAS_URL,
+      url: process.env.DB_URL || process.env.DB_NAS_URL || process.env.DB_ATLAS_URL,
       autoReconnect: true
     })
   },
@@ -304,7 +312,7 @@ module.exports = {
 
   // Agenda configuration
   agenda: {
-    dbCollection: process.env.AGENDA_DB_COLLECTION,
+    dbCollection: process.env.AGENDANAME_COLLECTION,
     pooltime: process.env.AGENDA_POOL_TIME,
     concurrency: parseInt(process.env.AGENDA_CONCURRENCY, 10)
   },

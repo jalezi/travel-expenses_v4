@@ -200,13 +200,13 @@ module.exports = {
   // MongoDB url
   dbURL: process.env.MONGODB_URL || process.env.MONGODB_SYNO_URL || process.env.MONGODB_ATLAS_URL,
   db: {
-    dbSrv: process.env.MONGODB_SRV || process.env.MONGODB_SYNO_SRV || process.env.MONGODB_ATLAS_SRV,
-    dbUser: process.env.MONGODB_USER || process.env.MONGODB_SYNO_USER || process.env.MONGODB_ATLAS_USER,
-    dbPwd: process.env.MONGODB_PWD || process.env.MONGODB_SYNO_PWD || process.env.MONGODB_ATLAS_PWD,
-    dbHost: process.env.MONGODB_HOST || process.env.MONGODB_SYNO_HOST || process.env.MONGODB_ATLAS_HOST,
-    dbName: process.env.MONGODB_DB || process.env.MONGODB_SYNO_DB || process.env.MONGODB_ATLAS_DB,
-    dbPort: process.env.MONGODB_PORT || process.env.MONGODB_SYNO_PORT || process.env.MONGODB_ATLAS_PORT,
-    dbAuth: process.env.MONGODB_AUTH || process.env.MONGODB_SYNO_AUTH || process.env.MONGODB_ATLAS_AUTH,
+    srv: process.env.MONGODB_SRV || process.env.MONGODB_SYNO_SRV || process.env.MONGODB_ATLAS_SRV,
+    user: process.env.MONGODB_USER || process.env.MONGODB_SYNO_USER || process.env.MONGODB_ATLAS_USER,
+    pwd: process.env.MONGODB_PWD || process.env.MONGODB_SYNO_PWD || process.env.MONGODB_ATLAS_PWD,
+    host: process.env.MONGODB_HOST || process.env.MONGODB_SYNO_HOST || process.env.MONGODB_ATLAS_HOST,
+    name: process.env.MONGODB_DB || process.env.MONGODB_SYNO_DB || process.env.MONGODB_ATLAS_DB,
+    port: process.env.MONGODB_PORT || process.env.MONGODB_SYNO_PORT || process.env.MONGODB_ATLAS_PORT,
+    auth: process.env.MONGODB_AUTH || process.env.MONGODB_SYNO_AUTH || process.env.MONGODB_ATLAS_AUTH,
   },
 
   // Mongoose options

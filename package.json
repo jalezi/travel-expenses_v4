@@ -10,8 +10,8 @@
     "generate:docs": "jsdoc -c conf.json -P package.json",
     "generate:docs2": "jsdoc -c jsdoc.json -P package.json",
     "postinstall": "npm rebuild node-sass",
-    "start": "node --icu-data-dir=\\node_modules\\full-icu app.js",
-    "start:nodemon": "nodemon --icu-data-dir=node_modules\\full-icu app.js",
+    "start": "node app.js",
+    "start:nodemon": "nodemon --ignore dbBackup --icu-data-dir=node_modules\\full-icu app.js",
     "start:playground": "node playground\\winston-logger\\loggerApp.js",
     "test": "set NODE_ENV=test && nyc --reporter=html mocha --timeout=10000 --exit",
     "lint": "eslint \"**/*.js\""

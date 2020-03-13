@@ -46,7 +46,6 @@ exports.empty = mixedVar => {
   logger.debug('empty function STARTS', { label });
   logger.silly(`mixedVar=${mixedVar}`, { label });
   let undef;
-  let key;
   const emptyValues = [undef, null, false, 0, '', '0'];
   logger.debug('for index loop array STARTS', { label });
   for (let i = 0; i < emptyValues.length; i++) {
@@ -114,13 +113,23 @@ exports.dbAutoBackUp = () => {
     cmdOptions.forEach(key => {
       if (key === 'ssl' && dbOptionsDynamic[key] === 'true') {
         cmd += '--ssl ';
+        logger.silly(`--${key}`, label);
       }
       if (dbOptionsDynamic[key] && key != 'ssl') {
         cmd += `--${key} ${dbOptionsDynamic[key]} `;
+        switch (key) {
+          case 'password':
+            logger.silly(`--${key}: ***********`, label);
+            break;
+          default:
+            logger.silly(`--${key}: ${dbOptionsDynamic[key]}`, label);
+            break;
+        }
       }
     });
     cmd += `--out ${newBackupPath}`;
-    logger.silly(`cmd: ${cmd}`, label);
+    logger.silly(`--out: ${newBackupPath}`, label);
+
 
     exec(cmd, (error, stderr, stdout) => {
       const label = 'exec';

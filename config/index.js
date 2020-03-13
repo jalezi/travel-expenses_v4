@@ -210,7 +210,6 @@ module.exports = {
   port: process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT,
 
   // MongoDB url
-  dbURL: process.env.DB_URL || process.env.DB_NAS_URL || process.env.DB_ATLAS_URL,
   db: {
     uri: process.env.DB_URL || process.env.DB_NAS_URL || process.env.DB_ATLAS_URL,
     srv,

@@ -27,7 +27,7 @@ const config = require('../config');
  */
 module.exports = async () => {
   logger.debug('DB connecting');
-  const { dbURL, db } = config;
+  const { db } = config;
 
   // Mongoose connection events
   mongoose.connection.on('connecting', () => {
@@ -61,7 +61,7 @@ module.exports = async () => {
     process.exit();
   });
 
-  const connection = await mongoose.connect(dbURL, config.mongooseOptions);
+  const connection = await mongoose.connect(db.uri, config.mongooseOptions);
 
   process.on('SIGINT', async () => {
     await mongoose.connection.close(() => {

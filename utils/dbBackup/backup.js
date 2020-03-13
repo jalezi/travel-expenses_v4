@@ -58,12 +58,15 @@ exports.empty = mixedVar => {
   }
 
   if (typeof mixedVar === 'object') {
-    logger.debug('mixedVar is object');
-    for (key in mixedVar) {
-      logger.silly(`key in mixedVar: ${key}`);
-      logger.debug('empty function returns FALSE', { label });
-      return false;
-    }
+    logger.warn('mixedVar is object');
+    Object.keys(mixedVar).forEach(key => {
+      if (Object.prototype.hasOwnProperty.call(mixedVar, key)) {
+        logger.info(`mixedVar hasOwnProperty: ${key}`);
+        logger.silly(`key in mixedVar: ${key}`);
+        logger.debug('empty function returns FALSE', { label });
+        return false;
+      }
+    });
 
     logger.debug('empty function returns TRUE', { label });
     return true;
@@ -110,22 +113,13 @@ exports.dbAutoBackUp = () => {
     let cmd = `${mongodump} `;
     cmdOptions.forEach(key => {
       if (key === 'ssl' && dbOptionsDynamic[key] === 'true') {
-        // console.log(key, dbOptionsDynamic[key], typeof dbOptionsDynamic[key]);
-        // console.log(key === 'ssl' && dbOptionsDynamic[key]);
-        // console.log(key === 'ssl');
-        // console.log(dbOptionsDynamic[key]);
         cmd += '--ssl ';
       }
       if (dbOptionsDynamic[key] && key != 'ssl') {
-        // console.log(key);
-        // console.log(key != 'ssl');
         cmd += `--${key} ${dbOptionsDynamic[key]} `;
       }
     });
     cmd += `--out ${newBackupPath}`;
-    console.log();
-    console.log(cmd);
-    console.log();
     logger.silly(`cmd: ${cmd}`, label);
 
     exec(cmd, (error, stderr, stdout) => {
@@ -141,6 +135,7 @@ exports.dbAutoBackUp = () => {
           logger.debug('Remove old backup STARTS', { label });
           if (fs.existsSync(oldBackupPath)) {
             logger.debug(`${oldBackupPath} exists`, { label });
+            // TODO make the same like for mongodump
             exec(`rmdir /Q /S ${oldBackupPath}`, err => { // linux rm -rf
               logger.debug('Removing old backup path.', { label });
               if (err) {

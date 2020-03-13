@@ -17,8 +17,7 @@ module.exports = dbData => {
     name,
     port,
     auth,
-    ssl,
-    rp
+    ssl
   } = dbData;
   result.uri = uri;
   result.srv = srv;
@@ -29,6 +28,5 @@ module.exports = dbData => {
   result.port = port;
   result.authenticationDatabase = auth === ' ' ? undefined : auth;
   result.ssl = ssl;
-  // result.readPreference = rp === ' ' ? undefined : rp;
   return result;
 };

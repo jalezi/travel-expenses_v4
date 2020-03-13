@@ -190,12 +190,16 @@ const host = process.env.DB_HOST || process.env.DB_NAS_HOST || process.env.DB_AT
 const name = process.env.DB_NAME || process.env.DB_NAS_NAME || process.env.DB_ATLAS_NAME;
 const port = process.env.DB_PORT || process.env.DB_NAS_PORT || process.env.DB_ATLAS_PORT;
 const auth = process.env.DB_AUTH || process.env.DB_NAS_AUTH || process.env.DB_ATLAS_AUTH;
+const ssl = process.env.DB_SSL || process.env.DB_NAS_SSL || process.env.DB_ATLAS_SSL;
+const rp = process.env.DB_RP || process.env.DB_NAS_RP || process.env.DB_ATLAS_RP;
 
 /**
  * Config object.
  * @type {configObject}
  */
 module.exports = {
+  // running platform
+  platform: process.platform,
   // Environment mode
   envNode: process.env.NODE_ENV,
 
@@ -208,13 +212,16 @@ module.exports = {
   // MongoDB url
   dbURL: process.env.DB_URL || process.env.DB_NAS_URL || process.env.DB_ATLAS_URL,
   db: {
+    uri: process.env.DB_URL || process.env.DB_NAS_URL || process.env.DB_ATLAS_URL,
     srv,
     user,
     pwd,
     host,
     name,
     port,
-    auth
+    auth,
+    ssl,
+    rp
   },
 
   // Mongoose options

@@ -6,7 +6,7 @@ const path = require('path');
 const appRoot = require('app-root-path');
 
 const { db } = require('../../config');
-const { OS_COMMANDS } = require('../../lib/constants');
+const { RUNNING_PLATFORM, OS_COMMANDS } = require('../../lib/constants');
 const getDbOptions = require('./getDbOptions');
 const LoggerClass = require('../../config/LoggerClass');
 
@@ -14,22 +14,27 @@ const Logger = new LoggerClass('backup');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('utils\\backup\\backup INITIALIZING!');
 
+// determine proper cmd command - for the moment only win32 or linux
+const { mongodump } = OS_COMMANDS[RUNNING_PLATFORM];
+const deleteCMD = OS_COMMANDS[RUNNING_PLATFORM].delete.directory.withContent;
+mainLogger.silly(`${RUNNING_PLATFORM} CMD delete command: ${deleteCMD}`);
+
 // Concatenate root directory path with our backup folder.
 const bckDirPath = appRoot.resolve('dbBackup');
 const backupDirPath = path.join(bckDirPath, 'database-backup');
 
-getDbOptions(db);
-const dbOptions = {
-  // user: 'myAdmin',
-  // pass: 'Minka-006',
-  host: 'localhost',
-  port: 27017,
-  database: 'test_travel_expenses',
+const dbOptionsBasic = {
   autoBackup: true,
   removeOldBackup: true,
   keepLastDaysBackup: 2,
   autoBackupPath: backupDirPath
 };
+
+const dbOptionsDynamic = getDbOptions(db);
+
+const dbOptionsMerged = { ...dbOptionsDynamic, ...dbOptionsBasic };
+
+const dbOptions = dbOptionsMerged;
 
 // return stringDate as a date object.
 exports.stringToDate = dateString => new Date(dateString);
@@ -46,7 +51,7 @@ exports.empty = mixedVar => {
   logger.debug('for index loop array STARTS', { label });
   for (let i = 0; i < emptyValues.length; i++) {
     if (mixedVar === emptyValues[i]) {
-      logger.silly(`mixedVar in emptyValue array, index: ${i}`, { label });
+      logger.silly(`mixedVar in emptyValue array, index: ${i}, ${mixedVar}`, { label });
       logger.debug('empty function returns TRUE', { label });
       return true;
     }
@@ -100,38 +105,32 @@ exports.dbAutoBackUp = () => {
       logger.silly(`oldBackupPath: ${oldBackupPath}`, { label });
     }
 
-    // // Command for mongodb dump process
-    // let cmd =
-    // `mongodump --host ${
-    //   dbOptions.host
-    // } --port ${
-    //   dbOptions.port
-    // } --db ${
-    //   dbOptions.database
-    // } --username ${
-    //   dbOptions.user
-    // } --password ${
-    //   dbOptions.pass
-    // } --out ${
-    //   newBackupPath}`;
-
     // Command for mongodb dump process
-    let cmd =
-       `"C:\\Program Files\\MongoDB\\Server\\4.2\\bin\\mongodump.exe" --host ${
-         dbOptions.host
-       } --port ${
-         dbOptions.port
-       } --db ${
-         dbOptions.database
-       } --out ${
-         newBackupPath}`;
-
-    logger.info(`cmd: ${cmd}`, label);
+    const cmdOptions = ['host', 'readPreference', 'port', 'ssl', 'username', 'password', 'authenticationDatabase', 'db'];
+    let cmd = `${mongodump} `;
+    cmdOptions.forEach(key => {
+      if (key === 'ssl' && dbOptionsDynamic[key] === 'true') {
+        // console.log(key, dbOptionsDynamic[key], typeof dbOptionsDynamic[key]);
+        // console.log(key === 'ssl' && dbOptionsDynamic[key]);
+        // console.log(key === 'ssl');
+        // console.log(dbOptionsDynamic[key]);
+        cmd += '--ssl ';
+      }
+      if (dbOptionsDynamic[key] && key != 'ssl') {
+        // console.log(key);
+        // console.log(key != 'ssl');
+        cmd += `--${key} ${dbOptionsDynamic[key]} `;
+      }
+    });
+    cmd += `--out ${newBackupPath}`;
+    console.log();
+    console.log(cmd);
+    console.log();
+    logger.silly(`cmd: ${cmd}`, label);
 
     exec(cmd, (error, stderr, stdout) => {
       const label = 'exec';
       logger.debug('exec STARTS', { label });
-      console.log('dbOptions', dbOptions);
       if (error) {
         logger.error(error.message);
       }
@@ -146,7 +145,6 @@ exports.dbAutoBackUp = () => {
               logger.debug('Removing old backup path.', { label });
               if (err) {
                 logger.error(err);
-                // console.log(err);
               } else {
                 logger.info('Old backup path removed!');
               }

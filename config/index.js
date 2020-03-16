@@ -3,6 +3,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const { argv } = require('yargs');
 
+
 /**
  * @memberof module:config
  * @alias mongooseOptions
@@ -184,8 +185,8 @@ const { argv } = require('yargs');
  * @see {@link https://www.npmjs.com/package/connect-mongo NPM:connect-mongo}
  */
 
-const connectTo = argv.dbServer.toLowerCase();
-const logLevel = argv.logLevel.toLowerCase();
+const connectTo = argv.dbServer ? argv.dbServer.toLowerCase() : undefined;
+const logLevel = argv.logLevel ? argv.logLevel.toLowerCase() : undefined;
 
 let uri;
 let srv;

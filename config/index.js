@@ -1,6 +1,7 @@
 const appRoot = require('app-root-path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
+const { argv } = require('yargs');
 
 /**
  * @memberof module:config
@@ -183,15 +184,59 @@ const MongoStore = require('connect-mongo')(session);
  * @see {@link https://www.npmjs.com/package/connect-mongo NPM:connect-mongo}
  */
 
-const srv = process.env.DB_SRV || process.env.DB_NAS_SRV || process.env.DB_ATLAS_SRV;
-const user = process.env.DB_USER || process.env.DB_NAS_USER || process.env.DB_ATLAS_USER;
-const pwd = process.env.DB_PWD || process.env.DB_NAS_PWD || process.env.DB_ATLAS_PWD;
-const host = process.env.DB_HOST || process.env.DB_NAS_HOST || process.env.DB_ATLAS_HOST;
-const name = process.env.DB_NAME || process.env.DB_NAS_NAME || process.env.DB_ATLAS_NAME;
-const port = process.env.DB_PORT || process.env.DB_NAS_PORT || process.env.DB_ATLAS_PORT;
-const auth = process.env.DB_AUTH || process.env.DB_NAS_AUTH || process.env.DB_ATLAS_AUTH;
-const ssl = process.env.DB_SSL || process.env.DB_NAS_SSL || process.env.DB_ATLAS_SSL;
-const rp = process.env.DB_RP || process.env.DB_NAS_RP || process.env.DB_ATLAS_RP;
+const connectTo = argv.dbServer.toLowerCase();
+const logLevel = argv.logLevel.toLowerCase();
+
+let uri;
+let srv;
+let user;
+let pwd;
+let host;
+let name;
+let port;
+let auth;
+let ssl;
+let rp;
+
+switch (connectTo) {
+  case 'nas':
+    uri = process.env.DB_NAS_URL;
+    srv = process.env.DB_NAS_SRV;
+    user = process.env.DB_NAS_USER;
+    pwd = process.env.DB_NAS_PWD;
+    host = process.env.DB_NAS_HOST;
+    name = process.env.DB_NAS_NAME;
+    port = process.env.DB_NAS_PORT;
+    auth = process.env.DB_NAS_AUTH;
+    ssl = process.env.DB_NAS_SSL;
+    rp = process.env.DB_NAS_RP;
+    break;
+  case 'atlas':
+    uri = process.env.DB_ATLAS_URL;
+    srv = process.env.DB_ATLAS_SRV;
+    user = process.env.DB_ATLAS_USER;
+    pwd = process.env.DB_ATLAS_PWD;
+    host = process.env.DB_ATLAS_HOST;
+    name = process.env.DB_ATLAS_NAME;
+    port = process.env.DB_ATLAS_PORT;
+    auth = process.env.DB_ATLAS_AUTH;
+    ssl = process.env.DB_ATLAS_SSL;
+    rp = process.env.DB_ATLAS_RP;
+    break;
+  default:
+    uri = process.env.DB_URL;
+    srv = process.env.DB_SRV;
+    user = process.env.DB_USER;
+    pwd = process.env.DB_PWD;
+    host = process.env.DB_HOST;
+    name = process.env.DB_NAME;
+    port = process.env.DB_PORT;
+    auth = process.env.DB_AUTH;
+    ssl = process.env.DB_SSL;
+    rp = process.env.DB_RP;
+    break;
+}
+
 
 /**
  * Config object.
@@ -211,7 +256,7 @@ module.exports = {
 
   // MongoDB url
   db: {
-    uri: process.env.DB_URL || process.env.DB_NAS_URL || process.env.DB_ATLAS_URL,
+    uri,
     srv,
     user,
     pwd,
@@ -245,7 +290,7 @@ module.exports = {
 
   // winston logger level
   logs: {
-    level: process.env.LOG_LEVEL || 'silly',
+    level: logLevel || process.env.LOG_LEVEL || 'silly',
     trace: process.env.LOG_TRACE === 'true' || false
   },
 

@@ -57,7 +57,7 @@ exports.empty = mixedVar => {
   }
 
   if (typeof mixedVar === 'object') {
-    logger.warn('mixedVar is object');
+    logger.warn('mixedVar is object', { label });
     Object.keys(mixedVar).forEach(key => {
       if (Object.prototype.hasOwnProperty.call(mixedVar, key)) {
         logger.info(`mixedVar hasOwnProperty: ${key}`);
@@ -113,29 +113,29 @@ exports.dbAutoBackUp = () => {
     cmdOptions.forEach(key => {
       if (key === 'ssl' && dbOptionsDynamic[key] === 'true') {
         cmd += '--ssl ';
-        logger.silly(`--${key}`, label);
+        logger.silly(`--${key}`, { label });
       }
       if (dbOptionsDynamic[key] && key != 'ssl') {
         cmd += `--${key} ${dbOptionsDynamic[key]} `;
         switch (key) {
           case 'password':
-            logger.silly(`--${key}: ***********`, label);
+            logger.silly(`--${key}: ***********`, { label });
             break;
           default:
-            logger.silly(`--${key}: ${dbOptionsDynamic[key]}`, label);
+            logger.silly(`--${key}: ${dbOptionsDynamic[key]}`, { label });
             break;
         }
       }
     });
     cmd += `--out ${newBackupPath}`;
-    logger.silly(`--out: ${newBackupPath}`, label);
+    logger.silly(`--out: ${newBackupPath}`, { label });
 
 
     exec(cmd, (error, stderr, stdout) => {
-      const label = 'exec';
+      const label = 'exec mongodump';
       logger.debug('exec STARTS', { label });
       if (error) {
-        logger.error(error.message);
+        logger.error(error.message, { label });
       }
       console.log('error', error);
       if (this.empty(error)) {
@@ -144,13 +144,14 @@ exports.dbAutoBackUp = () => {
           logger.debug('Remove old backup STARTS', { label });
           if (fs.existsSync(oldBackupPath)) {
             logger.debug(`${oldBackupPath} exists`, { label });
-            // TODO make the same like for mongodump
-            exec(`rmdir /Q /S ${oldBackupPath}`, err => { // linux rm -rf
+            const execCMD = `${deleteCMD} /Q /S ${oldBackupPath}`; // linux rm -rf win32 rmdir /Q /S
+            exec(execCMD, err => {
+              const label = `exec ${deleteCMD}`;
               logger.debug('Removing old backup path.', { label });
               if (err) {
                 logger.error(err);
               } else {
-                logger.info('Old backup path removed!');
+                logger.info('Old backup path removed!', { label });
               }
             });
           }

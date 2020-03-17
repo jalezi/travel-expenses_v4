@@ -186,8 +186,7 @@ const { argv } = require('yargs');
  */
 
 const connectTo = argv.dbServer ? argv.dbServer.toLowerCase() : undefined;
-const logLevel = argv.logLevel ? argv.logLevel.toLowerCase() : undefined;
-
+const logLevel = argv.logLevel ? argv.logLevel.toLowerCase() : 'debug';
 let uri;
 let srv;
 let user;
@@ -255,7 +254,7 @@ module.exports = {
   // Environment port
   port: process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT,
 
-  // MongoDB url
+  // MongoDB config
   db: {
     uri,
     srv,

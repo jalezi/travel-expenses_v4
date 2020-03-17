@@ -127,7 +127,7 @@ exports.dbAutoBackUp = () => {
         }
       }
     });
-    cmd += `--out ${newBackupPath}`;
+    cmd += `--out ${newBackupPath} -v`;
     logger.silly(`--out: ${newBackupPath}`, { label });
 
 

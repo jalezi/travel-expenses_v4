@@ -6,41 +6,10 @@ const path = require('path');
 const moment = require('moment');
 const { argv } = require('yargs')
   .command(['mongoexport [options]', 'me', 'export'], 'Export MongoDB collection from specific database', yargs => {
-    yargs
-      .positional('dbServer', {
-        describe: 'Server where database is running [localhost, nas, atlas]',
-        type: 'string',
-        default: 'localhost',
-        choices: ['localhost', 'nas', 'atlas']
-      })
-      .positional('logLevel', {
-        describe: 'Log level.',
-        type: 'string',
-        default: 'debug',
-        choices: ['error', 'warn', 'info', 'verbose', 'debug', 'silly']
-      })
-      .positional('collection', {
-        describe: 'Collections to export',
-        type: 'string',
-        choices: ['currencies', 'expenses', 'rates', 'travels', 'users'],
-        default: ['currencies', 'expenses', 'rates', 'travels', 'users']
-      })
-      .help();
+    yargs.help();
   })
   .command(['mongoimport', 'mi', 'import'], 'Import MongoDB collection to specific database', yargs => {
     yargs
-      .positional('logLevel', {
-        describe: 'Log level.',
-        type: 'string',
-        default: 'debug',
-        choices: ['error', 'warn', 'info', 'verbose', 'debug', 'silly']
-      })
-      .positional('collection', {
-        describe: 'Collections to export',
-        type: 'string',
-        choices: ['currencies', 'expenses', 'rates', 'travels', 'users'],
-        default: ['currencies', 'expenses', 'rates', 'travels', 'users']
-      })
       .positional('folder', {
         describe: 'Folder where json files are located [localhost, nas, atlas]',
         type: 'string',
@@ -51,18 +20,6 @@ const { argv } = require('yargs')
   })
   .command(['mongorestore', 'mr', 'restore'], 'Restore MongoDB database to specific datbase', yargs => {
     yargs
-      .positional('dbServer', {
-        describe: 'Server where database is running [localhost, nas, atlas]',
-        type: 'string',
-        default: 'localhost',
-        choices: ['localhost', 'nas', 'atlas']
-      })
-      .positional('logLevel', {
-        describe: 'Log level.',
-        type: 'string',
-        default: 'debug',
-        choices: ['error', 'warn', 'info', 'verbose', 'debug', 'silly']
-      })
       .positional('folder', {
         describe: 'Folder where json files are located [localhost, nas, atlas]',
         type: 'string',
@@ -77,6 +34,18 @@ const { argv } = require('yargs')
       default: 'localhost',
       choices: ['localhost', 'nas', 'atlas']
     },
+    logLevel: {
+      description: 'Log level',
+      type: 'string',
+      default: 'debug',
+      choices: ['error', 'warn', 'info', 'verbose', 'debug', 'silly']
+    },
+    collection: {
+      description: 'Collections to use export/import',
+      type: 'string',
+      choices: ['currencies', 'expenses', 'rates', 'travels', 'users'],
+      default: ['currencies', 'expenses', 'rates', 'travels', 'users']
+    }
   })
   .array('collection')
   .demandCommand(1)

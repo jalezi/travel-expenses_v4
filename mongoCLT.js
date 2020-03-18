@@ -153,13 +153,37 @@ switch (argv._[0]) {
 mainLogger.debug(exeFilePath, { label: 'exeFilePath' });
 mainLogger.debug(backupDirPath, { label: 'backupDirPath' });
 
+const cmdOptions = ['host', 'readPreference', 'port', 'ssl', 'username', 'password', 'authenticationDatabase', 'db'];
+
+const execFunc = cmd => {
+  exec(cmd, (error, stderr, stdout) => {
+    const label = `exec ${argv._[0]}`;
+    logger.debug('exec STARTS', { label });
+    if (error) {
+      logger.error(error.message, { label });
+      console.dir(error);
+    }
+
+    if (stdout) {
+      stdout.split('\n').forEach(value => {
+        logger.info(value, { label: 'exec stdout' });
+      });
+    }
+
+    if (stderr) {
+      logger.error(stderr, { label });
+      console.log(typeof stderr);
+    }
+    logger.debug('exec ENDS', { label });
+  });
+};
+
 const mongoExport = (
   command = exeFilePath, folder = argv.dbServer, collection = argv.collection
 ) => {
 // Command for mongodb mongoexport process
   const label = 'mongoExport';
   logger.debug('mongoExport Starts', { label });
-  const cmdOptions = ['host', 'readPreference', 'port', 'ssl', 'username', 'password', 'authenticationDatabase', 'db'];
   let cmd = `${command} `;
 
   collection.forEach(value => {
@@ -186,26 +210,7 @@ const mongoExport = (
     logger.silly(`--out: ${backupFilePath}`, { label });
     logger.debug(cmd, { label });
 
-    exec(cmd, (error, stderr, stdout) => {
-      const label = `exec ${argv._[0]}`;
-      logger.debug('exec STARTS', { label });
-      if (error) {
-        logger.error(error.message, { label });
-        console.dir(error);
-      }
-
-      if (stdout) {
-        stdout.split('\n').forEach(value => {
-          logger.info(value, { label: 'exec stdout' });
-        });
-      }
-
-      if (stderr) {
-        logger.error(stderr, { label });
-        console.log(typeof stderr);
-      }
-      logger.debug('exec ENDS', { label });
-    });
+    execFunc(cmd);
 
     cmd = `${command} `;
   });
@@ -217,7 +222,6 @@ const mongoImport = (
 ) => {
   const label = 'mongoImport';
   logger.debug('mongoImport STARTS', { label });
-  const cmdOptions = ['host', 'readPreference', 'port', 'ssl', 'username', 'password', 'authenticationDatabase', 'db'];
   let cmd = `${command} `;
 
   collection.forEach(value => {
@@ -244,26 +248,7 @@ const mongoImport = (
     logger.silly(`--file: ${backupFilePath}`, { label });
     logger.debug(cmd, { label });
 
-    exec(cmd, (error, stderr, stdout) => {
-      const label = `exec ${argv._[0]}`;
-      logger.debug('exec STARTS', { label });
-      if (error) {
-        logger.error(error.message, { label });
-        console.dir(error);
-      }
-
-      if (stdout) {
-        stdout.split('\n').forEach(value => {
-          logger.info(value, { label: 'exec stdout' });
-        });
-      }
-
-      if (stderr) {
-        logger.error(stderr, { label });
-        console.log(typeof stderr);
-      }
-      logger.debug('exec ENDS', { label });
-    });
+    execFunc(cmd);
 
     cmd = `${command} `;
   });
@@ -273,7 +258,6 @@ const mongoImport = (
 const mongoRestore = (command = exeFilePath, folder = argv.folder) => {
   const label = 'mongoRestore';
   logger.debug('mongoRestore STARTS', { label });
-  const cmdOptions = ['host', 'readPreference', 'port', 'ssl', 'username', 'password', 'authenticationDatabase', 'db'];
   let cmd = `${command} `;
   cmdOptions.forEach(key => {
     if (key === 'ssl' && dbOptions[key] === 'true') {
@@ -297,26 +281,7 @@ const mongoRestore = (command = exeFilePath, folder = argv.folder) => {
   logger.silly(`${backupFilePath}`, { label });
   logger.debug(cmd, { label });
 
-  exec(cmd, (error, stderr, stdout) => {
-    const label = `exec ${argv._[0]}`;
-    logger.debug('exec STARTS', { label });
-    if (error) {
-      logger.error(error.message, { label });
-      console.dir(error);
-    }
-
-    if (stdout) {
-      stdout.split('\n').forEach(value => {
-        logger.info(value, { label: 'exec stdout' });
-      });
-    }
-
-    if (stderr) {
-      logger.error(stderr, { label });
-      console.log(typeof stderr);
-    }
-    logger.debug('exec ENDS', { label });
-  });
+  execFunc(cmd);
 
   logger.debug('mongoRestore ENDS', { label });
 };

@@ -29,12 +29,6 @@ const { argv } = require('yargs')
   })
   .command(['mongoimport', 'mi', 'import'], 'Import MongoDB collection to specific database', yargs => {
     yargs
-      .positional('dbServer', {
-        describe: 'Server where database is running [localhost, nas, atlas]',
-        type: 'string',
-        default: 'localhost',
-        choices: ['localhost', 'nas', 'atlas']
-      })
       .positional('logLevel', {
         describe: 'Log level.',
         type: 'string',
@@ -78,12 +72,11 @@ const { argv } = require('yargs')
   })
   .options({
     dbServer: {
-      alias: 'dbs',
       description: 'Server where database is running [localhost, nas, atlas]',
       type: 'string',
       default: 'localhost',
       choices: ['localhost', 'nas', 'atlas']
-    }
+    },
   })
   .array('collection')
   .demandCommand(1)
@@ -155,6 +148,39 @@ mainLogger.debug(backupDirPath, { label: 'backupDirPath' });
 
 const cmdOptions = ['host', 'readPreference', 'port', 'ssl', 'username', 'password', 'authenticationDatabase', 'db'];
 
+const setCMD = (commandTextBegin, cmdOpt, value, folder, specialOpt) => {
+  const label = 'setCMD';
+  logger.debug('setCMD STARTS', { label });
+  if (!['file', 'out'].includes(specialOpt)) {
+    return;
+  }
+  let cmd = commandTextBegin;
+
+  cmdOpt.forEach(key => {
+    if (key === 'ssl' && dbOptions[key] === 'true') {
+      cmd += '--ssl ';
+      logger.silly(`--${key}`, { label: key });
+    }
+    if (dbOptions[key] && key !== 'ssl') {
+      cmd += `--${key} ${dbOptions[key]} `;
+      switch (key) {
+        case 'password':
+          mainLogger.silly(`--${key}: ***********`, { label });
+          break;
+        default:
+          logger.silly(`--${key}: ${dbOptions[key]}`, { label });
+          break;
+      }
+    }
+  });
+  backupFilePath = `${backupDirPath}\\${folder}\\${value}.json`;
+  cmd += `--${specialOpt} ${backupFilePath} -v`;
+  logger.silly(`--${specialOpt}: ${backupFilePath}`, { label });
+  logger.silly(cmd, { label });
+  logger.debug('setCMD ENDS', { label });
+  return cmd;
+};
+
 const execFunc = cmd => {
   exec(cmd, (error, stderr, stdout) => {
     const label = `exec ${argv._[0]}`;
@@ -163,13 +189,11 @@ const execFunc = cmd => {
       logger.error(error.message, { label });
       console.dir(error);
     }
-
     if (stdout) {
       stdout.split('\n').forEach(value => {
         logger.info(value, { label: 'exec stdout' });
       });
     }
-
     if (stderr) {
       logger.error(stderr, { label });
       console.log(typeof stderr);
@@ -177,6 +201,7 @@ const execFunc = cmd => {
     logger.debug('exec ENDS', { label });
   });
 };
+
 
 const mongoExport = (
   command = exeFilePath, folder = argv.dbServer, collection = argv.collection
@@ -188,29 +213,14 @@ const mongoExport = (
 
   collection.forEach(value => {
     cmd += `--collection ${value} `;
-    cmdOptions.forEach(key => {
-      if (key === 'ssl' && dbOptions[key] === 'true') {
-        cmd += '--ssl ';
-        logger.silly(`--${key}`, { label: key });
-      }
-      if (dbOptions[key] && key !== 'ssl') {
-        cmd += `--${key} ${dbOptions[key]} `;
-        switch (key) {
-          case 'password':
-            mainLogger.silly(`--${key}: ***********`, { label });
-            break;
-          default:
-            logger.silly(`--${key}: ${dbOptions[key]}`, { label });
-            break;
-        }
-      }
-    });
-    backupFilePath = `${backupDirPath}\\${folder}\\${value}.json`;
-    cmd += `--out ${backupFilePath} -v`;
-    logger.silly(`--out: ${backupFilePath}`, { label });
+    cmd = setCMD(cmd, cmdOptions, value, folder, 'out');
     logger.debug(cmd, { label });
 
-    execFunc(cmd);
+    if (cmd) {
+      execFunc(cmd);
+    } else {
+      logger.warn('Something went wrong! No command!');
+    }
 
     cmd = `${command} `;
   });
@@ -226,29 +236,14 @@ const mongoImport = (
 
   collection.forEach(value => {
     cmd += `--collection ${value} --mode merge `;
-    cmdOptions.forEach(key => {
-      if (key === 'ssl' && dbOptions[key] === 'true') {
-        cmd += '--ssl ';
-        logger.silly(`--${key}`, { label: key });
-      }
-      if (dbOptions[key] && key !== 'ssl') {
-        cmd += `--${key} ${dbOptions[key]} `;
-        switch (key) {
-          case 'password':
-            mainLogger.silly(`--${key}: ***********`, { label });
-            break;
-          default:
-            logger.silly(`--${key}: ${dbOptions[key]}`, { label });
-            break;
-        }
-      }
-    });
-    backupFilePath = `${backupDirPath}\\${folder}\\${value}.json`;
-    cmd += `--file ${backupFilePath} -v`;
-    logger.silly(`--file: ${backupFilePath}`, { label });
+    cmd = setCMD(cmd, cmdOptions, value, folder, 'file');
     logger.debug(cmd, { label });
 
-    execFunc(cmd);
+    if (cmd) {
+      execFunc(cmd);
+    } else {
+      logger.warn('Something went wrong! No command!');
+    }
 
     cmd = `${command} `;
   });

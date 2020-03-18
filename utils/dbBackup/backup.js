@@ -131,13 +131,12 @@ exports.dbAutoBackUp = () => {
     logger.silly(`--out: ${newBackupPath}`, { label });
 
 
-    exec(cmd, (error, stderr, stdout) => {
+    exec(cmd, (error, stdout, stderr) => {
       const label = 'exec mongodump';
       logger.debug('exec STARTS', { label });
       if (error) {
         logger.error(error.message, { label });
       }
-      console.log('error', error);
       if (this.empty(error)) {
         // check for remove old backup after keeping # of days given in configuration.
         if (dbOptions.removeOldBackup == true) {
@@ -159,10 +158,10 @@ exports.dbAutoBackUp = () => {
         }
       }
       if (stderr) {
-        logger.error(stderr);
+        // do something
       }
       if (stdout) {
-        logger.info(stdout);
+        // do something
       }
       logger.debug('exec ENDS', { label });
     });

@@ -55,7 +55,6 @@ const { argv } = require('yargs')
   .group('collection', 'Options')
   .group('folder', 'Specific options');
 
-console.dir(argv);
 
 // Load environment variables from .env file, where API keys and passwords are configured.
 const env = dotenv.config({ path: path.resolve(__dirname, '.env') });
@@ -70,9 +69,11 @@ const Logger = new LoggerClass('mongoCLT');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('utils\\backup\\mongoCLT INITIALIZING!');
 
+mainLogger.silly(JSON.stringify(argv), { label: 'yargs.argv' });
+
 if (argv._.length === 0) {
   mainLogger.error('Not valid command!');
-  process.exit();
+  process.exit(9);
 }
 
 mainLogger.debug(argv._[0], { label: 'argv._[0]' });
@@ -112,7 +113,7 @@ switch (argv._[0]) {
     break;
   default:
     mainLogger.warn(argv._[0], { label: 'Wrong 1st argument' });
-    process.exit();
+    process.exit(9);
 }
 
 mainLogger.debug(exeFilePath, { label: 'exeFilePath' });
@@ -154,21 +155,17 @@ const setCMD = (commandTextBegin, cmdOpt, value, folder, specialOpt) => {
 };
 
 const execFunc = cmd => {
-  exec(cmd, (error, stderr, stdout) => {
+  exec(cmd, (error, stdout, stderr) => {
     const label = `exec ${argv._[0]}`;
     logger.debug('exec STARTS', { label });
     if (error) {
       logger.error(error.message, { label });
-      console.dir(error);
     }
     if (stdout) {
-      stdout.split('\n').forEach(value => {
-        logger.info(value, { label: 'exec stdout' });
-      });
+      // do something
     }
     if (stderr) {
-      logger.error(stderr, { label });
-      console.log(typeof stderr);
+      // do something
     }
     logger.debug('exec ENDS', { label });
   });
@@ -273,5 +270,5 @@ switch (argv._[0]) {
     break;
   default:
     mainLogger.warn(argv._[0], { label: 'Wrong 1st argument' });
-    process.exit();
+    process.exit(9);
 }

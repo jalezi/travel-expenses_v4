@@ -391,7 +391,7 @@ async function expensesImportNewCurrenciesForSave(array) {
         },
         err => {
           if (err) {
-            console.log('Error: ', err.message);
+            logger.error(err.message);
             throw err;
           }
         }

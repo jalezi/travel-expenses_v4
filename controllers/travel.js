@@ -198,7 +198,7 @@ exports.getTravelExpensesPDF = async function (req, res) {
     }
   ]);
   const idx = invoiceNumberArray[0].index + 1;
-  console.log(idx);
+  logger.silly(idx);
   const stream = travelExpensesToPDF(res.locals.travel, req.user, idx);
   let filename = `TReport_${req.user._id}_${res.locals.travel._id}_${idx}.pdf`; // Be careful of special characters
   filename = encodeURIComponent(filename); // Ideally this should strip them

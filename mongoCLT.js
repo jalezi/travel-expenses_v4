@@ -21,7 +21,7 @@ const { argv } = require('yargs')
   .command(['mongorestore', 'mr', 'restore'], 'Restore MongoDB database to specific datbase', yargs => {
     yargs
       .positional('folder', {
-        describe: 'Folder where json files are located [localhost, nas, atlas]',
+        describe: 'Folder where mongorestore dump files are.',
         type: 'string',
         default: `mongodump-${moment().format('YYYY-M-D')}`
       })

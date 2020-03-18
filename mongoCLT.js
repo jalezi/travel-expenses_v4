@@ -8,7 +8,7 @@ const { argv } = require('yargs')
   .command(['mongoexport [options]', 'me', 'export'], 'Export MongoDB collection from specific database', yargs => {
     yargs.help();
   })
-  .command(['mongoimport', 'mi', 'import'], 'Import MongoDB collection to specific database', yargs => {
+  .command(['mongoimport [options]', 'mi', 'import'], 'Import MongoDB collection to specific database', yargs => {
     yargs
       .positional('folder', {
         describe: 'Folder where json files are located [localhost, nas, atlas]',
@@ -18,7 +18,7 @@ const { argv } = require('yargs')
       })
       .help();
   })
-  .command(['mongorestore', 'mr', 'restore'], 'Restore MongoDB database to specific datbase', yargs => {
+  .command(['mongorestore [options]', 'mr', 'restore'], 'Restore MongoDB database to specific datbase', yargs => {
     yargs
       .positional('folder', {
         describe: 'Folder where mongorestore dump files are.',
@@ -50,7 +50,10 @@ const { argv } = require('yargs')
   .array('collection')
   .demandCommand(1)
   .help()
-  .group('dbServer', 'Specific options');
+  .group('dbServer', 'Options')
+  .group('logLevel', 'Options')
+  .group('collection', 'Options')
+  .group('folder', 'Specific options');
 
 console.dir(argv);
 

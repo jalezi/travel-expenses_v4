@@ -202,6 +202,32 @@ const execFunc = cmd => {
   });
 };
 
+// Loop trough collections to export or import
+const loopCollections = (command, collection, folder, mode) => {
+  const label = 'loopCollections';
+  logger.debug('loopCollections STARTS', { label });
+  let cmd = `${command} `;
+  let outOrFile = 'out';
+  collection.forEach(value => {
+    cmd += `--collection ${value} `;
+    // When mongoimport we want to pass additional variable --mode=<insert|upsert|merge>
+    // see: https://docs.mongodb.com/manual/reference/program/mongoimport/
+    if (mode) {
+      cmd += `--mode ${mode} `;
+      outOrFile = 'file';
+    }
+    cmd = setCMD(cmd, cmdOptions, value, folder, outOrFile);
+    logger.debug(cmd, { label });
+    if (cmd) {
+      execFunc(cmd);
+    } else {
+      logger.warn('Something went wrong! No command!');
+    }
+    cmd = `${command} `;
+  });
+  logger.debug('loopCollections ENDS', { label });
+};
+
 
 const mongoExport = (
   command = exeFilePath, folder = argv.dbServer, collection = argv.collection
@@ -209,21 +235,7 @@ const mongoExport = (
 // Command for mongodb mongoexport process
   const label = 'mongoExport';
   logger.debug('mongoExport Starts', { label });
-  let cmd = `${command} `;
-
-  collection.forEach(value => {
-    cmd += `--collection ${value} `;
-    cmd = setCMD(cmd, cmdOptions, value, folder, 'out');
-    logger.debug(cmd, { label });
-
-    if (cmd) {
-      execFunc(cmd);
-    } else {
-      logger.warn('Something went wrong! No command!');
-    }
-
-    cmd = `${command} `;
-  });
+  loopCollections(command, collection, folder);
   logger.debug('mongoExport ENDS', { label });
 };
 
@@ -232,21 +244,7 @@ const mongoImport = (
 ) => {
   const label = 'mongoImport';
   logger.debug('mongoImport STARTS', { label });
-  let cmd = `${command} `;
-
-  collection.forEach(value => {
-    cmd += `--collection ${value} --mode merge `;
-    cmd = setCMD(cmd, cmdOptions, value, folder, 'file');
-    logger.debug(cmd, { label });
-
-    if (cmd) {
-      execFunc(cmd);
-    } else {
-      logger.warn('Something went wrong! No command!');
-    }
-
-    cmd = `${command} `;
-  });
+  loopCollections(command, collection, folder, 'merge');
   logger.debug('mongoImport ENDS', { label });
 };
 

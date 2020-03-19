@@ -123,7 +123,7 @@ const cmdOptions = ['host', 'readPreference', 'port', 'ssl', 'username', 'passwo
 
 const setCMD = (commandTextBegin, cmdOpt, value, folder, specialOpt) => {
   const label = 'setCMD';
-  logger.debug('setCMD STARTS', { label });
+  logger.debug('setCMD START', { label });
   if (!['file', 'out'].includes(specialOpt)) {
     return;
   }
@@ -150,16 +150,28 @@ const setCMD = (commandTextBegin, cmdOpt, value, folder, specialOpt) => {
   cmd += `--${specialOpt} ${backupFilePath} -v`;
   logger.silly(`--${specialOpt}: ${backupFilePath}`, { label });
   logger.silly(cmd, { label });
-  logger.debug('setCMD ENDS', { label });
+  logger.debug('setCMD END', { label });
   return cmd;
 };
 
 const execFunc = cmd => {
-  exec(cmd, (error, stdout, stderr) => {
+  const label = 'execFunc';
+  logger.debug('execFunc START', { label });
+  const cpExec = exec(cmd, (error, stdout, stderr) => {
     const label = `exec ${argv._[0]}`;
-    logger.debug('exec STARTS', { label });
+    logger.debug('exec callback START', { label });
     if (error) {
       logger.error(error.message, { label });
+      logger.error(stderr, { label: 'exec stderr' });
+    } else {
+      logger.info('No error', { label });
+      stderr.split('\n').forEach(value => {
+        let stderrArr = value.split('\t');
+        let msg = stderrArr[1];
+        if (msg) {
+          logger.silly(msg, { label: 'exec stderr' });
+        }
+      });
     }
     if (stdout) {
       // do something
@@ -167,14 +179,29 @@ const execFunc = cmd => {
     if (stderr) {
       // do something
     }
-    logger.debug('exec ENDS', { label });
+    logger.debug('exec callback END', { label });
   });
+  const { pid } = cpExec;
+  logger.debug(pid.toString(), { label: 'childprocess pid' });
+  cpExec.stdout.on('data', data => {
+    logger.info(data, { label: `process ${pid} stdout` });
+  });
+  cpExec.stderr.on('data', data => {
+    data.split('\n').forEach(value => {
+      let arr = value.split('\t');
+      let msg = arr[1];
+      if (msg) {
+        logger.info(msg, { label: `process ${pid} stderr` });
+      }
+    });
+  });
+  logger.debug('execFunc END', { label });
 };
 
 // Loop trough collections to export or import
 const loopCollections = (command, collection, folder, mode) => {
   const label = 'loopCollections';
-  logger.debug('loopCollections STARTS', { label });
+  logger.debug('loopCollections START', { label });
   let cmd = `${command} `;
   let outOrFile = 'out';
   collection.forEach(value => {
@@ -194,7 +221,7 @@ const loopCollections = (command, collection, folder, mode) => {
     }
     cmd = `${command} `;
   });
-  logger.debug('loopCollections ENDS', { label });
+  logger.debug('loopCollections END', { label });
 };
 
 
@@ -205,21 +232,21 @@ const mongoExport = (
   const label = 'mongoExport';
   logger.debug('mongoExport Starts', { label });
   loopCollections(command, collection, folder);
-  logger.debug('mongoExport ENDS', { label });
+  logger.debug('mongoExport END', { label });
 };
 
 const mongoImport = (
   command = exeFilePath, folder = argv.folder, collection = argv.collection
 ) => {
   const label = 'mongoImport';
-  logger.debug('mongoImport STARTS', { label });
+  logger.debug('mongoImport START', { label });
   loopCollections(command, collection, folder, 'merge');
-  logger.debug('mongoImport ENDS', { label });
+  logger.debug('mongoImport END', { label });
 };
 
 const mongoRestore = (command = exeFilePath, folder = argv.folder) => {
   const label = 'mongoRestore';
-  logger.debug('mongoRestore STARTS', { label });
+  logger.debug('mongoRestore START', { label });
   let cmd = `${command} `;
   cmdOptions.forEach(key => {
     if (key === 'ssl' && dbOptions[key] === 'true') {
@@ -245,7 +272,7 @@ const mongoRestore = (command = exeFilePath, folder = argv.folder) => {
 
   execFunc(cmd);
 
-  logger.debug('mongoRestore ENDS', { label });
+  logger.debug('mongoRestore END', { label });
 };
 
 // Run specific function

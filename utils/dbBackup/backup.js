@@ -43,11 +43,11 @@ exports.stringToDate = dateString => new Date(dateString);
 // Check if variable is empty or not.
 exports.empty = mixedVar => {
   const label = 'empty';
-  logger.debug('empty function STARTS', { label });
+  logger.debug('empty function START', { label });
   logger.silly(`mixedVar=${mixedVar}`, { label });
   let undef;
   const emptyValues = [undef, null, false, 0, '', '0'];
-  logger.debug('for index loop array STARTS', { label });
+  logger.debug('for index loop array START', { label });
   for (let i = 0; i < emptyValues.length; i++) {
     if (mixedVar === emptyValues[i]) {
       logger.silly(`mixedVar in emptyValue array, index: ${i}, ${mixedVar}`, { label });
@@ -78,7 +78,7 @@ exports.empty = mixedVar => {
 // Auto backup function
 exports.dbAutoBackUp = () => {
   const label = 'dbAutoBackUp';
-  logger.debug('abAutoBackUp function STARTS', { label });
+  logger.debug('abAutoBackUp function START', { label });
   // check for auto backup is enabled or disabled
   if (dbOptions.autoBackup == true) {
     let date = new Date();
@@ -131,16 +131,33 @@ exports.dbAutoBackUp = () => {
     logger.silly(`--out: ${newBackupPath}`, { label });
 
 
-    exec(cmd, (error, stdout, stderr) => {
+    const cpExec = exec(cmd, (error, stdout, stderr) => {
       const label = 'exec mongodump';
-      logger.debug('exec STARTS', { label });
+      logger.debug('exec callback START', { label });
       if (error) {
         logger.error(error.message, { label });
+        logger.error(stderr);
+      } else {
+        logger.info('No error', { label });
+        stderr.split('\n').forEach(value => {
+          let arr = value.split('\t');
+          let msg = arr[1];
+          if (msg) {
+            logger.silly(msg, { label: 'exec stderr' });
+          }
+        });
+        stdout.split('\n').forEach(value => {
+          let arr = value.split('\t');
+          let msg = arr[1];
+          if (msg) {
+            logger.silly(msg, { label: 'exec stderr' });
+          }
+        });
       }
       if (this.empty(error)) {
         // check for remove old backup after keeping # of days given in configuration.
         if (dbOptions.removeOldBackup == true) {
-          logger.debug('Remove old backup STARTS', { label });
+          logger.debug('Remove old backup START', { label });
           if (fs.existsSync(oldBackupPath)) {
             logger.debug(`${oldBackupPath} exists`, { label });
             const execCMD = `${deleteCMD} /Q /S ${oldBackupPath}`; // linux rm -rf win32 rmdir /Q /S
@@ -154,7 +171,7 @@ exports.dbAutoBackUp = () => {
               }
             });
           }
-          logger.debug('Remove old backup ENDS', { label });
+          logger.debug('Remove old backup END', { label });
         }
       }
       if (stderr) {
@@ -163,8 +180,22 @@ exports.dbAutoBackUp = () => {
       if (stdout) {
         // do something
       }
-      logger.debug('exec ENDS', { label });
+      logger.debug('exec callback END', { label });
+    });
+    const { pid } = cpExec;
+    logger.debug(pid.toString(), { label: 'childprocess pid' });
+    cpExec.stdout.on('data', data => {
+      logger.info(data, { label: `process ${pid} stdout` });
+    });
+    cpExec.stderr.on('data', data => {
+      data.split('\n').forEach(value => {
+        let arr = value.split('\t');
+        let msg = arr[1];
+        if (msg) {
+          logger.info(msg, { label: `process ${pid} stderr` });
+        }
+      });
     });
   }
-  logger.debug('abAutoBackUp function ENDS', { label });
+  logger.debug('abAutoBackUp function END', { label });
 };

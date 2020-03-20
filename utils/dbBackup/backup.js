@@ -16,13 +16,20 @@ mainLogger.debug('utils\\backup\\backup INITIALIZING!');
 
 // determine proper cmd command - for the moment only win32 or linux
 const { mongodump } = OS_COMMANDS[RUNNING_PLATFORM];
-const deleteCMD = OS_COMMANDS[RUNNING_PLATFORM].delete.directory.withContent;
-mainLogger.silly(`${RUNNING_PLATFORM} CMD delete command: ${deleteCMD}`);
+const delCmdObj = OS_COMMANDS[RUNNING_PLATFORM].delete;
+const delCmd = delCmdObj.cmd;
+const delCmdOpt = delCmdObj.options;
+const deleteCmd = `${delCmd} ${delCmdOpt}`;
+mainLogger.silly(`${RUNNING_PLATFORM} CMD delete command: ${deleteCmd}`);
+
+// log stdout and stderr function
+const { logStd, cpListen } = require('./utils');
 
 // Concatenate root directory path with our backup folder.
 const bckDirPath = appRoot.resolve('dbBackup');
 const backupDirPath = path.join(bckDirPath, 'database-backup');
 
+// Backup options
 const dbOptionsBasic = {
   autoBackup: true,
   removeOldBackup: true,
@@ -31,9 +38,7 @@ const dbOptionsBasic = {
 };
 
 const dbOptionsDynamic = getDbOptions(db);
-
 const dbOptionsMerged = { ...dbOptionsDynamic, ...dbOptionsBasic };
-
 const dbOptions = dbOptionsMerged;
 
 // return stringDate as a date object.
@@ -132,70 +137,52 @@ exports.dbAutoBackUp = () => {
 
 
     const cpExec = exec(cmd, (error, stdout, stderr) => {
-      const label = 'exec mongodump';
+      const label = 'exec mongodump cb';
       logger.debug('exec callback START', { label });
       if (error) {
         logger.error(error.message, { label });
         logger.error(stderr);
       } else {
         logger.info('No error', { label });
-        stderr.split('\n').forEach(value => {
-          let arr = value.split('\t');
-          let msg = arr[1];
-          if (msg) {
-            logger.silly(msg, { label: 'exec stderr' });
-          }
-        });
-        stdout.split('\n').forEach(value => {
-          let arr = value.split('\t');
-          let msg = arr[1];
-          if (msg) {
-            logger.silly(msg, { label: 'exec stderr' });
-          }
-        });
+        logStd(stdout, 'exec stdout', 'silly');
+        logStd(stderr, 'exec stderr', 'silly');
       }
+
       if (this.empty(error)) {
         // check for remove old backup after keeping # of days given in configuration.
         if (dbOptions.removeOldBackup == true) {
           logger.debug('Remove old backup START', { label });
           if (fs.existsSync(oldBackupPath)) {
             logger.debug(`${oldBackupPath} exists`, { label });
-            const execCMD = `${deleteCMD} /Q /S ${oldBackupPath}`; // linux rm -rf win32 rmdir /Q /S
-            exec(execCMD, err => {
-              const label = `exec ${deleteCMD}`;
-              logger.debug('Removing old backup path.', { label });
+            const execCMD = `${deleteCmd} ${oldBackupPath}`; // linux rm -rf win32 rmdir /Q /S
+            logger.debug('Removing old backup path.', { label });
+
+            const cpExecDel = exec(execCMD, (err, stdout, stderr) => {
+              const label = `exec ${deleteCmd} cb`;
+              logger.debug('exec callback START', { label });
               if (err) {
-                logger.error(err);
+                logger.error(err.message);
+                logger.error(stderr, { label: 'exec stderr' });
               } else {
+                logger.info('No error', { label });
+                logStd(stdout, 'exec stdout', 'silly');
+                logStd(stderr, 'exec stderr', 'silly');
                 logger.info('Old backup path removed!', { label });
               }
+              logger.debug('exec callback END', { label });
             });
+
+            // childprocess listen
+            cpListen(cpExecDel, label);
           }
           logger.debug('Remove old backup END', { label });
         }
       }
-      if (stderr) {
-        // do something
-      }
-      if (stdout) {
-        // do something
-      }
       logger.debug('exec callback END', { label });
     });
-    const { pid } = cpExec;
-    logger.debug(pid.toString(), { label: 'childprocess pid' });
-    cpExec.stdout.on('data', data => {
-      logger.info(data, { label: `process ${pid} stdout` });
-    });
-    cpExec.stderr.on('data', data => {
-      data.split('\n').forEach(value => {
-        let arr = value.split('\t');
-        let msg = arr[1];
-        if (msg) {
-          logger.info(msg, { label: `process ${pid} stderr` });
-        }
-      });
-    });
+
+    // childprocess events listen
+    cpListen(cpExec, label);
   }
   logger.debug('abAutoBackUp function END', { label });
 };

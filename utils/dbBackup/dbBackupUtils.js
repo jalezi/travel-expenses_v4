@@ -17,7 +17,7 @@ const { mainLogger, logger } = Logger;
 
 mainLogger.info('dbBackupUtils INITIALIZING');
 
-const { argv } = require('../../mongoCLT');
+const { argv } = require('./getYargs');
 const { db } = require('../../config');
 const { RUNNING_PLATFORM, OS_COMMANDS } = require('../../lib/constants');
 const getDbOptions = require('./getDbOptions');
@@ -86,11 +86,6 @@ exports.setCMD = (commandTextBegin, cmdOpt, value, folder, specialOpt, binExpImp
     return;
   }
 
-  // if (!['file', 'out'].includes(specialOpt)) {
-  //   logger.debug('specialOpt should be "out" or "file"');
-  //   logger.debug('setCMD END', { label });
-  //   return;
-  // }
   let cmd = commandTextBegin;
 
   cmdOpt.forEach(key => {
@@ -128,46 +123,30 @@ exports.setCMD = (commandTextBegin, cmdOpt, value, folder, specialOpt, binExpImp
 };
 
 
-const logStd = (data, label = 'stderr') => {
-  data.split('\n').forEach(value => {
-    let stderrArr = value.split('\t');
-    let msg = stderrArr[1];
-    if (msg) {
-      logger.info(msg, { label });
-    }
-  });
-};
+const { logStd, cpListen } = require('./utils');
 
 // run exec
 exports.execFunc = cmd => {
   const label = 'execFunc';
   logger.debug('execFunc START', { label });
   const cpExec = exec(cmd, (error, stdout, stderr) => {
-    const label = `exec ${argv._[0]}`;
+    const label = `exec ${argv._[0]} cb`;
     logger.debug('exec callback START', { label });
     if (error) {
       logger.error(error.message, { label });
       logger.error(stderr, { label: 'exec stderr' });
     } else {
       logger.info('No error', { label });
-      logStd(stderr, 'exec stdout');
-      logStd(stderr, 'exec stderr');
+      logStd(stdout, 'exec stdout', 'silly');
+      logStd(stderr, 'exec stderr', 'silly');
     }
 
     logger.debug('exec callback END', { label });
   });
 
-  // get pid
-  const { pid } = cpExec;
-  logger.debug(pid.toString(), { label: 'childprocess pid' });
+  // childprocess listen
+  cpListen(cpExec, label);
 
-  // listen on stdout and stderr
-  cpExec.stdout.on('data', data => {
-    logStd(data, `process ${pid} stdout`);
-  });
-  cpExec.stderr.on('data', data => {
-    logStd(data, `process ${pid} stderr`);
-  });
   logger.debug('execFunc END', { label });
 };
 

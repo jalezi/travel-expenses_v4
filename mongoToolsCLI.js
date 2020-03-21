@@ -1,11 +1,21 @@
-const { argv } = require('./utils/dbBackup/getYargs');
+const dotenv = require('dotenv');
+const dotenvExpand = require('dotenv-expand');
+const appRoot = require('app-root-path');
 
+const env = dotenv.config({ path: appRoot.resolve('.env') });
+dotenvExpand(env);
+if (env.error) {
+  throw env.error;
+}
+
+const { argv } = require('./utils/dbBackup/getYargs');
+const { setCMD } = require('./utils/dbBackup/utils');
 const {
   getExeAndBackupDirPath,
-  setCMD,
   execFunc,
   loopCollections
 } = require('./utils/dbBackup/dbBackupUtils');
+const { CMD_OPTIONS } = require('./lib/constants');
 
 const LoggerClass = require('./config/LoggerClass');
 
@@ -20,10 +30,9 @@ if (argv._.length === 0) {
 }
 mainLogger.debug(argv._[0], { label: 'argv._[0]' });
 
-const { backupDirPath, exeFilePath } = getExeAndBackupDirPath();
+const { exeFilePath } = getExeAndBackupDirPath();
 
 mainLogger.debug(exeFilePath, { label: 'exeFilePath' });
-mainLogger.debug(backupDirPath, { label: 'backupDirPath' });
 
 const mongoExport = (
   command = exeFilePath,
@@ -47,25 +56,26 @@ const mongoImport = (
   logger.debug('mongoImport END', { label });
 };
 
-const cmdOptions = [
-  'host',
-  'readPreference',
-  'port',
-  'ssl',
-  'username',
-  'password',
-  'authenticationDatabase',
-  'db'
-];
 const mongoRestore = (command = exeFilePath, folder = argv.folder) => {
   const label = 'mongoRestore';
   logger.debug('mongoRestore START', { label });
   let cmd = `${command} `;
-  cmd = setCMD(cmd, cmdOptions, undefined, folder, undefined, true);
+  cmd = setCMD(cmd, CMD_OPTIONS, undefined, folder, undefined, true);
   logger.debug(cmd, { label });
   execFunc(cmd);
 
   logger.debug('mongoRestore END', { label });
+};
+
+const mongoDump = (command = exeFilePath, folder = argv.folder) => {
+  const label = 'mongoDump';
+  logger.debug('mongoDump START', { label });
+  let cmd = `${command} `;
+  cmd = setCMD(cmd, CMD_OPTIONS, undefined, folder, 'out', true);
+  logger.debug(cmd, { label });
+  execFunc(cmd);
+
+  logger.debug('mongoDump END', { label });
 };
 
 // Run specific command
@@ -87,6 +97,12 @@ switch (argv._[0]) {
   case 'restore':
     mainLogger.info('MONGORESTORE');
     mongoRestore();
+    break;
+  case 'mongodump':
+  case 'md':
+  case 'dump':
+    mainLogger.info('MONGODUMP');
+    mongoDump();
     break;
   default:
     mainLogger.warn(argv._[0], { label: 'Wrong 1st argument' });

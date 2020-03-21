@@ -36,6 +36,17 @@ const { argv } = require('yargs')
         .help();
     }
   )
+  .command(
+    ['mongodump [options]', 'md', 'dump'],
+    'Dump MongoDB database to folder',
+    yargs => {
+      yargs.positional('folder', {
+        describe: 'Where to dump files',
+        type: 'string',
+        default: `mongodump-${moment().format('YYYY-M-D')}`
+      });
+    }
+  )
   .options({
     dbServer: {
       description: 'Server where database is running [localhost, nas, atlas]',

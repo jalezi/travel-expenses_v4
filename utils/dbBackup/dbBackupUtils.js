@@ -1,14 +1,4 @@
-const dotenv = require('dotenv');
-const dotenvExpand = require('dotenv-expand');
-const appRoot = require('app-root-path');
-const path = require('path');
 const { exec } = require('child_process');
-
-const env = dotenv.config({ path: appRoot.resolve('.env') });
-dotenvExpand(env);
-if (env.error) {
-  throw env.error;
-}
 
 const LoggerClass = require('../../config/LoggerClass');
 
@@ -18,19 +8,15 @@ const { mainLogger, logger } = Logger;
 mainLogger.info('dbBackupUtils INITIALIZING');
 
 const { argv } = require('./getYargs');
-const { db } = require('../../config');
 const { RUNNING_PLATFORM, OS_COMMANDS } = require('../../lib/constants');
-const getDbOptions = require('./getDbOptions');
-
-exports.dbOptions = getDbOptions(db);
-
-exports.bckDirPath = appRoot.resolve('dbBackup');
+const { logStd, cpListen, setCMD } = require('./utils');
+const { CMD_OPTIONS } = require('../../lib/constants');
 
 // determine proper cmd command - for the moment only win32 or linux
 exports.getExeAndBackupDirPath = () => {
   const label = 'getExeAndBackupDirPath';
   logger.debug('getExeAndBackupDirPath START', { label });
-  let backupDirPath;
+  // let backupDirPath;
   let exeFilePath;
   let outOrFile;
 
@@ -39,91 +25,34 @@ exports.getExeAndBackupDirPath = () => {
     case 'me':
     case 'export':
       exeFilePath = OS_COMMANDS[RUNNING_PLATFORM].mongoexport;
-      backupDirPath = path.join(this.bckDirPath, 'JSON');
       outOrFile = 'out';
       break;
     case 'mongoimport':
     case 'mi':
     case 'import':
       exeFilePath = OS_COMMANDS[RUNNING_PLATFORM].mongoimport;
-      backupDirPath = path.join(this.bckDirPath, 'JSON');
       outOrFile = 'file';
       break;
     case 'mongorestore':
     case 'mr':
     case 'restore':
       exeFilePath = OS_COMMANDS[RUNNING_PLATFORM].mongorestore;
-      backupDirPath = path.join(this.bckDirPath, 'database-backup');
+      break;
+    case 'mongodump':
+    case 'md':
+    case 'dump':
+      exeFilePath = OS_COMMANDS[RUNNING_PLATFORM].mongodump;
+      outOrFile = 'out';
       break;
     default:
       mainLogger.warn(argv._[0], { label: 'Wrong 1st argument' });
       process.exit(9);
   }
 
-  return { backupDirPath, exeFilePath, outOrFile };
+  return { exeFilePath, outOrFile };
 };
 
-const { backupDirPath, outOrFile } = this.getExeAndBackupDirPath();
-
-const checkSpecialOpt = opt => {
-  const label = 'checkSpecialOpt';
-  logger.debug('checkSpecialOpt START', { label });
-  if (!['file', 'out'].includes(opt)) {
-    logger.debug('specialOpt should be "out" or "file"');
-    logger.debug('checkSpecialOpt END', { label });
-    return false;
-  }
-  return true;
-};
-
-// set command
-exports.setCMD = (commandTextBegin, cmdOpt, value, folder, specialOpt, binExpImpTool = false) => {
-  const label = 'setCMD';
-  logger.debug('setCMD START', { label });
-
-  if (!binExpImpTool && !checkSpecialOpt(specialOpt)) {
-    logger.debug('setCMD END', { label });
-    return;
-  }
-
-  let cmd = commandTextBegin;
-
-  cmdOpt.forEach(key => {
-    if (binExpImpTool && key === 'db') {
-      return;
-    }
-    if (key === 'ssl' && this.dbOptions[key] === 'true') {
-      cmd += '--ssl ';
-      logger.silly(`--${key}`, { label: key });
-    }
-    if (this.dbOptions[key] && key !== 'ssl') {
-      cmd += `--${key} ${this.dbOptions[key]} `;
-      switch (key) {
-        case 'password':
-          mainLogger.silly(`--${key}: ***********`, { label });
-          break;
-        default:
-          logger.silly(`--${key}: ${this.dbOptions[key]}`, { label });
-          break;
-      }
-    }
-  });
-  let backupFilePath;
-  if (!binExpImpTool) {
-    backupFilePath = `${backupDirPath}\\${folder}\\${value}.json`;
-    cmd += `--${specialOpt} ${backupFilePath} -v`;
-  } else {
-    backupFilePath = `${backupDirPath}-${folder}`;
-    cmd += `-v ${backupFilePath}/`;
-  }
-  logger.silly(`--${specialOpt}: ${backupFilePath}`, { label });
-  logger.silly(cmd, { label });
-  logger.debug('setCMD END', { label });
-  return cmd;
-};
-
-
-const { logStd, cpListen } = require('./utils');
+const { outOrFile } = this.getExeAndBackupDirPath();
 
 // run exec
 exports.execFunc = cmd => {
@@ -151,7 +80,6 @@ exports.execFunc = cmd => {
 };
 
 // Loop trough collections to export or import
-exports.cmdOptions = ['host', 'readPreference', 'port', 'ssl', 'username', 'password', 'authenticationDatabase', 'db'];
 
 exports.loopCollections = (command, collection, folder, mode) => {
   const label = 'loopCollections';
@@ -164,7 +92,7 @@ exports.loopCollections = (command, collection, folder, mode) => {
     if (mode) {
       cmd += `--mode ${mode} `;
     }
-    cmd = this.setCMD(cmd, this.cmdOptions, value, folder, outOrFile);
+    cmd = setCMD(cmd, CMD_OPTIONS, value, folder, outOrFile);
     logger.debug(cmd, { label });
     if (cmd) {
       this.execFunc(cmd);

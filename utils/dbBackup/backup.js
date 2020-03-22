@@ -1,18 +1,19 @@
 /* eslint-disable eqeqeq */
 const { exec } = require('child_process');
 
-const { db } = require('../../config');
 const {
   RUNNING_PLATFORM,
   OS_COMMANDS,
   DB_BCK_OPTIONS,
   CMD_OPTIONS
 } = require('../../lib/constants');
-const getDbOptions = require('./getDbOptions');
-const LoggerClass = require('../../config/LoggerClass');
-const { getBackupPaths, removeOldBck } = require('./utils');
+
+// backup paths, remove old backup folder, set CMD
+const { getBackupPaths, removeOldBck, setCMD } = require('./utils');
 // log stdout and stderr function
 const { logStd, cpListen } = require('./utils');
+
+const LoggerClass = require('../../config/LoggerClass');
 
 const Logger = new LoggerClass('backup');
 const { mainLogger, logger } = Logger;
@@ -20,9 +21,6 @@ mainLogger.debug('utils\\backup\\backup INITIALIZING!');
 
 // determine proper cmd command - for the moment only win32 or linux
 const { mongodump } = OS_COMMANDS[RUNNING_PLATFORM];
-
-// get options for specific database
-const dbOptions = getDbOptions(db);
 
 // Check if variable is empty or not.
 exports.empty = mixedVar => {
@@ -61,36 +59,18 @@ exports.empty = mixedVar => {
   return false;
 };
 
-
 // Auto backup function
 exports.dbAutoBackUp = () => {
   const label = 'dbAutoBackUp';
   logger.debug('abAutoBackUp function START', { label });
+
   // check for auto backup is enabled or disabled
   if (DB_BCK_OPTIONS.autoBackup == true) {
-    const { oldBackupPath, newBackupPath } = getBackupPaths();
+    const { oldBackupPath, newBackupDir } = getBackupPaths();
 
-    // Command for mongodb dump process
     let cmd = `${mongodump} `;
-    CMD_OPTIONS.forEach(key => {
-      if (key === 'ssl' && dbOptions[key] === 'true') {
-        cmd += '--ssl ';
-        logger.silly(`--${key}`, { label });
-      }
-      if (dbOptions[key] && key != 'ssl') {
-        cmd += `--${key} ${dbOptions[key]} `;
-        switch (key) {
-          case 'password':
-            logger.silly(`--${key}: ***********`, { label });
-            break;
-          default:
-            logger.silly(`--${key}: ${dbOptions[key]}`, { label });
-            break;
-        }
-      }
-    });
-    cmd += `--out ${newBackupPath} -v`;
-    logger.silly(`--out: ${newBackupPath}`, { label });
+    cmd = setCMD(cmd, CMD_OPTIONS, undefined, newBackupDir, 'out', true);
+    logger.debug(cmd, { label });
 
     const cpExec = exec(cmd, (error, stdout, stderr) => {
       const label = 'exec mongodump cb';

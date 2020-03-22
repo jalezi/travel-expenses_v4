@@ -31,7 +31,7 @@ const { argv } = require('yargs')
         .positional('folder', {
           describe: 'Folder where mongorestore dump files are.',
           type: 'string',
-          default: `mongodump-${moment().format('YYYY-M-D')}`
+          default: `mongodump-${moment().format('YYYY-MM-DD')}`
         })
         .help();
     }
@@ -43,7 +43,7 @@ const { argv } = require('yargs')
       yargs.positional('folder', {
         describe: 'Where to dump files',
         type: 'string',
-        default: `mongodump-${moment().format('YYYY-M-D')}`
+        default: `mongodump-${moment().format('YYYY-MM-DD')}`
       });
     }
   )

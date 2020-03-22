@@ -1,6 +1,6 @@
-const _ = require('lodash');
 const fs = require('fs');
 const { exec } = require('child_process');
+const moment = require('moment');
 
 const { db } = require('../../config');
 const getDbOptions = require('./getDbOptions');
@@ -17,46 +17,51 @@ mainLogger.info('utils INITIALIZING');
 // return database options
 exports.dbOptions = getDbOptions(db);
 
-// return stringDate as a date object.
-exports.stringToDate = dateString => new Date(dateString);
+
+// return new and old dates in object as string
+exports.bckDates = (date = new Date()) => {
+  const label = 'bckDates';
+  logger.debug('bckDates START', { label });
+  const result = {};
+  const subtractDays = DB_BCK_OPTIONS.keepLastDaysBackup;
+  result.newDate = moment(date).format('YYYY-MM-DD');
+  result.oldDate = moment(date).subtract(subtractDays, 'days').format('YYYY-MM-DD');
+  logger.silly(`newDate = ${result.newDate}`, { label });
+  logger.silly(`oldDate = ${result.oldDate}`, { label });
+  logger.debug('bckDates END', { label });
+  return result;
+};
+
 
 // get backup paths
-exports.getBackupPaths = () => {
+exports.getBackupPaths = (specilaPath = 'mongodump') => {
   const label = 'getBackupPaths';
   logger.debug('getBackupPaths START', { label });
-  let date = new Date();
-  let beforeDate;
+
+  const { newDate, oldDate } = this.bckDates();
+  const { autoBackupPath } = DB_BCK_OPTIONS;
   let oldBackupDir;
   let oldBackupPath;
 
   // Current date
-  let currentDate = this.stringToDate(date);
-  let newBackupDir = `${currentDate.getFullYear()}-${currentDate.getMonth() +
-    1}-${currentDate.getDate()}`;
+  const newBackupDir = `${specilaPath}-${newDate}`;
   logger.silly(`newBackupDir: ${newBackupDir}`, { label });
 
   // New backup path for current backup process
-  let newBackupPath = `${DB_BCK_OPTIONS.autoBackupPath}-mongodump-${newBackupDir}`;
+  let newBackupPath = `${autoBackupPath}-${newBackupDir}`;
   logger.silly(`newBackupPath: ${newBackupPath}`, { label });
 
   // check for remove old backup after keeping # of days given in configuration
   if (DB_BCK_OPTIONS.removeOldBackup === true) {
-    beforeDate = _.clone(currentDate);
-
-    // Substract number of days to keep backup and remove old backup
-    beforeDate.setDate(
-      beforeDate.getDate() - DB_BCK_OPTIONS.keepLastDaysBackup
-    );
-    oldBackupDir = `${beforeDate.getFullYear()}-${beforeDate.getMonth() +
-      1}-${beforeDate.getDate()}`;
+    oldBackupDir = `${specilaPath}-${oldDate}`;
     logger.silly(`oldBackupDir: ${oldBackupDir}`, { label });
 
     // old backup(after keeping # of days)
-    oldBackupPath = `${DB_BCK_OPTIONS.autoBackupPath}-mongodump-${oldBackupDir}`;
+    oldBackupPath = `${autoBackupPath}-${oldBackupDir}`;
     logger.silly(`oldBackupPath: ${oldBackupPath}`, { label });
   }
   logger.debug('getBackupPaths END', { label });
-  return { oldBackupPath, newBackupPath };
+  return { oldBackupPath, newBackupPath, oldBackupDir, newBackupDir };
 };
 
 // Remove old backup function

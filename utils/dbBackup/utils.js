@@ -146,6 +146,11 @@ exports.cpListen = (
       logger.debug(`${pid} closed with code: ${code} and signal: ${signal}`, {
         label
       });
+      const argv1 = process.argv[1];
+      const arr = argv1.split('\\');
+      if (arr[arr.length - 1] !== 'app.js' && arr[arr.length - 1] !== 'app') {
+        process.exit(1);
+      }
     });
   }
 

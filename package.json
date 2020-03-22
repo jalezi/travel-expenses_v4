@@ -11,7 +11,7 @@
     "generate:docs2": "jsdoc -c jsdoc.json -P package.json",
     "postinstall": "npm rebuild node-sass",
     "start": "node app.js",
-    "start:nodemon": "nodemon --ignore dbBackup --ignore dump --icu-data-dir=node_modules\\full-icu app.js",
+    "start:nodemon": "nodemon --ignore dbBackup/* --icu-data-dir=node_modules\\full-icu app.js",
     "start:playground": "node playground\\loopObject\\loopObject.js",
     "test": "set NODE_ENV=test && nyc --reporter=html mocha --timeout=10000 --exit",
     "lint": "eslint \"**/*.js\""

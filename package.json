@@ -113,6 +113,9 @@
     "webpack-cli": "^3.3.11",
     "webpack-node-externals": "^1.7.2"
   },
+  "peerDependencies": {
+    "sinon": "7.5.0"
+  },
   "engines": {
     "node": ">=8.11.3",
     "npm": ">=5.6.0"

@@ -51,7 +51,7 @@ const { currencyOptions } = require('./utils');
  * @param {http.response} res
  * @param {function} next
  */
-exports.getTravelsTotalPDF = async function (req, res, next) {
+exports.getTravelsTotalPDF = async function(req, res, next) {
   logger.debug('Middleware getTravelsTotalPDF');
   // Create and open PDF
   function createTravelsTotalPDF(res, travels, user, dateRange, sum, indexes) {
@@ -181,7 +181,7 @@ exports.getTravelsTotalPDF = async function (req, res, next) {
  * @param {http.response} res
  * @param {function} next
  */
-exports.getTravelExpensesPDF = async function (req, res) {
+exports.getTravelExpensesPDF = async function(req, res) {
   logger.debug('MIddleware getTravelExpensesPDF');
   const invoiceNumberArray = await User.aggregate([
     {
@@ -216,7 +216,7 @@ exports.getTravelExpensesPDF = async function (req, res) {
  * @param {http.response} res
  * @param {function} next
  */
-exports.getTravels = async function (req, res, next) {
+exports.getTravels = async function(req, res, next) {
   logger.debug('Getting travels');
   // let filter;
   // let sortBy;
@@ -309,7 +309,7 @@ exports.getTravels = async function (req, res, next) {
  * @param {http.response} res
  * @param {function} next
  */
-exports.getNewTravel = async function (req, res) {
+exports.getNewTravel = async function(req, res) {
   logger.debug('Getting new travel');
   res.render('travels/new', {
     title: 'New travel',
@@ -326,7 +326,7 @@ exports.getNewTravel = async function (req, res) {
  * @param {http.response} res
  * @param {function} next
  */
-exports.postNewTravel = async function (req, res, next) {
+exports.postNewTravel = async function(req, res, next) {
   logger.debug('Posting new travel');
   req
     .assert(
@@ -399,7 +399,7 @@ exports.postNewTravel = async function (req, res, next) {
  * @param {http.response} res
  * @param {function} next
  */
-exports.getTravel = async function (req, res, next) {
+exports.getTravel = async function(req, res, next) {
   logger.debug('Getting single travel');
   const { id } = req.params;
   if (!ObjectId.isValid(id)) {
@@ -423,7 +423,6 @@ exports.getTravel = async function (req, res, next) {
       }
     });
 
-
     res.render('travels/travel', {
       title: 'Travel',
       travel,
@@ -446,7 +445,7 @@ exports.getTravel = async function (req, res, next) {
  * @param {http.response} res
  * @param {function} next
  */
-exports.deleteTravel = async function (req, res, next) {
+exports.deleteTravel = async function(req, res, next) {
   logger.debug('Deleting single travel');
   const { id } = req.params;
 
@@ -498,7 +497,7 @@ exports.deleteTravel = async function (req, res, next) {
  * @param {http.response} res
  * @param {function} next
  */
-exports.updateTravel = async function (req, res, next) {
+exports.updateTravel = async function(req, res, next) {
   logger.debug('Updating(PATCH) single travel');
 
   req

@@ -4,8 +4,15 @@ const moment = require('moment');
 
 const { db } = require('../../config');
 const getDbOptions = require('./getDbOptions');
-const { OS_COMMANDS, RUNNING_PLATFORM, DB_BCK_OPTIONS } = require('../../lib/constants');
-const { BCK_BIN_DIR_PATH, BCK_DATA_DIR_PATH } = require('../../lib/constants').BCK_PATHS;
+const {
+  OS_COMMANDS,
+  RUNNING_PLATFORM,
+  DB_BCK_OPTIONS
+} = require('../../lib/constants');
+const {
+  BCK_BIN_DIR_PATH,
+  BCK_DATA_DIR_PATH
+} = require('../../lib/constants').BCK_PATHS;
 
 const LoggerClass = require('../../config/LoggerClass');
 
@@ -17,7 +24,6 @@ mainLogger.info('utils INITIALIZING');
 // return database options
 exports.dbOptions = getDbOptions(db);
 
-
 // return new and old dates in object as string
 exports.bckDates = (date = new Date()) => {
   const label = 'bckDates';
@@ -25,13 +31,14 @@ exports.bckDates = (date = new Date()) => {
   const result = {};
   const subtractDays = DB_BCK_OPTIONS.keepLastDaysBackup;
   result.newDate = moment(date).format('YYYY-MM-DD');
-  result.oldDate = moment(date).subtract(subtractDays, 'days').format('YYYY-MM-DD');
+  result.oldDate = moment(date)
+    .subtract(subtractDays, 'days')
+    .format('YYYY-MM-DD');
   logger.silly(`newDate = ${result.newDate}`, { label });
   logger.silly(`oldDate = ${result.oldDate}`, { label });
   logger.debug('bckDates END', { label });
   return result;
 };
-
 
 // get backup paths
 exports.getBackupPaths = (specilaPath = 'mongodump') => {
@@ -72,7 +79,9 @@ exports.removeOldBck = oldBackupPath => {
   const delCmd = delCmdObj.cmd;
   const delCmdOpt = delCmdObj.options;
   const deleteCmd = `${delCmd} ${delCmdOpt}`;
-  logger.silly(`${RUNNING_PLATFORM} CMD delete command: ${deleteCmd}`, { label });
+  logger.silly(`${RUNNING_PLATFORM} CMD delete command: ${deleteCmd}`, {
+    label
+  });
 
   if (fs.existsSync(oldBackupPath)) {
     logger.debug(`${oldBackupPath} exists`, { label });
@@ -148,6 +157,7 @@ exports.cpListen = (
       });
       const argv1 = process.argv[1];
       const arr = argv1.split('\\');
+      // exit node
       if (arr[arr.length - 1] !== 'app.js' && arr[arr.length - 1] !== 'app') {
         process.exit(1);
       }
@@ -216,9 +226,15 @@ const setCmdSpecialOpt = (binaryOrData, folderSuffix, val, option) => {
   return `${backupFilePath}/`;
 };
 
-
 // set command
-exports.setCMD = (commandTextBegin, cmdOpt, value, folder, specialOpt, binExpImpTool = false) => {
+exports.setCMD = (
+  commandTextBegin,
+  cmdOpt,
+  value,
+  folder,
+  specialOpt,
+  binExpImpTool = false
+) => {
   const label = 'setCMD';
   logger.debug('setCMD START', { label });
 

@@ -8,7 +8,7 @@ const Logger = new LoggerClass('mongoose');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('config\\mongoose INITIALIZING!');
 
-const config = require('./');
+const config = require('.');
 
 /**
  * @fileoverview Connects to MongooDB with NPM:mongoose.

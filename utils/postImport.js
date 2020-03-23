@@ -29,7 +29,7 @@ const Expense = require('../models/Expense');
 const Currency = require('../models/Currency');
 
 const constants = require('../lib/constants');
-const myErrors = require('../utils/myErrors');
+const myErrors = require('./myErrors');
 
 const { ObjectId } = mongoose.Types;
 

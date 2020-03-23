@@ -4,11 +4,11 @@
     "eslint-plugin-import",
     "eslint-plugin-node",
     "eslint-plugin-security"
-    // "prettier/recommended"
     // "prettier"
   ],
   "extends": [
-    "airbnb-base"
+    "airbnb-base",
+    "eslint:recommended"
     // "plugin:prettier/recommended"
   ],
   "env": {

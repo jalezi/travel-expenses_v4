@@ -80,3 +80,6 @@ app-new.js
 /utils/dbBackup/database*
 /dbBackup
 .editorconfig
+.eslintrc
+.elsintignore
+.prettierrc

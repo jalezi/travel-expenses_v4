@@ -4,7 +4,7 @@ const path = require('path');
 const { createLogger, config, transports, format } = require('winston');
 const stripAnsi = require('strip-ansi');
 
-const { envNode, logs } = require('./');
+const { envNode, logs } = require('.');
 const { HTTP } = require('../lib/constants');
 const getTrace = require('../utils/getTrace');
 

@@ -1,7 +1,7 @@
 const errorHandler = require('errorhandler');
 const mongoose = require('mongoose');
 
-const LoggerClass = require('../config/LoggerClass');
+const LoggerClass = require('./LoggerClass');
 
 const Logger = new LoggerClass('error');
 const { mainLogger, logger } = Logger;

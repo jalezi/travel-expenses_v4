@@ -2,13 +2,13 @@
 const mongoose = require('mongoose');
 
 // Logger
-const LoggerClass = require('../config/LoggerClass');
+const LoggerClass = require('./LoggerClass');
 
 const Logger = new LoggerClass('mongoose');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('config\\mongoose INITIALIZING!');
 
-const config = require('../config');
+const config = require('./');
 
 /**
  * @fileoverview Connects to MongooDB with NPM:mongoose.

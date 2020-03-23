@@ -13,7 +13,7 @@ const homeController = require('../../controllers/home');
 const contactController = require('../../controllers/contact');
 const importController = require('../../controllers/import');
 
-const passportConfig = require('../../config/passport');
+const passportConfig = require('../passport');
 
 
 /**

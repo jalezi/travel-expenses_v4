@@ -4,7 +4,7 @@ const Logger = new LoggerClass('expense');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('config\\routes\\expense INITIALIZING!');
 
-const { isAuthenticated } = require('../../config/passport');
+const { isAuthenticated } = require('../passport');
 const expenseController = require('../../controllers/expense');
 
 /**

@@ -12,7 +12,7 @@ const lusca = require('lusca');
 const express = require('express');
 const cors = require('cors');
 
-const LoggerClass = require('../config/LoggerClass');
+const LoggerClass = require('./LoggerClass');
 
 const Logger = new LoggerClass('express');
 const { mainLogger, logger } = Logger;

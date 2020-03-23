@@ -7,7 +7,7 @@ const { OAuth2Strategy: GoogleStrategy } = require('passport-google-oauth');
 // const { OAuth2Strategy } = require('passport-oauth');
 
 // Logger
-const LoggerClass = require('../config/LoggerClass');
+const LoggerClass = require('./LoggerClass');
 
 const Logger = new LoggerClass('passport');
 const { mainLogger, logger } = Logger;

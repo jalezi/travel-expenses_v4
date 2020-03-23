@@ -79,3 +79,4 @@ app-new.js
 /uploads/*
 /utils/dbBackup/database*
 /dbBackup
+.editorconfig

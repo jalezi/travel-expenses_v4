@@ -68,18 +68,22 @@ audit-resolv.json
 con.js
 *.txt
 snapshots.js
-/build/*
+/build
 
 app-new.js
 /loaders/*
 /api/*
 /coverage/*
-/docs/*
-/docs2/*
-/uploads/*
+/docs
+/docs2
+/uploads
 /utils/dbBackup/database*
 /dbBackup
 .editorconfig
 .eslintrc
 .elsintignore
 .prettierrc
+.codacy-coverage
+/coverage
+.nyc_output
+/pdf

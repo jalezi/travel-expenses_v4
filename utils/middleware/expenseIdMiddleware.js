@@ -27,7 +27,7 @@ module.exports = async (req, res, next) => {
       logger.debug('expenseIdMiddleware END');
       next();
     } catch (err) {
-      logger.err(err);
+      logger.error(err.message);
       logger.silly('next(err)');
       logger.debug('expenseIdMiddleware END');
       next(err);

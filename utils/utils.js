@@ -94,7 +94,7 @@ const findRatesByExactOrClosestDate = async (date = new Date()) => {
     logger.error('Could not find any rates for exact, greater or lower date');
     return 'FUCK AGAIN!';
   } catch (err) {
-    logger.error(err);
+    logger.error(err.message);
     return err;
   }
 };

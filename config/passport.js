@@ -103,7 +103,7 @@ passport.use(new GoogleStrategy({
 }, (req, accessToken, refreshToken, profile, done) => {
   logger.debug('Google Strategy');
   if (req.user) {
-    Logger.debug('req.user exist');
+    logger.debug('req.user exist');
     User.findOne({ google: profile.id }, (err, existingUser) => {
       if (err) { return done(err); }
       if (existingUser) {

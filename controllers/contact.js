@@ -97,7 +97,7 @@ exports.postContact = (req, res, next) => {
         msg: 'An e-mail has been sent to TExpenses App.'
       });
     } catch (err) {
-      logger.error(err);
+      logger.error(err.message);
       req.flash('errors', {
         msg: 'Error sending the contact message. Please try again shortly.'
       });

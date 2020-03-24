@@ -54,7 +54,7 @@ async function readAndParseFile(filePath, enc = 'utf8') {
     });
     return parsedData;
   } catch (err) {
-    logger.error(err);
+    logger.error(err.message);
     throw err;
   }
 }
@@ -117,7 +117,7 @@ const checkFile = myFile =>
         resolve(result);
       })
       .catch(err => {
-        logger.error(err);
+        logger.error(err.message);
         resolve(err);
       });
   });
@@ -275,7 +275,7 @@ function deleteFile(filePath, message = '') {
     }
   } catch (err) {
     logger.error(`File: ${filePath} not deleted!`);
-    logger.error(err);
+    logger.error(err.message);
     throw err;
   }
 }
@@ -366,7 +366,7 @@ async function expensesImportSetCurrencyArray(dataArray, userId, travels) {
   } catch (err) {
     message = 'Something went wrong during expenses import! Check console log!';
     logger.error(message);
-    logger.error(err);
+    logger.error(err.message);
     return { err, message };
   }
 }
@@ -424,7 +424,7 @@ const expenseImport = async dataArray =>
     logger.debug('Expense Import');
     try {
       const expenses = await Expense.insertMany(dataArray).catch(err => {
-        logger.error(err);
+        logger.error(err.message);
         throw new myErrors.SaveToDbError(
           'Something went wrong during saving expenses to DB!'
         );
@@ -438,7 +438,7 @@ const expenseImport = async dataArray =>
         uniqueTravelObjectIds,
         expenses
       ).catch(err => {
-        logger.error(err);
+        logger.error(err.message);
         throw new myErrors.SaveToDbError(
           'Something went wrong during updating travels with expenses!'
         );
@@ -449,7 +449,7 @@ const expenseImport = async dataArray =>
       resolve(message);
     } catch (err) {
       logger.error('Something went wrong during expense import!');
-      logger.error(err);
+      logger.error(err.message);
       resolve({
         error: err,
         msg: 'Something went wrong during expense import!'
@@ -484,7 +484,7 @@ async function travelImport(dataArray, userId) {
           errMsg += ` ${value.path}: ${value.value},`;
           logger.debug(msg);
         });
-        logger.error(err);
+        logger.error(err.message);
         throw new myErrors.SaveToDbError(errMsg);
       });
 
@@ -501,7 +501,7 @@ async function travelImport(dataArray, userId) {
         }
       }).catch(err => {
         logger.error('Something went wrong during updating user with travels');
-        logger.error(err);
+        logger.error(err.message);
         throw new myErrors.SaveToDbError(
           'Something went wrong during updating user with travels!'
         );
@@ -512,7 +512,7 @@ async function travelImport(dataArray, userId) {
       resolve(message);
     } catch (err) {
       logger.warn('Something went wrong during travel import!');
-      logger.error(err);
+      logger.error(err.message);
       resolve({
         error: err,
         msg: 'Something went wrong during travel import!'

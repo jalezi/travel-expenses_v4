@@ -34,7 +34,7 @@ exports.findRates = async travel => {
   logger.debug('findRates');
   let rates = await Rate.findRatesOnDate(travel, err => {
     if (err) {
-      logger.error(err);
+      logger.error(err.message);
       logger.debug('findRates END');
       return err;
       // throw err;
@@ -44,7 +44,7 @@ exports.findRates = async travel => {
   if (rates.length === 0) {
     rates = await Rate.findRateBeforeOrAfterDate(travel, err => {
       if (err) {
-        logger.error(err);
+        logger.error(err.message);
         logger.debug('findRates END');
         return new Error(err);
         // throw new Error(err);

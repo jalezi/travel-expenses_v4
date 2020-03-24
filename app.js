@@ -80,7 +80,7 @@ async function startServer() {
 
   app.listen(config.port, err => {
     if (err) {
-      logger.error(err);
+      logger.error(err.message);
       process.exit(1);
       return;
     }

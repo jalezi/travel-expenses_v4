@@ -54,7 +54,7 @@ module.exports = async () => {
   });
 
   mongoose.connection.on('error', err => {
-    logger.error(err);
+    logger.error(err.message);
     logger.info(
       'MongoDB connection error. Please make sure MongoDB is running.'
     );

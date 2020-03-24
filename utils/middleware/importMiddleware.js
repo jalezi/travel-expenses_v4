@@ -26,7 +26,7 @@ module.exports = async (req, res, next) => {
     logger.debug(`res.locals.travel.length: ${travels.length}`);
     next();
   } catch (err) {
-    logger.err(err);
+    logger.error(err.message);
     next(err);
   }
 };

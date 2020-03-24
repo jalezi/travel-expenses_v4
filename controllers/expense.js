@@ -188,13 +188,13 @@ exports.updateExpense = async (req, res, next) => {
           res.redirect(`/travels/${travel._id}`);
         })
         .catch(err => {
-          logger.error(err);
+          logger.error(err.message);
           logger.debug('Updating expense END - next(err');
           next(err);
         });
     })
     .catch(err => {
-      logger.error(err);
+      logger.error(err.message);
       logger.debug('Updating expense END - catch - next(err');
       next(err);
     });
@@ -251,7 +251,7 @@ exports.postNewExpense = async (req, res, next) => {
       { $addToSet: { expenses: doc._id } },
       err => {
         if (err) {
-          logger.error(err);
+          logger.error(err.message);
           logger.debug('Creating new expense END - return next err');
           return next(err);
         }

@@ -70,7 +70,7 @@ const checkDbForTodayRates = async () =>
     try {
       Rate.find({ date: today }, (err, docs) => {
         if (err) {
-          logger.error(err);
+          logger.error(err.message);
           reject(err);
         }
         logger.info(`Found ${docs.length} rates for ${today} in DB.`, {

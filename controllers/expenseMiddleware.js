@@ -106,7 +106,7 @@ exports.getCurRate = async (req, res, next) => {
             logger.silly({ currency: doc });
           })
           .catch(err => {
-            logger.error(err);
+            logger.error(err.message);
             logger.debug('getCurRate END');
             return next(err);
           });

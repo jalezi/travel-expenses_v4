@@ -23,7 +23,7 @@ const updateExpensesToMatchTravelRangeDates = require('../utils/updateExpensesTo
 const travelExpensesToPDF = require('../utils/toPDF/travelExpensesToPDF');
 const travelsTotalToPDF = require('../utils/toPDF/travelsTotalToPDF');
 
-const { currencyOptions } = require('./utils');
+const { reqAssertion } = require('./travelMiddleware');
 
 /**
  * Travel routes.
@@ -326,33 +326,11 @@ exports.getNewTravel = async function(req, res) {
  * @param {http.response} res
  * @param {function} next
  */
-exports.postNewTravel = async function(req, res, next) {
-  logger.debug('Posting new travel');
-  req
-    .assert(
-      'description',
-      'Description is empty or to long (max 60 characters)!'
-    )
-    .isLength({ min: 1, max: 60 });
-  req
-    .assert('homeCurrency', 'Home currency should have exactly 3 characters!')
-    .isLength({ min: 3, max: 3 });
-  req
-    .assert(
-      'perMileAmount',
-      'Per mile amount should be positive number with 2 decimals!'
-    )
-    .isNumeric()
-    .isCurrency(currencyOptions);
+exports.postNewTravel = async function (req, res, next) {
+  const label = 'postNewTravel';
+  logger.debug('Posting new travel START', { label });
 
-  const dateCompare = moment(req.body.dateTo)
-    .add(1, 'days')
-    .format('YYYY-MM-DD');
-  req
-    .assert('dateFrom', 'Date from should be before date to')
-    .isBefore(dateCompare);
-
-  const errors = req.validationErrors();
+  const errors = reqAssertion(req);
 
   if (errors) {
     req.flash('errors', errors);
@@ -386,6 +364,7 @@ exports.postNewTravel = async function(req, res, next) {
   }
 
   req.flash('success', { msg: 'Successfully added new travel!' });
+  logger.debug('Posting new travel END', { label });
   res.redirect('/travels');
 };
 
@@ -498,33 +477,9 @@ exports.deleteTravel = async function(req, res, next) {
  */
 exports.updateTravel = async function (req, res, next) {
   const label = 'updateTravel';
-  logger.debug('Updating(PATCH) single travel', { label });
+  logger.debug('Updating(PATCH) single travel START', { label });
 
-  req
-    .assert(
-      'description',
-      'Description is empty or to long (max 120 characters)!'
-    )
-    .isLength({ min: 1, max: 60 });
-  req
-    .assert('homeCurrency', 'Home currency should have exactly 3 characters!')
-    .isLength({ min: 3, max: 3 });
-  req
-    .assert(
-      'perMileAmount',
-      'Per mile amount should be positive number with 2 decimals!'
-    )
-    .isNumeric()
-    .isCurrency(currencyOptions);
-
-  const dateCompare = moment(req.body.dateTo)
-    .add(1, 'days')
-    .format('YYYY-MM-DD');
-  req
-    .assert('dateFrom', 'Date from should be before date to')
-    .isBefore(dateCompare);
-
-  const errors = req.validationErrors();
+  const errors = reqAssertion(req);
   const { id } = req.params;
 
   if (errors) {
@@ -572,12 +527,15 @@ exports.updateTravel = async function (req, res, next) {
           .then(doc => {
             doc.updateTotal().then(() => {
               req.flash('success', { msg: 'Travel successfully updated!' });
+              logger.debug('Updating(PATCH) single travel END', { label });
               res.redirect('/travels');
             });
           });
       });
     });
   } catch (err) {
+    logger.error(err.message);
+    logger.debug('Updating(PATCH) single travel END', { label });
     return next(err);
   }
 };

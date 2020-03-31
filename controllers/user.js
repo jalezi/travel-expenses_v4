@@ -48,10 +48,14 @@ const randomBytesAsync = promisify(crypto.randomBytes);
  * Login page.
  */
 exports.getLogin = (req, res) => {
-  logger.debug('Getting login page');
+  const label = 'getLogin';
+  logger.debug('Getting login page', { label });
   if (req.user) {
+    logger.silly('User already logged in!', { label });
+    logger.silly('Redirecting to home page.', { label });
     return res.redirect('/');
   }
+  logger.silly('User not logged in!', { label });
   res.render('account/login', {
     title: 'Login'
   });
@@ -63,7 +67,8 @@ exports.getLogin = (req, res) => {
  * Sign in using email and password.
  */
 exports.postLogin = (req, res, next) => {
-  logger.debug('Posting login form');
+  const label = 'postLogin';
+  logger.debug('Posting login form', { label });
   req.assert('email', 'Please enter a valid email address.').isEmail();
   req.assert('password', 'Password cannot be blank.').notEmpty();
   req.sanitize('email').normalizeEmail({
@@ -73,22 +78,31 @@ exports.postLogin = (req, res, next) => {
   const errors = req.validationErrors();
 
   if (errors) {
+    console.dir(errors);
     req.flash('errors', errors);
     return res.redirect('/login');
   }
 
   passport.authenticate('local', (err, user, info) => {
+    const label = 'passport auth';
     if (err) {
+      logger.error(err.message, { label });
       return next(err);
     }
+    logger.debug('No error', { label });
     if (!user) {
+      logger.error(info.msg, { label });
       req.flash('errors', info);
       return res.redirect('/login');
     }
+    logger.debug('User exists', { label });
     req.logIn(user, err => {
+      const label = 'req.logIn';
       if (err) {
+        logger.error(err.message, { label });
         return next(err);
       }
+      logger.debug('Success! User is logged in.', { label });
       req.flash('success', {
         msg: 'Success! You are logged in.'
       });
@@ -97,17 +111,20 @@ exports.postLogin = (req, res, next) => {
   })(req, res, next);
 };
 
-// TODO refactor conole log to logger.error
 /**
  * GET /logout
  *
  * Log out.
  */
 exports.logout = (req, res) => {
-  logger.debug('Getting logout');
+  const label = 'logout';
+  logger.debug('Getting logout', { label });
   req.logout();
   req.session.destroy(err => {
-    if (err) console.log('Error : Failed to destroy the session during logout.', err);
+    if (err) {
+      logger.error('Failed to destroy the session during logout.', { label });
+      logger.error(err.message);
+    }
     req.user = null;
     res.redirect('/');
   });
@@ -119,10 +136,13 @@ exports.logout = (req, res) => {
  * Signup page.
  */
 exports.getSignup = (req, res) => {
-  logger.debug('Getting signup page');
+  const label = 'getSignup';
+  logger.debug('Getting signup page', { label });
   if (req.user) {
+    logger.debug('Redirecting to home. User allready logged in', { label });
     return res.redirect('/');
   }
+  logger.debug('No user.', { label });
   res.render('account/signup', {
     title: 'Create Account'
   });
@@ -134,7 +154,8 @@ exports.getSignup = (req, res) => {
  * Create a new local account.
  */
 exports.postSignup = (req, res, next) => {
-  logger.debug('Posting signup form');
+  const label = 'postSignup';
+  logger.debug('Posting signup form', { label });
   let assertObject = { email: true, password: true, cPassword: true, profile: true };
   let errors = reqAssertion(req, assertObject);
   req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
@@ -156,23 +177,34 @@ exports.postSignup = (req, res, next) => {
   });
 
   User.findOne({ email: req.body.email }, (err, existingUser) => {
+    const label = 'findOne';
     if (err) {
+      logger.error(err.message, { label });
       return next(err);
     }
+    logger.debug('No error', { label });
     if (existingUser) {
+      logger.error('Account with that email address already exists.', { label });
       req.flash('errors', {
         msg: 'Account with that email address already exists.'
       });
       return res.redirect('/signup');
     }
+    logger.info('New user', { label });
     user.save(err => {
+      const label = 'save';
       if (err) {
+        logger.error(err.message, { label });
         return next(err);
       }
+      logger.debug('No error', { label });
       req.logIn(user, err => {
+        const label = 'req.logIn';
         if (err) {
+          logger.error(err.message, { label });
           return next(err);
         }
+        logger.debug('No error', { label });
         res.redirect('/');
       });
     });
@@ -185,10 +217,11 @@ exports.postSignup = (req, res, next) => {
  * Profile page.
  */
 exports.getAccount = (req, res) => {
-  logger.debug('Getting account page');
-  if (req.query.length !== 0) {
-    const { team } = req.query;
-    const { jobPosition } = req.query;
+  const label = 'getAccount';
+  logger.debug('Getting account page', { label });
+  if (req.user) {
+    logger.debug('Account find', { label });
+    const { team, jobPosition } = req.user;
     if (team === '') {
       req.flash('info', { msg: 'To create PDF you need to define TEAM' });
     }
@@ -196,6 +229,7 @@ exports.getAccount = (req, res) => {
       req.flash('info', { msg: 'To create PDF you need to define POSITION' });
     }
   }
+  logger.silly('req.user exists.', { label });
   res.render('account/profile', {
     title: 'Account Management'
   });
@@ -207,24 +241,30 @@ exports.getAccount = (req, res) => {
  * Update profile information.
  */
 exports.postUpdateProfile = (req, res, next) => {
-  logger.debug('Updating account profile');
+  const label = 'postUpdateProfile';
+  logger.debug('Updating account profile', { label });
   let assertObject = { email: true, hCurrency: true, profile: true };
   let errors = reqAssertion(req, assertObject);
   req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
 
   if (!errors) {
+    logger.warn('Errors exists.', { label });
     errors = req.validationErrors();
   }
 
   if (errors) {
+    logger.debug('req.flash', { label });
     req.flash('errors', errors);
     return res.redirect('/account');
   }
 
   User.findById(req.user.id, (err, user) => {
+    const label = 'findById';
     if (err) {
+      logger.error(err.message, { label });
       return next(err);
     }
+    logger.debug('Update user from form', { label });
     user.email = req.body.email || '';
     user.profile.name = req.body.name || '';
     user.profile.fName = req.body.fName || '';
@@ -238,16 +278,23 @@ exports.postUpdateProfile = (req, res, next) => {
     user.profile.location = req.body.location || '';
     user.profile.website = req.body.website || '';
     user.save(err => {
+      const label = 'save';
       if (err) {
+        logger.error(err.message, { label });
         if (err.code === 11000) {
+          logger.error('The email address you have entered is already associated with an account.', { label });
           req.flash('errors', {
             msg:
               'The email address you have entered is already associated with an account.'
           });
+          logger.debug('redirecting to /account', { label });
           return res.redirect('/account');
         }
+        logger.silly('next(err)', { label });
         return next(err);
       }
+      logger.debug('Profile information has been updated.', { label });
+      logger.debug('redirecting to /account', { label });
       req.flash('success', { msg: 'Profile information has been updated.' });
       res.redirect('/account');
     });

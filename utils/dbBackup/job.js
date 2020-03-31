@@ -12,10 +12,10 @@ module.exports = async () => {
   const label = 'backup/job';
   logger.debug('Creating db backup job START', { label });
   const rule = new schedule.RecurrenceRule();
-  rule.second = 1;
-  // rule.minute = 1;
-  // rule.hour = 1;
-  // rule.dayOfWeek = 0;
+  // rule.second = 1;
+  rule.minute = 1;
+  rule.hour = 1;
+  rule.dayOfWeek = 0;
   const scheduleId = 'db backup job';
 
   const job = schedule.scheduleJob(scheduleId, rule, async () => {

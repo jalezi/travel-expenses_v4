@@ -96,6 +96,9 @@ async function updateExpense(
 */
 // eslint-disable-next-line no-async-promise-executor
 module.exports = async travel => new Promise(async (resolve, reject) => {
+  const label = 'UETMTRD';
+  logger.debug('UETMTRD START', { label });
+
   const { dateFrom } = travel;
   const { dateTo } = travel;
   const travelHomeCurrency = travel.homeCurrency;
@@ -133,6 +136,7 @@ module.exports = async travel => new Promise(async (resolve, reject) => {
                 ).then(doc => {
                   result.push(doc);
                   if (result.length === expenses.length) {
+                    logger.debug('UETMTRD END', { label });
                     resolve(result);
                   }
                 });
@@ -149,6 +153,7 @@ module.exports = async travel => new Promise(async (resolve, reject) => {
                 ).then(doc => {
                   result.push(doc);
                   if (result.length === expenses.length) {
+                    logger.debug('UETMTRD END', { label });
                     resolve(result);
                   }
                 });
@@ -159,6 +164,7 @@ module.exports = async travel => new Promise(async (resolve, reject) => {
           await expense.save(doc => {
             result.push(doc);
             if (result.length === expenses.length) {
+              logger.debug('UETMTRD END', { label });
               resolve(result);
             }
           });
@@ -166,11 +172,16 @@ module.exports = async travel => new Promise(async (resolve, reject) => {
       } else {
         result.push(expense);
         if (result.length === expenses.length) {
+          logger.debug('UETMTRD END', { label });
           resolve(result);
         }
       }
     });
+    logger.debug('UETMTRD END', { label });
+    resolve(result);
   } catch (err) {
+    logger.error(err.message, { label });
+    logger.debug('UETMTRD END', { label });
     reject(new Error(err));
   }
 });

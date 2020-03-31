@@ -337,14 +337,13 @@ exports.postNewTravel = async function(req, res, next) {
   req
     .assert('homeCurrency', 'Home currency should have exactly 3 characters!')
     .isLength({ min: 3, max: 3 });
-
-  const decimalOptions = { decimal_digits: 2 };
   req
     .assert(
       'perMileAmount',
       'Per mile amount should be positive number with 2 decimals!'
     )
-    .isDecimal(decimalOptions);
+    .isNumeric()
+    .isCurrency(currencyOptions);
 
   const dateCompare = moment(req.body.dateTo)
     .add(1, 'days')
@@ -497,8 +496,9 @@ exports.deleteTravel = async function(req, res, next) {
  * @param {http.response} res
  * @param {function} next
  */
-exports.updateTravel = async function(req, res, next) {
-  logger.debug('Updating(PATCH) single travel');
+exports.updateTravel = async function (req, res, next) {
+  const label = 'updateTravel';
+  logger.debug('Updating(PATCH) single travel', { label });
 
   req
     .assert(
@@ -542,6 +542,7 @@ exports.updateTravel = async function(req, res, next) {
   ]);
 
   if (!ObjectId.isValid(id)) {
+    logger.error('Not valid Object Id', { label });
     return next(new Error('Not valid Object Id'));
   }
 
@@ -554,6 +555,7 @@ exports.updateTravel = async function(req, res, next) {
     ).populate({ path: 'expenses', populate: { path: 'curRate' } });
 
     if (!travel) {
+      logger.error('Travel not found', { label });
       return next(new Error('Travel not found'));
     }
     /**
@@ -561,7 +563,9 @@ exports.updateTravel = async function(req, res, next) {
      * Calculate travel total. New expenses date, new rate.
      * Rates for same currency are not the same for different dates.
      */
+    logger.debug('Updating expenses to match travel dates', { label });
     updateExpensesToMatchTravelRangeDates(travel).then(() => {
+      logger.debug('UETMTRD then', { label });
       travel.save().then(doc => {
         Travel.findOne({ _id: doc._id, _user: req.user.id })
           .populate({ path: 'expenses', populate: { path: 'curRate' } })

@@ -208,11 +208,12 @@ passport.use(new GoogleStrategy({
 exports.isAuthenticated = (req, res, next) => {
   const label = 'isAuthenticated';
   logger.debug('isAuthenticated START', { label });
-  logger.debug(`isAuthenticated: ${req.isAuthenticated}`, { label });
   if (req.isAuthenticated()) {
+    logger.debug('isAuthenticated exists', { label });
     logger.debug('isAuthenticated END', { label });
     return next();
   }
+  logger.debug('isAuthenticated not exists', { label });
   logger.debug('Redirecting to /login');
   logger.debug('isAuthenticated END', { label });
   res.redirect('/login');

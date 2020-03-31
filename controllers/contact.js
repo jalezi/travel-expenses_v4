@@ -85,7 +85,7 @@ exports.postContact = (req, res, next) => {
               Name: 'TExpenses App'
             }
           ],
-          Subject: 'Contact TExpenses App',
+          Subject: `${fromName} - ${fromEmail} - tExpApp`,
           TextPart: req.body.message
         }
       ]

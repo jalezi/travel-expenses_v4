@@ -31,7 +31,7 @@ const { ImportFileError } = myErrors;
  */
 module.exports = app => {
   logger.debug('Error handler initializing');
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test ') {
     // only use in development
     app.use(
       errorHandler({
@@ -42,7 +42,8 @@ module.exports = app => {
           ) {
             logger.log(str);
           } else {
-            logger.log(err);
+            logger.error(err.message);
+            logger.error(err.stack);
           }
         }
       })
@@ -58,7 +59,7 @@ module.exports = app => {
         res.status(400);
         res.redirect('/travels');
       } else {
-        logger.log(err);
+        logger.error(err.message);
         res.status(500).render('error', {
           layout: 'errorLayout',
           title: 'Error'

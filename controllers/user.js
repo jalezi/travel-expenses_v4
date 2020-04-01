@@ -56,6 +56,7 @@ exports.getLogin = (req, res) => {
     return res.redirect('/');
   }
   logger.silly('User not logged in!', { label });
+  logger.silly('Redirecting to login page.', { label });
   res.render('account/login', {
     title: 'Login'
   });
@@ -78,7 +79,7 @@ exports.postLogin = (req, res, next) => {
   const errors = req.validationErrors();
 
   if (errors) {
-    console.dir(errors);
+    logger.warn('There are some req assertion errors', { label });
     req.flash('errors', errors);
     return res.redirect('/login');
   }
@@ -309,7 +310,6 @@ exports.postUpdateProfile = (req, res, next) => {
  */
 exports.postUpdatePassword = (req, res, next) => {
   logger.debug('Updating account password');
-  logger.debug('Update account password');
   let assertObject = { password: true, cPassword: true };
 
   const errors = reqAssertion(req, assertObject);

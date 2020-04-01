@@ -7,7 +7,7 @@ const Logger = new LoggerClass('user');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('controllers\\userMiddleware INITIALIZING');
 
-exports.reqAssertion = (req) => {
+exports.reqAssertion = req => {
   const label = 'travel.reqAssertion';
   logger.debug('travel.reqAssertion START', { label });
 

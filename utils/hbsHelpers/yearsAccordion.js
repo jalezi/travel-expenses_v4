@@ -652,7 +652,7 @@ const createExpenseForm = (
  More in Travel Schema /models/Travel.js Travel.byYear_byMonth
  */
 expressHbs.registerHelper('yearsAccordionWithForm', (value, csrf) => {
-  logger.debug('yearsAccordionWithForm');
+  logger.debug('yearsAccordionWithForm START');
   const formatter = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2

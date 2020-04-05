@@ -74,6 +74,7 @@ expressHbs.registerHelper('countList', value => {
 
 expressHbs.registerHelper('formatDate', date => {
   logger.debug('formatDate helper');
+  logger.silly(`${date.toString()}`);
   if (!date) {
     const today = moment().format('YYYY-MM-DD');
     return today;

@@ -1,3 +1,6 @@
+/* eslint-disable no-await-in-loop */
+const moment = require('moment');
+
 const Expense = require('../models/Expense');
 const Currency = require('../models/Currency');
 
@@ -10,37 +13,55 @@ mainLogger.debug('utils\\updateExpensesToMatchTravelRangeDates INITIALIZING!');
 const { findRatesByExactOrClosestDate } = require('./utils');
 const { convertRateToHomeCurrencyRate } = require('./utils');
 
-
 // Returns true if expense date is not in travel's dates range
-function checkExpenseDate(expDate, travelDateFrom, travelDateTo) {
+const checkExpenseDate = async (
+  expDate,
+  travelDateFrom,
+  travelDateTo,
+  requestId
+) => {
+  const label = 'checkExpenseDate';
   const condition = expDate < travelDateFrom || expDate > travelDateTo;
-  logger.debug(`Cheking expense date. Date in travel's dates: ${!condition}`);
+  logger.debug(`Cheking expense date. Date in travel's dates: ${!condition}`, {
+    label,
+    requestId
+  });
   if (condition) {
     return true;
   }
   return false;
-}
+};
 
 // Returns new expense, based on travel dates range.
-function setNewExpenseDate(expDate, travelDateFrom, travelDateTo) {
+async function setNewExpenseDate(expDate, travelDateFrom, travelDateTo, requestId) {
+  const label = 'setNewExpenseDate';
+  const ed = moment(expDate).format('YYYY-MM-DD');
+  const dt = moment(travelDateFrom).format('YYYY-MM-DD');
+  const df = moment(travelDateTo).format('YYYY-MM-DD');
   if (expDate < travelDateFrom) {
-    logger.debug(`Expense date is lower than travel date from: ${expDate} < ${travelDateFrom}`);
+    logger.debug(
+      `Expense date is lower than travel date from: ${ed} < ${df}`,
+      { label, requestId }
+    );
     return travelDateFrom;
   }
   if (expDate > travelDateTo) {
-    logger.debug(`Expense date is greater than travel date to: ${expDate} > ${travelDateTo}`);
+    logger.debug(
+      `Expense date is greater than travel date to: ${ed} > ${dt}`,
+      { label, requestId }
+    );
     return travelDateTo;
   }
   return travelDateTo;
 }
-
 
 /*
 Returns new currency object based on user default currency.
 Throws Error if something goes wrong
 */
 async function createNewCurrency(expenseDate, homeCurrency, invoiceCurrency) {
-  logger.debug('Creating new currency');
+  const label = 'createNewCurrency';
+  logger.debug('Creating new currency', { label });
   try {
     const cur = {};
     const dateRates = await findRatesByExactOrClosestDate(expenseDate);
@@ -55,7 +76,12 @@ async function createNewCurrency(expenseDate, homeCurrency, invoiceCurrency) {
       date: expenseDate,
       rate: cur
     });
-    logger.debug(`New currency: {base: ${curRate.base}, date: ${curRate.date}, rate: ${cur.toString()}}`);
+    logger.debug(
+      `New currency: {base: ${curRate.base}, date: ${
+        curRate.date
+      }, rate: ${cur.toString()}}`,
+      { label }
+    );
     return { curRate, convertedRate };
   } catch (err) {
     throw new Error(err);
@@ -94,94 +120,230 @@ async function updateExpense(
   Checks if expense type is mileage
 
 */
-// eslint-disable-next-line no-async-promise-executor
-module.exports = async travel => new Promise(async (resolve, reject) => {
-  const label = 'UETMTRD';
-  logger.debug('UETMTRD START', { label });
+module.exports = async travel =>
+  // eslint-disable-next-line no-async-promise-executor
+  new Promise(async (resolve, reject) => {
+    const label = 'UETMTRD';
+    logger.debug('UETMTRD START', { label });
+    const { expenses } = travel;
+    const result = [];
+    if (expenses.length === 0) {
+      logger.silly('No expenses to update', { label });
+      logger.debug('UETMTRD END', { label });
+      return resolve(result);
+    }
 
-  const { dateFrom } = travel;
-  const { dateTo } = travel;
-  const travelHomeCurrency = travel.homeCurrency;
-  const { expenses } = travel;
-  const result = [];
+    logger.silly(`Expenses to check: ${expenses.length}`, { label });
 
-  try {
-    await expenses.forEach(async expense => {
-      if (checkExpenseDate(expense.date, dateFrom, dateTo)) {
-        expense.date = setNewExpenseDate(expense.date, dateFrom, dateTo);
+    const { dateFrom } = travel;
+    const { dateTo } = travel;
+    const travelHomeCurrency = travel.homeCurrency;
 
-        if (expense.type !== 'Mileage') {
-          let invoiceCurrency = Object.keys(expense.curRate.rate)[0];
-          Currency.find(
-            { base: travelHomeCurrency, date: expense.date },
-            async (err, curRates) => {
-              const filertedRatesFromDB = curRates.filter(
-                // eslint-disable-next-line no-restricted-globals
-                item => !isNaN(item.rate[invoiceCurrency])
-              );
-              if (filertedRatesFromDB.length === 0) {
-                const { curRate, convertedRate } = await createNewCurrency(
-                  expense.date,
-                  travelHomeCurrency,
-                  invoiceCurrency
-                );
-                await curRate.save();
-                const rateObjectId = curRate._id;
-                await updateExpense(
-                  expense._id,
-                  expense.amount,
-                  expense.date,
-                  convertedRate,
-                  rateObjectId
-                ).then(doc => {
-                  result.push(doc);
-                  if (result.length === expenses.length) {
-                    logger.debug('UETMTRD END', { label });
-                    resolve(result);
-                  }
-                });
-              } else {
-                const convertedRate =
-                    filertedRatesFromDB[0].rate[invoiceCurrency];
-                const rateObjectId = filertedRatesFromDB[0]._id;
-                await updateExpense(
-                  expense._id,
-                  expense.amount,
-                  expense.date,
-                  convertedRate,
-                  rateObjectId
-                ).then(doc => {
-                  result.push(doc);
-                  if (result.length === expenses.length) {
-                    logger.debug('UETMTRD END', { label });
-                    resolve(result);
-                  }
-                });
-              }
-            }
-          );
-        } else {
-          await expense.save(doc => {
-            result.push(doc);
-            if (result.length === expenses.length) {
-              logger.debug('UETMTRD END', { label });
-              resolve(result);
-            }
+    try {
+      for (let index = 0; index < expenses.length; index++) {
+        const expense = expenses[index];
+
+        let label = expense.type;
+        const requestId = index + 1;
+        logger.silly(`result length: ${result.length}`, { label, requestId });
+        logger.silly(`expenses length: ${expenses.length}`, {
+          label,
+          requestId
+        });
+        logger.silly(`${result.length === expenses.length}`, {
+          label,
+          requestId
+        });
+
+        const dateToBeChanged = await checkExpenseDate(expense.date, dateFrom, dateTo, requestId);
+
+        if (dateToBeChanged) {
+          label = `${label} - new date`;
+          expense.date = await setNewExpenseDate(expense.date, dateFrom, dateTo, requestId);
+          logger.silly(`New expense date: ${moment(expense.date).format('YYYY-MM-DD')}`, {
+            label,
+            requestId
           });
-        }
-      } else {
-        result.push(expense);
-        if (result.length === expenses.length) {
-          logger.debug('UETMTRD END', { label });
-          resolve(result);
+
+          if (expense.type !== 'Mileage') {
+            logger.silly('Expense type not mileage', { label, requestId });
+            let invoiceCurrency = Object.keys(expense.curRate.rate)[0];
+            await Currency.find(
+              { base: travelHomeCurrency, date: expense.date },
+              async (err, curRates) => {
+                logger.silly(`Found rates: ${curRates.length}`, { label });
+                const filertedRatesFromDB = curRates.filter(
+                  // eslint-disable-next-line no-restricted-globals
+                  item => !isNaN(item.rate[invoiceCurrency])
+                );
+                logger.silly(`Filtered rates: ${filertedRatesFromDB.length}`, { label });
+                if (filertedRatesFromDB.length === 0) {
+                  logger.silly('new currency', { label, requestId });
+                  const { curRate, convertedRate } = await createNewCurrency(
+                    expense.date,
+                    travelHomeCurrency,
+                    invoiceCurrency
+                  );
+                  await curRate.save();
+                  const rateObjectId = curRate._id;
+                  await updateExpense(
+                    expense._id,
+                    expense.amount,
+                    expense.date,
+                    convertedRate,
+                    rateObjectId
+                  ).then(doc => {
+                    logger.silly('Expense updated', { label }, requestId);
+                    result.push(doc);
+                    if (result.length === expenses.length) {
+                      logger.debug('UETMTRD END', { label, requestId });
+                      return resolve(result);
+                    }
+                  });
+                } else {
+                  logger.silly('old currency', { label, requestId });
+                  const convertedRate =
+                    filertedRatesFromDB[0].rate[invoiceCurrency];
+                  const rateObjectId = filertedRatesFromDB[0]._id;
+                  await updateExpense(
+                    expense._id,
+                    expense.amount,
+                    expense.date,
+                    convertedRate,
+                    rateObjectId
+                  ).then(doc => {
+                    logger.silly('Expense updated', { label, requestId });
+                    result.push(doc);
+                    if (result.length === expenses.length) {
+                      logger.debug('UETMTRD END', { label, requestId });
+                      return resolve(result);
+                    }
+                  });
+                }
+              }
+            );
+          } else {
+            logger.silly('Expense type mileage', { label, requestId });
+            await expense.save(doc => {
+              logger.silly('Expense saved', { label, requestId });
+              result.push(doc);
+              if (result.length === expenses.length) {
+                logger.debug('UETMTRD END', { label, requestId });
+                return resolve(result);
+              }
+            });
+          }
+        } else {
+          label = `${label} - old date`;
+          result.push(expense);
+          if (result.length === expenses.length) {
+            logger.debug('UETMTRD END', { label, requestId });
+            return resolve(result);
+          }
         }
       }
-    });
-    logger.debug('UETMTRD END', { label });
-    resolve(result);
-  } catch (err) {
-    logger.error(err.message, { label });
-    logger.debug('UETMTRD END', { label });
-    reject(new Error(err));
-  }
-});
+      // await expenses.forEach(async (expense, index) => {
+      //   let label = expense.type;
+      //   const requestId = index + 1;
+      //   logger.silly(`result length: ${result.length}`, { label, requestId });
+      //   logger.silly(`expenses length: ${expenses.length}`, {
+      //     label,
+      //     requestId
+      //   });
+      //   logger.silly(`${result.length === expenses.length}`, {
+      //     label,
+      //     requestId
+      //   });
+      //   if (await checkExpenseDate(expense.date, dateFrom, dateTo, requestId)) {
+      //     label = `${label} - new date`;
+      //     expense.date = setNewExpenseDate(expense.date, dateFrom, dateTo, requestId);
+      //     logger.silly(`New expense date: ${expense.date}`, {
+      //       label,
+      //       requestId
+      //     });
+
+      //     if (expense.type !== 'Mileage') {
+      //       logger.silly('Expense type not mileage', { label, requestId });
+      //       let invoiceCurrency = Object.keys(expense.curRate.rate)[0];
+      //       Currency.find(
+      //         { base: travelHomeCurrency, date: expense.date },
+      //         async (err, curRates) => {
+      //           const filertedRatesFromDB = curRates.filter(
+      //             // eslint-disable-next-line no-restricted-globals
+      //             item => !isNaN(item.rate[invoiceCurrency])
+      //           );
+      //           if (filertedRatesFromDB.length === 0) {
+      //             logger.silly('new currency', { label, requestId });
+      //             const { curRate, convertedRate } = await createNewCurrency(
+      //               expense.date,
+      //               travelHomeCurrency,
+      //               invoiceCurrency
+      //             );
+      //             await curRate.save();
+      //             const rateObjectId = curRate._id;
+      //             await updateExpense(
+      //               expense._id,
+      //               expense.amount,
+      //               expense.date,
+      //               convertedRate,
+      //               rateObjectId
+      //             ).then(doc => {
+      //               logger.silly('Expense updated', { label }, requestId);
+      //               result.push(doc);
+      //               if (result.length === expenses.length) {
+      //                 logger.debug('UETMTRD END', { label, requestId });
+      //                 return resolve(result);
+      //               }
+      //             });
+      //           } else {
+      //             logger.silly('old currency', { label, requestId });
+      //             const convertedRate =
+      //               filertedRatesFromDB[0].rate[invoiceCurrency];
+      //             const rateObjectId = filertedRatesFromDB[0]._id;
+      //             await updateExpense(
+      //               expense._id,
+      //               expense.amount,
+      //               expense.date,
+      //               convertedRate,
+      //               rateObjectId
+      //             ).then(doc => {
+      //               logger.silly('Expense updated', { label, requestId });
+      //               result.push(doc);
+      //               if (result.length === expenses.length) {
+      //                 logger.debug('UETMTRD END', { label, requestId });
+      //                 return resolve(result);
+      //               }
+      //             });
+      //           }
+      //         }
+      //       );
+      //     } else {
+      //       logger.silly('Expense type mileage', { label, requestId });
+      //       await expense.save(doc => {
+      //         logger.silly('Expense saved', { label, requestId });
+      //         result.push(doc);
+      //         if (result.length === expenses.length) {
+      //           logger.debug('UETMTRD END', { label, requestId });
+      //           return resolve(result);
+      //         }
+      //       });
+      //     }
+      //   } else {
+      //     label = `${label} - old date`;
+      //     result.push(expense);
+      //     if (result.length === expenses.length) {
+      //       logger.debug('UETMTRD END', { label, requestId });
+      //       return resolve(result);
+      //     }
+      //   }
+      // });
+      // if (result.length === expenses.length) {
+      //   logger.debug('UETMTRD END', { label });
+      //   return resolve(result);
+      // }
+    } catch (err) {
+      logger.error(err.message, { label });
+      logger.debug('UETMTRD END', { label });
+      return reject(new Error(err));
+    }
+  });

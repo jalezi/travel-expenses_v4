@@ -107,7 +107,7 @@ const toTitleCase = str =>
   );
 
 // eslint-disable-next-line no-extend-native
-String.prototype.splice = function(idx, rem, str) {
+String.prototype.splice = function (idx, rem, str) {
   // eslint-disable-line func-names
   return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
 };

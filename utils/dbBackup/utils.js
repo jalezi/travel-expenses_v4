@@ -72,7 +72,7 @@ exports.getBackupPaths = (specilaPath = 'mongodump') => {
 };
 
 // Remove old backup function
-exports.removeOldBck = (oldBackupPath) => {
+exports.removeOldBck = oldBackupPath => {
   const label = 'removeOldBck';
   logger.debug('removeOldBck START', { label });
   const delCmdObj = OS_COMMANDS[RUNNING_PLATFORM].delete;
@@ -112,7 +112,7 @@ exports.removeOldBck = (oldBackupPath) => {
 
 // Log stdout or stderr with custom logger
 exports.logStd = (data, label = 'stderr', level) => {
-  data.split('\n').forEach((value) => {
+  data.split('\n').forEach(value => {
     let stderrArr = value.split('\t');
     let msg = stderrArr[1];
     if (msg) {
@@ -173,26 +173,26 @@ exports.cpListen = (
   }
 
   if (error) {
-    cp.on('error', (error) => {
+    cp.on('error', error => {
       logger.error(error.message, { label });
     });
   }
 
   // listen on stdout and stderr
   if (stdout) {
-    cp.stdout.on('data', (data) => {
+    cp.stdout.on('data', data => {
       this.logStd(data, `process ${pid} stdout`);
     });
   }
 
   if (stderr) {
-    cp.stderr.on('data', (data) => {
+    cp.stderr.on('data', data => {
       this.logStd(data, `process ${pid} stderr`);
     });
   }
 };
 
-const checkSpecialOpt = (opt) => {
+const checkSpecialOpt = opt => {
   const label = 'checkSpecialOpt';
   logger.debug('checkSpecialOpt START', { label });
   if (!['file', 'out'].includes(opt)) {
@@ -247,7 +247,7 @@ exports.setCMD = (
 
   let cmd = commandTextBegin;
 
-  cmdOpt.forEach((key) => {
+  cmdOpt.forEach(key => {
     // mongorestore does not require --db
     if (binExpImpTool && key === 'db' && !specialOpt) {
       return;

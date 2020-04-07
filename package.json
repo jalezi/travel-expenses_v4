@@ -1,25 +1,5 @@
 {
-  "name": "travel-expense-v4",
-  "version": "1.0.0",
-  "description": "App for keeping travel expenses.",
   "author": "Jaka Daneu",
-  "license": "",
-  "scripts": {
-    "build": "webpack",
-    "build:dev": "webpack --config webpack.config.js",
-    "coverage": "nyc npm run test",
-    "generate:docs": "jsdoc -c conf.json -P package.json",
-    "generate:docs2": "jsdoc -c jsdoc.json -P package.json",
-    "postinstall": "npm rebuild node-sass",
-    "start": "node app.js",
-    "start:nodemon": "nodemon --ignore dbBackup/* --icu-data-dir=node_modules\\full-icu app.js --logLevel silly",
-    "start:playground": "node playground\\loopObject\\loopObject.js",
-    "test": "set NODE_ENV=test && nyc -r clover --clean mocha --recursive --inline-diffs --timeout=10000 --exit",
-    "lint": "eslint \"**/*.js\""
-  },
-  "peerDependencies": {
-    "sinon": "7.5.0"
-  },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.13.0",
     "@icetee/handlebars-loader": "^1.6.0",
@@ -81,6 +61,7 @@
     "winston": "^3.2.1",
     "yargs": "^15.3.1"
   },
+  "description": "App for keeping travel expenses.",
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/node": "^7.8.7",
@@ -124,14 +105,33 @@
     "node": ">=8.11.3",
     "npm": ">=5.6.0"
   },
+  "license": "",
+  "name": "travel-expense-v4",
   "nyc": {
-    "ignore-class-method": "render",
     "branches": 80,
-    "lines": 80,
-    "functions": 80,
-    "statements": 80,
     "exclude": [
       "/utils/*.*"
-    ]
-  }
+    ],
+    "functions": 80,
+    "ignore-class-method": "render",
+    "lines": 80,
+    "statements": 80
+  },
+  "peerDependencies": {
+    "sinon": "7.5.0"
+  },
+  "scripts": {
+    "build": "webpack",
+    "build:dev": "webpack --config webpack.config.js",
+    "coverage": "nyc npm run test",
+    "generate:docs": "jsdoc -c conf.json -P package.json",
+    "generate:docs2": "jsdoc -c jsdoc.json -P package.json",
+    "lint": "eslint \"**/*.js\"",
+    "postinstall": "npm rebuild node-sass",
+    "start": "node app.js",
+    "start:nodemon": "nodemon --ignore dbBackup/* --icu-data-dir=node_modules\\full-icu app.js --logLevel silly",
+    "start:playground": "node playground\\loopObject\\loopObject.js",
+    "test": "set NODE_ENV=test && nyc -r clover --clean mocha --recursive --inline-diffs --timeout=10000 --exit"
+  },
+  "version": "1.0.0"
 }

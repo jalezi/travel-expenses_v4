@@ -60,9 +60,10 @@ before(done => {
   app.then(result => {
     agent = request(result);
     appResolved = result;
-    result.on('appStarted', () => {
-      done();
-    });
+    done();
+    // result.on('appStarted', () => {
+    //   done();
+    // });
   });
 });
 

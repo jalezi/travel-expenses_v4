@@ -78,18 +78,21 @@ async function startServer() {
   errorHandler(app);
   logger.info('Error handler loaded');
 
-  app.listen(config.port, err => {
-    if (err) {
-      logger.error(err.message);
-      process.exit(1);
-      return;
-    }
-    logger.info(`Server listening on port: ${config.port}`);
 
-    // Setup the event emitter to assume that app is running.
-    // It's for tests.
-    app.emit('appStarted');
-  });
+  if (!module.parent) {
+    app.listen(config.port, err => {
+      if (err) {
+        logger.error(err.message);
+        process.exit(1);
+        return;
+      }
+      logger.info(`Server listening on port: ${config.port}`);
+
+      // Setup the event emitter to assume that app is running.
+      // It's for tests.
+      app.emit('appStarted');
+    });
+  }
   return app;
 }
 

@@ -2,14 +2,7 @@
 
 {{#if user}}
   {{> travelsHeader}}
-  {{!-- <hr> --}}
-  <div class="">
 
-    {{!-- <p>Hello {{user.fName}}!</p> --}}
-    {{!-- {{{yearsAccordionWithForm docs _csrf}}} --}}
-  </div>
-
-  {{!-- <hr> --}}
 
 {{else}}
 <div class="info">
@@ -17,10 +10,10 @@
     <h2>App was build for my friend and it is basically my first project.</h2>
 
     <h3>You are free to use it but I don't guarantee that this app will be maintained!</h3>
-    {{!-- {{{yearsAccordionWithForm docs _csrf}}} --}}
+
   </div>
   <h2>Login or Sign up
-    <!-- <p class="lead">Neki Neki</p> -->
+
   </h2>
   <div class="row">
     <div class="col-xs-6 p-3 mx-auto">
@@ -51,7 +44,7 @@
 
     if (event.target.localName != "button") {
       button = event.target.parentElement;
-      // console.log('toggle', event, event.target.localName);
+
       button.click();
       return;
     } else {
@@ -63,12 +56,7 @@
       button.innerHTML = button.getAttribute("data-text-original");
       let badge = document.createElement("SPAN");
       let badgeTextNode = document.createTextNode(button.getAttribute("data-text-badge"));
-      /*
-       * classes.indexOf(class) class id related to hbsHelper.yearsAccordion()
-       *    badge-light => monthButtonBadge
-       *    badge-warning => travelButtonBadge
-       *    badge-dark => yearButtonBadge
-       */
+
       if (classes.indexOf("badge-light") > 0) {
         badge.setAttribute("class", "badge badge-dark mx-1");
       } else if (classes.indexOf("badge-secondary") > 0) {

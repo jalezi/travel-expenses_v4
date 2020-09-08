@@ -23,7 +23,7 @@ const updateExpensesToMatchTravelRangeDates = require('../utils/updateExpensesTo
 const travelExpensesToPDF = require('../utils/toPDF/travelExpensesToPDF');
 const travelsTotalToPDF = require('../utils/toPDF/travelsTotalToPDF');
 
-const { currencyOptions } = require('./utils');
+const { reqAssertion } = require('./travelMiddleware');
 
 /**
  * Travel routes.
@@ -198,7 +198,7 @@ exports.getTravelExpensesPDF = async function (req, res) {
     }
   ]);
   const idx = invoiceNumberArray[0].index + 1;
-  console.log(idx);
+  logger.silly(idx);
   const stream = travelExpensesToPDF(res.locals.travel, req.user, idx);
   let filename = `TReport_${req.user._id}_${res.locals.travel._id}_${idx}.pdf`; // Be careful of special characters
   filename = encodeURIComponent(filename); // Ideally this should strip them
@@ -327,33 +327,10 @@ exports.getNewTravel = async function (req, res) {
  * @param {function} next
  */
 exports.postNewTravel = async function (req, res, next) {
-  logger.debug('Posting new travel');
-  req
-    .assert(
-      'description',
-      'Description is empty or to long (max 60 characters)!'
-    )
-    .isLength({ min: 1, max: 60 });
-  req
-    .assert('homeCurrency', 'Home currency should have exactly 3 characters!')
-    .isLength({ min: 3, max: 3 });
+  const label = 'postNewTravel';
+  logger.debug('Posting new travel START', { label });
 
-  const decimalOptions = { decimal_digits: 2 };
-  req
-    .assert(
-      'perMileAmount',
-      'Per mile amount should be positive number with 2 decimals!'
-    )
-    .isDecimal(decimalOptions);
-
-  const dateCompare = moment(req.body.dateTo)
-    .add(1, 'days')
-    .format('YYYY-MM-DD');
-  req
-    .assert('dateFrom', 'Date from should be before date to')
-    .isBefore(dateCompare);
-
-  const errors = req.validationErrors();
+  const errors = reqAssertion(req);
 
   if (errors) {
     req.flash('errors', errors);
@@ -387,6 +364,7 @@ exports.postNewTravel = async function (req, res, next) {
   }
 
   req.flash('success', { msg: 'Successfully added new travel!' });
+  logger.debug('Posting new travel END', { label });
   res.redirect('/travels');
 };
 
@@ -422,7 +400,6 @@ exports.getTravel = async function (req, res, next) {
         expense.rate = travel.perMileAmount;
       }
     });
-
 
     res.render('travels/travel', {
       title: 'Travel',
@@ -499,33 +476,10 @@ exports.deleteTravel = async function (req, res, next) {
  * @param {function} next
  */
 exports.updateTravel = async function (req, res, next) {
-  logger.debug('Updating(PATCH) single travel');
+  const label = 'updateTravel';
+  logger.debug('Updating(PATCH) single travel START', { label });
 
-  req
-    .assert(
-      'description',
-      'Description is empty or to long (max 120 characters)!'
-    )
-    .isLength({ min: 1, max: 60 });
-  req
-    .assert('homeCurrency', 'Home currency should have exactly 3 characters!')
-    .isLength({ min: 3, max: 3 });
-  req
-    .assert(
-      'perMileAmount',
-      'Per mile amount should be positive number with 2 decimals!'
-    )
-    .isNumeric()
-    .isCurrency(currencyOptions);
-
-  const dateCompare = moment(req.body.dateTo)
-    .add(1, 'days')
-    .format('YYYY-MM-DD');
-  req
-    .assert('dateFrom', 'Date from should be before date to')
-    .isBefore(dateCompare);
-
-  const errors = req.validationErrors();
+  const errors = reqAssertion(req);
   const { id } = req.params;
 
   if (errors) {
@@ -543,6 +497,7 @@ exports.updateTravel = async function (req, res, next) {
   ]);
 
   if (!ObjectId.isValid(id)) {
+    logger.error('Not valid Object Id', { label });
     return next(new Error('Not valid Object Id'));
   }
 
@@ -555,6 +510,7 @@ exports.updateTravel = async function (req, res, next) {
     ).populate({ path: 'expenses', populate: { path: 'curRate' } });
 
     if (!travel) {
+      logger.error('Travel not found', { label });
       return next(new Error('Travel not found'));
     }
     /**
@@ -562,19 +518,24 @@ exports.updateTravel = async function (req, res, next) {
      * Calculate travel total. New expenses date, new rate.
      * Rates for same currency are not the same for different dates.
      */
+    logger.debug('Updating expenses to match travel dates', { label });
     updateExpensesToMatchTravelRangeDates(travel).then(() => {
+      logger.debug('UETMTRD then', { label });
       travel.save().then(doc => {
         Travel.findOne({ _id: doc._id, _user: req.user.id })
           .populate({ path: 'expenses', populate: { path: 'curRate' } })
           .then(doc => {
             doc.updateTotal().then(() => {
               req.flash('success', { msg: 'Travel successfully updated!' });
+              logger.debug('Updating(PATCH) single travel END', { label });
               res.redirect('/travels');
             });
           });
       });
     });
   } catch (err) {
+    logger.error(err.message);
+    logger.debug('Updating(PATCH) single travel END', { label });
     return next(err);
   }
 };

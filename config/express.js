@@ -12,7 +12,7 @@ const lusca = require('lusca');
 const express = require('express');
 const cors = require('cors');
 
-const LoggerClass = require('../config/LoggerClass');
+const LoggerClass = require('./LoggerClass');
 
 const Logger = new LoggerClass('express');
 const { mainLogger, logger } = Logger;
@@ -131,6 +131,7 @@ module.exports = async app => {
   //  Using cookie-parser may result in issues if the secret
   //  is not the same between this module and cookie-parser.
   app.use(session(config.session));
+  logger.debug(`MongosStore session url === mongo connect url: ${config.session.store.options.url === config.db.uri}`);
   logger.silly('Use session middleware');
 
   //  Passport uses the concept of strategies to authenticate requests.
@@ -202,7 +203,7 @@ module.exports = async app => {
   // The magic package that prevents frontend developers going nuts
   // Alternate description:
   // Enable Cross Origin Resource Sharing to all origins by default
-  app.use(cors());
+  app.use(cors({ origin: 'http://localhost' }));
   logger.silly('Use cors middleware');
 
   // Some sauce that always add since 2014

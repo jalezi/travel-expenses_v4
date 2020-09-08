@@ -94,7 +94,7 @@ const findRatesByExactOrClosestDate = async (date = new Date()) => {
     logger.error('Could not find any rates for exact, greater or lower date');
     return 'FUCK AGAIN!';
   } catch (err) {
-    logger.error(err);
+    logger.error(err.message);
     return err;
   }
 };
@@ -107,7 +107,7 @@ const toTitleCase = str =>
   );
 
 // eslint-disable-next-line no-extend-native
-String.prototype.splice = function(idx, rem, str) {
+String.prototype.splice = function (idx, rem, str) {
   // eslint-disable-line func-names
   return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
 };

@@ -19,7 +19,7 @@ const {
   createTableObject,
   bTableBody,
   dataRowAlignment
-} = require('./');
+} = require('.');
 
 const { FONTS, toCurrencyFormat } = utils;
 const { totalRow: tRow } = bTableBody;

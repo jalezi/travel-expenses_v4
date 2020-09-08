@@ -2,13 +2,13 @@
 const mongoose = require('mongoose');
 
 // Logger
-const LoggerClass = require('../config/LoggerClass');
+const LoggerClass = require('./LoggerClass');
 
 const Logger = new LoggerClass('mongoose');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('config\\mongoose INITIALIZING!');
 
-const config = require('../config');
+const config = require('.');
 
 /**
  * @fileoverview Connects to MongooDB with NPM:mongoose.
@@ -27,14 +27,18 @@ const config = require('../config');
  */
 module.exports = async () => {
   logger.debug('DB connecting');
-  const dbURL = config.databaseURL;
+  const { db } = config;
 
   // Mongoose connection events
   mongoose.connection.on('connecting', () => {
-    logger.debug(`Mongoose connecting to: ${dbURL}`);
+    logger.debug(
+      `Mongoose connecting to: user: ${db.user}, host: ${db.host}, db: ${db.name}`
+    );
   });
   mongoose.connection.on('connected', () => {
-    logger.debug(`Mongoose connected to: ${dbURL}`);
+    logger.debug(
+      `Mongoose connected to: user: ${db.user}, host: ${db.host}, db: ${db.name}`
+    );
   });
 
   mongoose.connection.on('disconnecting', () => {
@@ -54,14 +58,14 @@ module.exports = async () => {
   });
 
   mongoose.connection.on('error', err => {
-    logger.error(err);
+    logger.error(err.message);
     logger.info(
       'MongoDB connection error. Please make sure MongoDB is running.'
     );
     process.exit();
   });
 
-  const connection = await mongoose.connect(dbURL, config.mongooseOptions);
+  const connection = await mongoose.connect(db.uri, config.mongooseOptions);
 
   process.on('SIGINT', async () => {
     await mongoose.connection.close(() => {

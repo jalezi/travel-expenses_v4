@@ -8,7 +8,8 @@ const { populateTravel, findRates } = require('./populateModels');
 
 
 module.exports = async (req, res, next) => {
-  logger.debug('travelIdMiddleware');
+  const label = 'travelIdMiddleware';
+  logger.debug('travelIdMiddleware', { label });
   if (
     (!res.locals.travel || res.locals.travel._id !== req.params.id) &&
     req.params.id !== 'new' &&
@@ -21,17 +22,17 @@ module.exports = async (req, res, next) => {
       res.locals.rates = rates;
       logger.silly({ travel });
       logger.silly('next()');
-      logger.debug('travelIdMiddleware END');
+      logger.debug('travelIdMiddleware END', { label });
       next();
     } catch (err) {
-      logger.error(err);
+      logger.error(err.message);
       logger.silly('next(err)');
-      logger.debug('travelIdMiddleware END');
+      logger.debug('travelIdMiddleware END', { label });
       next(err);
     }
   } else {
     logger.silly('next()');
-    logger.debug('travelIdMiddleware END');
+    logger.debug('travelIdMiddleware END', { label });
     next();
   }
 };

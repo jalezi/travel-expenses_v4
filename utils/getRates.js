@@ -15,7 +15,7 @@ const Rate = require('../models/Rate');
  Throws an error if something goes wrong
  */
 const dataFixer = async date => {
-  logger.debug('dataFixer STARTS');
+  logger.debug('dataFixer START');
   let response;
   const today = moment().format('YYYY-MM-DD');
   try {
@@ -46,7 +46,7 @@ const dataFixer = async date => {
       logger.warn("Couldn't get rates from data.fixer.io");
       logger.warn(response.data);
     }
-    logger.debug('dataFixer ENDS');
+    logger.debug('dataFixer END');
     return response.data;
   } catch (err) {
     logger.debug('dataFixer ERROR');
@@ -65,18 +65,18 @@ const checkDbForTodayRates = async () =>
   new Promise((resolve, reject) => {
     const label = 'checkDbForTodayRates';
     const today = moment(new Date()).format('YYYY-MM-DD');
-    logger.debug('checkDbForTodayRates STARTS', { label });
+    logger.debug('checkDbForTodayRates START', { label });
     logger.info(`Cheking for rates for date: ${today} in DB`, { label });
     try {
       Rate.find({ date: today }, (err, docs) => {
         if (err) {
-          logger.error(err);
+          logger.error(err.message);
           reject(err);
         }
         logger.info(`Found ${docs.length} rates for ${today} in DB.`, {
           label
         });
-        logger.debug('checkDbForTodayRates ENDS', { label });
+        logger.debug('checkDbForTodayRates END', { label });
         resolve(docs);
       });
     } catch (err) {
@@ -88,7 +88,7 @@ const checkDbForTodayRates = async () =>
 
 const checkDbForMissingRates = async () => new Promise((resolve, reject) => {
   const label = 'checkDbForMissingRates';
-  logger.debug('checkDbForMissingRates STARTS', { label });
+  logger.debug('checkDbForMissingRates START', { label });
   Rate.aggregate([
     { $project: { date: 1, _id: 0 } },
     { $sort: { date: 1 } }
@@ -98,7 +98,7 @@ const checkDbForMissingRates = async () => new Promise((resolve, reject) => {
       reject(err);
     }
     logger.debug(`Found rates for ${dates.length} days.`, { label });
-    logger.debug('checkDbForMissingRates ENDS', { label });
+    logger.debug('checkDbForMissingRates END', { label });
     const arr = dates.map(a => a.date);
     resolve(arr);
   });
@@ -107,7 +107,7 @@ const checkDbForMissingRates = async () => new Promise((resolve, reject) => {
 const loopRatesDates = async arr => {
   const label = 'loopRatesDates';
   const day = 86400000;
-  logger.debug('loopRatesDates STARTS', { label });
+  logger.debug('loopRatesDates START', { label });
   const today = moment().format('YYYY-MM-DD');
   const firstDate = moment(arr[0]).format('YYYY-MM-DD');
   const lastDate = moment(arr[arr.length - 1]).format('YYYY-MM-DD');
@@ -126,13 +126,13 @@ const loopRatesDates = async arr => {
     }
   }
   logger.debug(`Missing dates ranges: ${missingDateRanges.length}`);
-  logger.debug('loopRatesDates ENDS', { label });
+  logger.debug('loopRatesDates END', { label });
   return missingDateRanges;
 };
 
 const getDateArray = (start, end) => {
   const label = 'getDateArray';
-  logger.debug('getDateArray STARTS', { label });
+  logger.debug('getDateArray START', { label });
   const arr = [];
   let dt = new Date(start);
 
@@ -142,13 +142,13 @@ const getDateArray = (start, end) => {
   }
   arr.shift();
   arr.pop();
-  logger.debug('getDateArray ENDS', { label });
+  logger.debug('getDateArray END', { label });
   return arr;
 };
 
 const createMissingDatesArr = async arr => new Promise(resolve => {
   const label = 'createMissingDatesArr';
-  logger.debug('createMissingDatesArr STARTS', { label });
+  logger.debug('createMissingDatesArr START', { label });
   const newArr = [];
   for (let index = 0; index < arr.length; index++) {
     const element = arr[index];
@@ -157,13 +157,13 @@ const createMissingDatesArr = async arr => new Promise(resolve => {
   }
 
   logger.debug(`Missing rates: ${newArr.length}`, { label });
-  logger.debug('createMissingDatesArr ENDS', { label });
+  logger.debug('createMissingDatesArr END', { label });
   resolve(newArr);
 });
 
 const getMissingRates = async () => {
   const label = 'getMissingRates';
-  logger.debug('getMissingRates STARTS', { label });
+  logger.debug('getMissingRates START', { label });
   const allRatesDates = await checkDbForMissingRates();
   if (allRatesDates instanceof Error) {
     logger.warn('Can not check Rates documents', { label });
@@ -179,7 +179,7 @@ const getMissingRates = async () => {
       }
     }
   }
-  logger.debug('getMissingRates ENDS', { label });
+  logger.debug('getMissingRates END', { label });
 };
 
 /*
@@ -188,7 +188,7 @@ const getMissingRates = async () => {
  */
 module.exports = async () => {
   const today = moment().format('YYYY-MM-DD');
-  logger.debug(`getRates STARTS - ${today}`);
+  logger.debug(`getRates START - ${today}`);
   const rates = await checkDbForTodayRates();
   logger.silly(`${rates.length} rates found!`);
   if (rates.length === 0) {
@@ -208,7 +208,7 @@ module.exports = async () => {
   const job = schedule.scheduleJob(scheduleId, rule, async () => {
     let responseData;
     const today = moment().format('YYYY-MM-DD');
-    logger.debug(`${scheduleId} - STARTS`, { label: scheduleId });
+    logger.debug(`${scheduleId} - START`, { label: scheduleId });
     let rates = await checkDbForTodayRates();
     logger.debug(`${rates.length} rates for ${today} in DB!`, {
       label: scheduleId
@@ -249,12 +249,12 @@ module.exports = async () => {
 
     await getMissingRates();
 
-    logger.debug(`${scheduleId} ENDS`, { label: scheduleId });
+    logger.debug(`${scheduleId} END`, { label: scheduleId });
   });
 
   await getMissingRates();
 
   logger.debug(`getRates returns ${job.name}`);
-  logger.debug(`getRates ENDS - ${today}`);
+  logger.debug(`getRates END - ${today}`);
   return job;
 };

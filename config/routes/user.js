@@ -4,7 +4,7 @@ const Logger = new LoggerClass('user');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('config\\routes\\user INITIALIZING!');
 
-const { isAuthenticated } = require('../../config/passport');
+const { isAuthenticated } = require('../passport');
 const userController = require('../../controllers/user');
 
 /**

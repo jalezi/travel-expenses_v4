@@ -4,7 +4,7 @@ const Logger = new LoggerClass('travels');
 const { mainLogger, logger } = Logger;
 mainLogger.debug('config\\routes\\travels  INITIALIZING!');
 
-const { isAuthenticated } = require('../../config/passport');
+const { isAuthenticated } = require('../passport');
 const travelController = require('../../controllers/travel');
 
 /**

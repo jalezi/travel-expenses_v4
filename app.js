@@ -78,15 +78,16 @@ async function startServer() {
   errorHandler(app);
   logger.info('Error handler loaded');
 
+  const port = config.port || 3000
 
   if (!module.parent) {
-    app.listen(config.port, err => {
+    app.listen(port, err => {
       if (err) {
         logger.error(err.message);
         process.exit(1);
         return;
       }
-      logger.info(`Server listening on port: ${config.port}`);
+      logger.info(`Server listening on port: ${port}`);
 
       // Setup the event emitter to assume that app is running.
       // It's for tests.

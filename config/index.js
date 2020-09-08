@@ -289,7 +289,7 @@ module.exports = {
 
   // winston logger level
   logs: {
-    level: logLevel || process.env.LOG_LEVEL || 'silly',
+    level: process.env.LOG_LEVEL || logLevel || 'silly',
     trace: process.env.LOG_TRACE === 'true' || false
   },
 

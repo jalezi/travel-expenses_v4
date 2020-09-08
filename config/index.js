@@ -184,8 +184,8 @@ const { argv } = require('yargs');
  * @see {@link https://www.npmjs.com/package/connect-mongo NPM:connect-mongo}
  */
 
-const connectTo = argv.dbServer ? argv.dbServer.toLowerCase() : undefined;
-const logLevel = argv.logLevel ? argv.logLevel.toLowerCase() : 'debug';
+const connectTo = 'atlas';
+const logLevel = 'info';
 
 let uri;
 let srv;

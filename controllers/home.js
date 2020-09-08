@@ -24,14 +24,21 @@ const constants = require('../lib/constants');
  * @param {function} next
  */
 exports.index = (req, res, next) => {
-  logger.debug('Getting home');
+  logger.debug('Getting home START');
   if (!req.user) {
+    const label = 'user not exists';
+    logger.debug('rendering home', { label });
+    logger.debug('Getting home ENDS');
     res.render('home', {
       title: 'Home'
     });
   } else {
+    const label = 'user exists';
     Travel.byYear_byMonth(req.user)
       .then(docs => {
+        logger.silly(`Travel docs found: ${docs.length}`, { label });
+        logger.debug('rendering home', { label });
+        logger.debug('Getting home ENDS');
         res.render('home', {
           title: 'Home',
           docs,
@@ -39,6 +46,10 @@ exports.index = (req, res, next) => {
         });
       })
       .catch(err => {
+        const label = 'catch error';
+        logger.error(err.message, { label });
+        logger.silly('next(err)', { label });
+        logger.debug('Getting home ENDS');
         next(err);
       });
   }

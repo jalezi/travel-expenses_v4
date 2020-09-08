@@ -1,6 +1,7 @@
 const appRoot = require('app-root-path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
+const { argv } = require('yargs');
 
 /**
  * @memberof module:config
@@ -152,7 +153,7 @@ const MongoStore = require('connect-mongo')(session);
  * @property {string} envNode                   Environment mode: development, test, production.
  * @property {string} envHost                   Environment host.
  * @property {string} port                      Server port.
- * @property {string} databaseURL               URL to database - MongoDB.
+ * @property {string} dbURL               URL to database - MongoDB.
  * @property {mongooseOptions} mongooseOptions  Some mongoose options to avoid warnings.
  * @property {string} jwtSecret                 JWT secret - not used at the moment.
  * @property {string} dataFixer {@link https://fixer.io/documentation Fixer} api key.
@@ -183,11 +184,66 @@ const MongoStore = require('connect-mongo')(session);
  * @see {@link https://www.npmjs.com/package/connect-mongo NPM:connect-mongo}
  */
 
+const connectTo = argv.dbServer ? argv.dbServer.toLowerCase() : undefined;
+const logLevel = argv.logLevel ? argv.logLevel.toLowerCase() : 'debug';
+
+let uri;
+let srv;
+let user;
+let pwd;
+let host;
+let name;
+let port;
+let auth;
+let ssl;
+let rp;
+
+switch (connectTo) {
+  case 'nas':
+    uri = process.env.DB_NAS_URL;
+    srv = process.env.DB_NAS_SRV;
+    user = process.env.DB_NAS_USER;
+    pwd = process.env.DB_NAS_PWD;
+    host = process.env.DB_NAS_HOST;
+    name = process.env.DB_NAS_NAME;
+    port = process.env.DB_NAS_PORT;
+    auth = process.env.DB_NAS_AUTH;
+    ssl = process.env.DB_NAS_SSL;
+    rp = process.env.DB_NAS_RP;
+    break;
+  case 'atlas':
+    uri = process.env.DB_ATLAS_URL;
+    srv = process.env.DB_ATLAS_SRV;
+    user = process.env.DB_ATLAS_USER;
+    pwd = process.env.DB_ATLAS_PWD;
+    host = process.env.DB_ATLAS_HOST;
+    name = process.env.DB_ATLAS_NAME;
+    port = process.env.DB_ATLAS_PORT;
+    auth = process.env.DB_ATLAS_AUTH;
+    ssl = process.env.DB_ATLAS_SSL;
+    rp = process.env.DB_ATLAS_RP;
+    break;
+  default:
+    uri = process.env.DB_URL;
+    srv = process.env.DB_SRV;
+    user = process.env.DB_USER;
+    pwd = process.env.DB_PWD;
+    host = process.env.DB_HOST;
+    name = process.env.DB_NAME;
+    port = process.env.DB_PORT;
+    auth = process.env.DB_AUTH;
+    ssl = process.env.DB_SSL;
+    rp = process.env.DB_RP;
+    break;
+}
+
 /**
  * Config object.
  * @type {configObject}
  */
 module.exports = {
+  // running platform
+  platform: process.platform,
   // Environment mode
   envNode: process.env.NODE_ENV,
 
@@ -197,8 +253,19 @@ module.exports = {
   // Environment port
   port: process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT,
 
-  // MongoDB url
-  databaseURL: process.env.MONGODB_URI,
+  // MongoDB config
+  db: {
+    uri,
+    srv,
+    user,
+    pwd,
+    host,
+    name,
+    port,
+    auth,
+    ssl,
+    rp
+  },
 
   // Mongoose options
   mongooseOptions: {
@@ -222,7 +289,7 @@ module.exports = {
 
   // winston logger level
   logs: {
-    level: process.env.LOG_LEVEL || 'silly',
+    level: logLevel || process.env.LOG_LEVEL || 'silly',
     trace: process.env.LOG_TRACE === 'true' || false
   },
 
@@ -270,7 +337,10 @@ module.exports = {
     secret: process.env.SESSION_SECRET,
     cookie: { maxAge: 1209600000 }, // two weeks in milliseconds
     store: new MongoStore({
-      url: process.env.MONGODB_URI,
+      url:
+        process.env.DB_URL ||
+        process.env.DB_NAS_URL ||
+        process.env.DB_ATLAS_URL,
       autoReconnect: true
     })
   },
@@ -295,7 +365,7 @@ module.exports = {
 
   // Agenda configuration
   agenda: {
-    dbCollection: process.env.AGENDA_DB_COLLECTION,
+    dbCollection: process.env.AGENDANAME_COLLECTION,
     pooltime: process.env.AGENDA_POOL_TIME,
     concurrency: parseInt(process.env.AGENDA_CONCURRENCY, 10)
   },

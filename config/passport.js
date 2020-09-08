@@ -7,7 +7,7 @@ const { OAuth2Strategy: GoogleStrategy } = require('passport-google-oauth');
 // const { OAuth2Strategy } = require('passport-oauth');
 
 // Logger
-const LoggerClass = require('../config/LoggerClass');
+const LoggerClass = require('./LoggerClass');
 
 const Logger = new LoggerClass('passport');
 const { mainLogger, logger } = Logger;
@@ -24,7 +24,8 @@ const User = require('../models/User');
  * @param {serializeUser~callback} cb
  */
 passport.serializeUser((user, done) => {
-  logger.debug('Serialize User');
+  const label = 'serializeUser';
+  logger.debug('Serialize User', { label });
   done(null, user.id);
 });
 
@@ -47,8 +48,10 @@ passport.serializeUser((user, done) => {
  * @param {deserializeUser~callback} cb
  */
 passport.deserializeUser((id, done) => {
-  logger.debug('Deserialize User');
+  const label = 'deserializeUser';
+  logger.debug('Deserialize User', { label });
   User.findById(id, (err, user) => {
+    if (err) logger.error(err.message, { label });
     done(err, user);
   });
 });
@@ -63,17 +66,36 @@ passport.deserializeUser((id, done) => {
 
 /** Passport use LocalStrategy. */
 passport.use(new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
-  logger.debug('Local strategy');
+  const label = 'local strategy';
+  logger.debug('Using local strategy START', { label });
   User.findOne({ email: email.toLowerCase() }, (err, user) => {
-    if (err) { return done(err); }
+    if (err) {
+      logger.error(err.message, { label });
+      logger.debug('return done(err)', { label });
+      logger.debug('Using local strategy END', { label });
+      return done(err);
+    }
     if (!user) {
+      logger.debug(`Email ${email} not found.`, { label });
+      logger.debug('Using local strategy END', { label });
       return done(null, false, { msg: `Email ${email} not found.` });
     }
     user.comparePassword(password, (err, isMatch) => {
-      if (err) { return done(err); }
+      logger.debug('Comparing password', { label });
+      if (err) {
+        logger.error(err.message, { label });
+        logger.debug('Using local strategy END', { label });
+        return done(err);
+      }
       if (isMatch) {
+        logger.debug(`Password match: ${isMatch}`, { label });
+        logger.silly('returning done(null, user', { label });
+        logger.debug('Using local strategy END', { label });
         return done(null, user);
       }
+      logger.error('Invalid email or password');
+      logger.silly('returning done(null, false, msg)', { label });
+      logger.debug('Using local strategy END', { label });
       return done(null, false, { msg: 'Invalid email or password.' });
     });
   });
@@ -103,7 +125,7 @@ passport.use(new GoogleStrategy({
 }, (req, accessToken, refreshToken, profile, done) => {
   logger.debug('Google Strategy');
   if (req.user) {
-    Logger.debug('req.user exist');
+    logger.debug('req.user exist');
     User.findOne({ google: profile.id }, (err, existingUser) => {
       if (err) { return done(err); }
       if (existingUser) {
@@ -184,10 +206,16 @@ passport.use(new GoogleStrategy({
  * @param {function} next
  */
 exports.isAuthenticated = (req, res, next) => {
+  const label = 'isAuthenticated';
+  logger.debug('isAuthenticated START', { label });
   if (req.isAuthenticated()) {
+    logger.debug('isAuthenticated exists', { label });
+    logger.debug('isAuthenticated END', { label });
     return next();
   }
+  logger.debug('isAuthenticated not exists', { label });
   logger.debug('Redirecting to /login');
+  logger.debug('isAuthenticated END', { label });
   res.redirect('/login');
 };
 
@@ -201,13 +229,17 @@ exports.isAuthenticated = (req, res, next) => {
  * @param {function} next
  */
 exports.isAuthorized = (req, res, next) => {
+  const label = 'isAuthorized';
+  logger.debug('isAuthorized START', { label });
   const provider = req.path.split('/').slice(-1)[0];
   const token = req.user.tokens.find(token => token.kind === provider);
   if (token) {
-    logger.debug(next());
+    logger.debug('next()');
+    logger.debug('isAuthorized END', { label });
     next();
   } else {
     logger.debug(`Redirecting /auth/${provider}`);
+    logger.debug('isAuthorized END', { label });
     res.redirect(`/auth/${provider}`);
   }
 };

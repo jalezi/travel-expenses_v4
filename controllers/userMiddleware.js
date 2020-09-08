@@ -10,8 +10,9 @@ exports.reqAssertion = (
     rPassword = false, hCurrency = false, profile = false
   }
 ) => {
-  logger.debug('reqAssertion');
-  logger.silly(`e: ${email}, p: ${password}, cP: ${cPassword}, hC: ${hCurrency}, pr:${profile}`);
+  const label = 'reqAssertion';
+  logger.debug('reqAssertion START', { label });
+  logger.silly(`e: ${email}, p: ${password}, cP: ${cPassword}, hC: ${hCurrency}, pr:${profile}`, { label });
   if (email) {
     req.assert('email', 'Please enter a valid email address.').isEmail();
   }
@@ -44,6 +45,6 @@ exports.reqAssertion = (
 
   const errors = req.validationErrors();
 
-  logger.debug('reqAssertion END');
+  logger.debug('reqAssertion END', { label });
   return errors;
 };

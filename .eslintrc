@@ -1,12 +1,13 @@
 {
   "plugins": [
-    "chai-friendly"
-    // "prettier/recommended"
-    // "prettier"
+    "chai-friendly",
+    "eslint-plugin-import",
+    "eslint-plugin-node",
+    "eslint-plugin-security"
   ],
   "extends": [
-    "airbnb-base"
-    // "plugin:prettier/recommended"
+    "airbnb-base",
+    "eslint:recommended"
   ],
   "env": {
     "browser": true,

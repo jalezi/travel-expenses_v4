@@ -59,17 +59,32 @@ const UserSchema = new mongoose.Schema(
 
 // Password hash mongoose pre hook middleware function
 UserSchema.pre('save', function save(next) {
-  logger.debug('UserSchema.pre save()');
+  const label = 'UserSchema.pre save';
+  logger.debug('UserSchema.pre save() START', { label });
   const user = this;
-  if (!user.isModified('password')) { return next(); }
+  if (!user.isModified('password')) {
+    logger.debug('User password not modified.', { label });
+    logger.silly('returning next()', { label });
+    return next();
+  }
   bcrypt.genSalt(10, (err, salt) => {
-    if (err) { return next(err); }
+    logger.debug('bcrypt.genSalt', { label });
+    if (err) {
+      logger.error(err.message, { label });
+      return next(err);
+    }
     bcrypt.hash(user.password, salt, null, (err, hash) => {
-      if (err) { return next(err); }
+      logger.debug('bcrypt.hash', { label });
+      if (err) {
+        logger.error(err.message, { label });
+        return next(err);
+      }
       user.password = hash;
+      logger.silly('returning next()', { label });
       next();
     });
   });
+  logger.debug('UserSchema.pre save() END', { label });
 });
 
 /*
@@ -77,9 +92,16 @@ UserSchema.pre('save', function save(next) {
  It is User document method.
  */
 UserSchema.methods.comparePassword = function comparePassword(candidatePassword, cb) {
+  const label = 'UserSchema.methods';
+  logger.debug('UseSchema.methods.comparePassword START', { label });
   bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
+    logger.debug('bcrypt.compare', { label });
+    if (err) logger.error(err.message, { label });
+    logger.silly(`Password match: ${isMatch}`, { label });
+    logger.silly('calling cb(err, isMatch', { label });
     cb(err, isMatch);
   });
+  logger.debug('UseSchema.methods.comparePassword END', { label });
 };
 
 /*

@@ -23,12 +23,12 @@
       </div>
       <div class="col-md-5">
         <label class="col-form-label font-weight-bold" for="expenseDescription">Description</label>
-        <!-- TODO checl input attr type => should be text? same with travel form -->
+        <!-- TODO check input attr type => should be text? same with travel form -->
         <input class="form-control" id="expenseDescription" type="expenseDescription" value="{{expense.description}}" name="expenseDescription" placeholder="Description" autofocus="autofocus" autocomplete="expenseDescription" required="required" />
       </div>
       <div class="col-md-4">
         <label class="col-form-label font-weight-bold" for="invoiceDate">Invoice date</label>
-        <input class="form-control" id="invoiceDate" type="date" min={{formatDate tDateFrom}} max={{formatDate travel.dateTo}} value={{formatDate tDateTo}} name="invoiceDate" autocomplete="invoiceDate" required="required" />
+        <input class="form-control" id="invoiceDate" type="date" min={{formatDate tDateFrom}} max={{formatDate travel.dateTo}} value={{formatDate expense.date}} name="invoiceDate" autocomplete="invoiceDate" required="required" />
       </div>
     </div>
 

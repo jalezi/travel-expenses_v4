@@ -4,7 +4,7 @@ const path = require('path');
 const { createLogger, config, transports, format } = require('winston');
 const stripAnsi = require('strip-ansi');
 
-const { envNode, logs } = require('../config');
+const { envNode, logs } = require('.');
 const { HTTP } = require('../lib/constants');
 const getTrace = require('../utils/getTrace');
 
@@ -31,14 +31,16 @@ const getTrace = require('../utils/getTrace');
 const stackTrace = () => {
   const trace = getTrace();
   const mainModule = path.basename(process.mainModule.filename);
-  const callerSplit = (module.parent) ? module.parent.filename.split('\\') : ['none'];
+  const callerSplit = module.parent
+    ? module.parent.filename.split('\\')
+    : ['none'];
   const callerName = callerSplit[callerSplit.length - 1];
   const filenameSplit = __filename.split('\\');
   const filename = filenameSplit[filenameSplit.length - 1];
   const data = {
     trace,
     mainModule,
-    callerPath: (module.parent) ? module.parent.filename : 'none',
+    callerPath: module.parent ? module.parent.filename : 'none',
     callerName,
     filepath: __filename,
     filename
@@ -212,6 +214,11 @@ switch (process.env.NODE_ENV) {
         }),
         logDevFormat
       )
+    });
+    break;
+  case (envNode.match(/^production/) || {}).input:
+    consoleTransport = new transports.Console({
+      format: format.combine(logTestFormat)
     });
     break;
   default:

@@ -70,6 +70,8 @@ con.js
 snapshots.js
 /build/*
 
+/dbBackup
+
 app-new.js
 /loaders/*
 /api/*

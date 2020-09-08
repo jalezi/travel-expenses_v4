@@ -72,8 +72,10 @@ async function startServer() {
   await getRates();
   logger.silly('Function getRates intialized!');
 
-  await dbAutoBackUp();
-  logger.silly('Function dbAutoBackUp initialized');
+  if (process.env !== 'production') {
+    await dbAutoBackUp();
+    logger.silly('Function dbAutoBackUp initialized');
+  }
 
   // Error Handler.
   errorHandler(app);

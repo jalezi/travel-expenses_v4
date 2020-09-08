@@ -18,6 +18,9 @@ module.exports = async () => {
   rule.dayOfWeek = 0;
   const scheduleId = 'db backup job';
 
+  dbBackup.dbAutoBackUp();
+
+  // TODO remove async?
   const job = schedule.scheduleJob(scheduleId, rule, async () => {
     const jobLabel = 'db backup job';
     logger.debug('db backupjob START', jobLabel);

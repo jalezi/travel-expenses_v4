@@ -122,7 +122,7 @@
     "sinon": "7.5.0"
   },
   "scripts": {
-    "build": "webpack",
+    "build": "set NODE_ENV=production&& node app.js --dbServer atlas --logLevel info",
     "build:dev": "webpack --config webpack.config.js",
     "coverage": "nyc npm run test",
     "generate:docs": "jsdoc -c conf.json -P package.json",

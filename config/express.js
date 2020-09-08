@@ -203,7 +203,7 @@ module.exports = async app => {
   // The magic package that prevents frontend developers going nuts
   // Alternate description:
   // Enable Cross Origin Resource Sharing to all origins by default
-  app.use(cors());
+  app.use(cors({ origin: 'http://localhost' }));
   logger.silly('Use cors middleware');
 
   // Some sauce that always add since 2014

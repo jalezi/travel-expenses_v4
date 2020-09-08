@@ -65,6 +65,12 @@ const { argv } = require('yargs')
       type: 'string',
       choices: ['currencies', 'expenses', 'rates', 'travels', 'users'],
       default: ['currencies', 'expenses', 'rates', 'travels', 'users']
+    },
+    folder: {
+      description: 'Where on local machine are collections imported from ',
+      type: 'string',
+      default: 'localhost',
+      choices: ['localhost', 'nas', 'atlas']
     }
   })
   .array('collection')

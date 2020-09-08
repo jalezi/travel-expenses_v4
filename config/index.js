@@ -3,7 +3,6 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const { argv } = require('yargs');
 
-
 /**
  * @memberof module:config
  * @alias mongooseOptions
@@ -187,6 +186,7 @@ const { argv } = require('yargs');
 
 const connectTo = argv.dbServer ? argv.dbServer.toLowerCase() : undefined;
 const logLevel = argv.logLevel ? argv.logLevel.toLowerCase() : 'debug';
+
 let uri;
 let srv;
 let user;
@@ -236,7 +236,6 @@ switch (connectTo) {
     rp = process.env.DB_RP;
     break;
 }
-
 
 /**
  * Config object.
@@ -338,7 +337,10 @@ module.exports = {
     secret: process.env.SESSION_SECRET,
     cookie: { maxAge: 1209600000 }, // two weeks in milliseconds
     store: new MongoStore({
-      url: process.env.DB_URL || process.env.DB_NAS_URL || process.env.DB_ATLAS_URL,
+      url:
+        process.env.DB_URL ||
+        process.env.DB_NAS_URL ||
+        process.env.DB_ATLAS_URL,
       autoReconnect: true
     })
   },

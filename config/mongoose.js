@@ -66,7 +66,7 @@ module.exports = async () => {
   });
 
   logger.info(db.uri);
-  logger.info({...config.mongooseOptions})
+  logger.info({ ...config.mongooseOptions });
   const connection = await mongoose.connect(db.uri, config.mongooseOptions);
   console.log(db.uri);
   console.log(config.mongooseOptions)

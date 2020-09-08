@@ -4,10 +4,11 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const dotenvExpand = require('dotenv-expand');
-const path = require('path');
+// const path = require('path');
 
 // Load environment variables from .env file, where API keys and passwords are configured.
-const env = dotenv.config({ path: path.resolve(__dirname, '.env') });
+// const env = dotenv.config({ path: path.resolve(__dirname, '.env') });
+const env = dotenv.config();
 dotenvExpand(env);
 if (env.error) {
   throw env.error;
@@ -78,7 +79,7 @@ async function startServer() {
   errorHandler(app);
   logger.info('Error handler loaded');
 
-  const port = config.port || 3000
+  const { port } = config;
 
   if (!module.parent) {
     app.listen(port, err => {

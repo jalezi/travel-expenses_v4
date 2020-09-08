@@ -61,6 +61,7 @@ async function startServer() {
   const app = express();
 
   // Connect to MongoDB
+  logger.info(config.db.uri);
   await mongoConnection();
   logger.info(`DB: ${config.db.name} loaded and connected`);
 

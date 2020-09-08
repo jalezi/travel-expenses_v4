@@ -66,8 +66,6 @@ module.exports = async () => {
   });
 
   const connection = await mongoose.connect(db.uri, config.mongooseOptions);
-  console.log(db.uri);
-  console.log(config.mongooseOptions)
 
   process.on('SIGINT', async () => {
     await mongoose.connection.close(() => {

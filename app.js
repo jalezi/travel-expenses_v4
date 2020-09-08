@@ -72,7 +72,7 @@ async function startServer() {
   await getRates();
   logger.silly('Function getRates intialized!');
 
-  if (process.env !== 'production') {
+  if (process.env.NODE_ENV !== 'production') {
     await dbAutoBackUp();
     logger.silly('Function dbAutoBackUp initialized');
   }

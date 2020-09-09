@@ -3,6 +3,7 @@
 const path = require('path');
 const { createLogger, config, transports, format } = require('winston');
 const stripAnsi = require('strip-ansi');
+require('winston-mongodb');
 
 const { envNode, logs } = require('.');
 const { HTTP } = require('../lib/constants');
@@ -43,7 +44,7 @@ const stackTrace = () => {
     callerPath: module.parent ? module.parent.filename : 'none',
     callerName,
     filepath: __filename,
-    filename
+    filename,
   };
   return data;
 };
@@ -201,7 +202,7 @@ let consoleTransport;
 switch (process.env.NODE_ENV) {
   case (envNode.match(/^test/) || {}).input:
     consoleTransport = new transports.Console({
-      format: format.combine(logTestFormat)
+      format: format.combine(logTestFormat),
     });
     break;
   case 'development':
@@ -210,16 +211,23 @@ switch (process.env.NODE_ENV) {
         format.align(),
         format.colorize({ all: true }),
         format.metadata({
-          fillWith: ['currency', 'travel', 'expense', 'user']
+          fillWith: ['currency', 'travel', 'expense', 'user'],
         }),
         logDevFormat
-      )
+      ),
     });
     break;
   case (envNode.match(/^production/) || {}).input:
-    consoleTransport = new transports.Console({
-      format: format.combine(logTestFormat)
+    consoleTransport = new transports.MongoDB({
+      level: 'debug',
+      db:
+        'mongodb+srv://t-exp-app1:BK6iL2VdUzbSROS1@cluster0-sx0tb.mongodb.net/t_exp_app?retryWrites=true&w=majority',
+      options: {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      },
     });
+    console.log('HERE');
     break;
   default:
     consoleTransport = new transports.Console({ format: format.simple() });
@@ -250,15 +258,15 @@ const logger = createLogger({
         'ms',
         'timestamp',
         'service',
-        'stackTrace'
+        'stackTrace',
       ],
-      fillwith: ['label', 'requestId']
+      fillwith: ['label', 'requestId'],
     }),
     specialFormat()
   ),
   defaultMeta: { service: 'user-service', stackTrace: logs.trace },
   transports: wTransports,
-  exitOnError: false
+  exitOnError: false,
 });
 
 /**
@@ -273,7 +281,7 @@ const stream = {
   write: (message, encoding) => {
     // use the 'info' log level so the output will be picked up by transports
     logger.info(message);
-  }
+  },
 };
 
 /**
@@ -337,7 +345,7 @@ class Logger {
     this.__logger.stream = stream;
     this._logger = this.__logger.child({
       label: `${this._label}`,
-      requestId: this._requestId
+      requestId: this._requestId,
     });
     this._logger.stream = stream;
     this._childLoggers = [];

@@ -3,6 +3,7 @@
 const path = require('path');
 const { createLogger, config, transports, format } = require('winston');
 const stripAnsi = require('strip-ansi');
+require('winston-mongodb');
 
 const { envNode, logs } = require('.');
 const { HTTP } = require('../lib/constants');
@@ -217,9 +218,16 @@ switch (process.env.NODE_ENV) {
     });
     break;
   case (envNode.match(/^production/) || {}).input:
-    consoleTransport = new transports.Console({
-      format: format.combine(logTestFormat)
+    consoleTransport = new transports.MongoDB({
+      level: 'debug',
+      db:
+        'mongodb+srv://t-exp-app1:BK6iL2VdUzbSROS1@cluster0-sx0tb.mongodb.net/t_exp_app?retryWrites=true&w=majority',
+      options: {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      }
     });
+    console.log('HERE');
     break;
   default:
     consoleTransport = new transports.Console({ format: format.simple() });

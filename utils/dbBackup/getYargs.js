@@ -18,7 +18,7 @@ const { argv } = require('yargs')
             'Folder where json files are located [localhost, nas, atlas]',
           type: 'string',
           default: 'localhost',
-          choices: ['localhost', 'nas', 'atlas']
+          choices: ['localhost', 'nas', 'atlas'],
         })
         .help();
     }
@@ -31,7 +31,7 @@ const { argv } = require('yargs')
         .positional('folder', {
           describe: 'Folder where mongorestore dump files are.',
           type: 'string',
-          default: `mongodump-${moment().format('YYYY-MM-DD')}`
+          default: `mongodump-${moment().format('YYYY-MM-DD')}`,
         })
         .help();
     }
@@ -43,7 +43,7 @@ const { argv } = require('yargs')
       yargs.positional('folder', {
         describe: 'Where to dump files',
         type: 'string',
-        default: `mongodump-${moment().format('YYYY-MM-DD')}`
+        default: `mongodump-${moment().format('YYYY-MM-DD')}`,
       });
     }
   )
@@ -52,26 +52,26 @@ const { argv } = require('yargs')
       description: 'Server where database is running [localhost, nas, atlas]',
       type: 'string',
       default: 'localhost',
-      choices: ['localhost', 'nas', 'atlas']
+      choices: ['localhost', 'nas', 'atlas'],
     },
     logLevel: {
       description: 'Log level',
       type: 'string',
       default: 'debug',
-      choices: ['error', 'warn', 'info', 'verbose', 'debug', 'silly']
+      choices: ['error', 'warn', 'info', 'verbose', 'debug', 'silly'],
     },
     collection: {
       description: 'Collections to use export/import',
       type: 'string',
       choices: ['currencies', 'expenses', 'rates', 'travels', 'users'],
-      default: ['currencies', 'expenses', 'rates', 'travels', 'users']
+      default: ['currencies', 'expenses', 'rates', 'travels', 'users'],
     },
     folder: {
       description: 'Where on local machine are collections imported from ',
       type: 'string',
       default: 'localhost',
-      choices: ['localhost', 'nas', 'atlas']
-    }
+      choices: ['localhost', 'nas', 'atlas'],
+    },
   })
   .array('collection')
   .demandCommand(1)

@@ -4,14 +4,15 @@ const moment = require('moment');
 
 const { db } = require('../../config');
 const getDbOptions = require('./getDbOptions');
+
 const {
   OS_COMMANDS,
   RUNNING_PLATFORM,
-  DB_BCK_OPTIONS
+  DB_BCK_OPTIONS,
 } = require('../../lib/constants');
 const {
   BCK_BIN_DIR_PATH,
-  BCK_DATA_DIR_PATH
+  BCK_DATA_DIR_PATH,
 } = require('../../lib/constants').BCK_PATHS;
 
 const LoggerClass = require('../../config/LoggerClass');
@@ -34,6 +35,7 @@ exports.bckDates = (date = new Date()) => {
   result.oldDate = moment(date)
     .subtract(subtractDays, 'days')
     .format('YYYY-MM-DD');
+
   logger.silly(`newDate = ${result.newDate}`, { label });
   logger.silly(`oldDate = ${result.oldDate}`, { label });
   logger.debug('bckDates END', { label });
@@ -79,8 +81,9 @@ exports.removeOldBck = oldBackupPath => {
   const delCmd = delCmdObj.cmd;
   const delCmdOpt = delCmdObj.options;
   const deleteCmd = `${delCmd} ${delCmdOpt}`;
+
   logger.silly(`${RUNNING_PLATFORM} CMD delete command: ${deleteCmd}`, {
-    label
+    label,
   });
 
   if (fs.existsSync(oldBackupPath)) {
@@ -153,7 +156,7 @@ exports.cpListen = (
   if (close) {
     cp.on('close', (code, signal) => {
       logger.debug(`${pid} closed with code: ${code} and signal: ${signal}`, {
-        label
+        label,
       });
       const argv1 = process.argv[1];
       const arr = argv1.split('\\');
@@ -167,7 +170,7 @@ exports.cpListen = (
   if (exit) {
     cp.on('exit', (code, signal) => {
       logger.debug(`${pid} exit with code: ${code} and signal: ${signal}`, {
-        label
+        label,
       });
     });
   }

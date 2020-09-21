@@ -1,7 +1,7 @@
 const appRoot = require('app-root-path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
-// const { argv } = require('yargs');
+const { argv } = require('yargs');
 
 /**
  * @memberof module:config
@@ -189,6 +189,9 @@ let logLevel;
 if (process.env.NODE_ENV === 'production') {
   connectTo = 'atlas';
   logLevel = process.env.LOG_LEVEL || 'info';
+} else {
+  logLevel = process.env.LOG_LEVEL || argv.logLevel || 'info';
+  connectTo = argv.dbServer || 'localhost';
 }
 
 let uri;

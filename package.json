@@ -131,7 +131,7 @@
     "postinstall": "npm rebuild node-sass",
     "start": "set NODE_ENV=production&& node app.js --logLevel info",
     "start:dev": "node app.js --logLevel info",
-    "start:nodemon": "nodemon --ignore dbBackup/* --icu-data-dir=node_modules\\full-icu app.js --logLevel silly",
+    "start:nodemon": "nodemon --ignore dbBackup/* --icu-data-dir=node_modules\\full-icu app.js --logLevel info",
     "start:playground": "node playground\\loopObject\\loopObject.js",
     "test": "set NODE_ENV=test && nyc -r clover --clean mocha --recursive --inline-diffs --timeout=10000 --exit"
   },

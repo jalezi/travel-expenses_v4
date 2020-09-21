@@ -55,12 +55,22 @@ exports.getTravelsTotalPDF = async function (req, res, next) {
   logger.debug('Middleware getTravelsTotalPDF');
   // Create and open PDF
   function createTravelsTotalPDF(res, travels, user, dateRange, sum, indexes) {
-    const stream = travelsTotalToPDF(travels, user, dateRange, sum, indexes);
-    let filename = `TOTAL_${user._id}_${dateRange.df}_${dateRange.dt}.pdf`; // Be careful of special characters
-    filename = encodeURIComponent(filename); // Ideally this should strip them
-    res.setHeader('Content-disposition', `inline; filename="${filename}"`);
-    res.setHeader('Content-type', 'application/pdf');
-    stream.pipe(res);
+    travelsTotalToPDF(
+      travels,
+      user,
+      dateRange,
+      sum,
+      indexes,
+      binary => {
+        res.contentType('application/pdf');
+        res.set('Content-Transfer-Encoding', 'binary');
+        console.log(binary);
+        res.send(binary);
+      },
+      error => {
+        res.send('ERROR: ', error);
+      }
+    );
   }
 
   let travels;
@@ -181,7 +191,7 @@ exports.getTravelsTotalPDF = async function (req, res, next) {
  * @param {http.response} res
  * @param {function} next
  */
-exports.getTravelExpensesPDF = async function (req, res) {
+exports.getTravelExpensesPDF = async function (req, res, next) {
   logger.debug('MIddleware getTravelExpensesPDF');
   const invoiceNumberArray = await User.aggregate([
     {
@@ -199,12 +209,25 @@ exports.getTravelExpensesPDF = async function (req, res) {
   ]);
   const idx = invoiceNumberArray[0].index + 1;
   logger.silly(idx);
-  const stream = travelExpensesToPDF(res.locals.travel, req.user, idx);
-  let filename = `TReport_${req.user._id}_${res.locals.travel._id}_${idx}.pdf`; // Be careful of special characters
-  filename = encodeURIComponent(filename); // Ideally this should strip them
-  res.setHeader('Content-disposition', `inline; filename="${filename}"`);
-  res.setHeader('Content-type', 'application/pdf');
-  stream.pipe(res);
+  try {
+    travelExpensesToPDF(
+      res.locals.travel,
+      req.user,
+      idx,
+      binary => {
+        res.contentType('application/pdf');
+        res.set('Content-Transfer-Encoding', 'binary');
+        console.log(binary);
+        res.send(binary);
+      },
+      error => {
+        res.send('ERROR: ', error);
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
 };
 
 /**

@@ -5,7 +5,6 @@
     "@icetee/handlebars-loader": "^1.6.0",
     "@ladjs/bootstrap-social": "^7.0.2",
     "@octokit/rest": "^17.11.2",
-
     "acorn": "^7.4.0",
     "app-root-path": "^3.0.0",
     "axios": "^0.19.2",
@@ -36,7 +35,6 @@
     "jsdom": "^16.4.0",
     "lob": "^6.1.0",
     "lodash": "^4.17.20",
-
     "lusca": "^1.6.1",
     "method-override": "^3.0.0",
     "moment": "^2.27.0",
@@ -64,7 +62,6 @@
     "winston": "^3.3.3",
     "winston-mongodb": "^5.0.4",
     "yargs": "^15.4.1"
-
   },
   "description": "App for keeping travel expenses.",
   "devDependencies": {
@@ -133,10 +130,10 @@
     "lint": "eslint \"**/*.js\"",
     "postinstall": "npm rebuild node-sass",
     "start": "set NODE_ENV=production&& node app.js --logLevel info",
+    "start:dev": "node app.js --logLevel info",
     "start:nodemon": "nodemon --ignore dbBackup/* --icu-data-dir=node_modules\\full-icu app.js --logLevel silly",
     "start:playground": "node playground\\loopObject\\loopObject.js",
     "test": "set NODE_ENV=test && nyc -r clover --clean mocha --recursive --inline-diffs --timeout=10000 --exit"
   },
   "version": "1.1.0"
 }
-

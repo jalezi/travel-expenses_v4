@@ -2,13 +2,17 @@
 // test change gitflow again
 
 const express = require('express');
-// const dotenv = require('dotenv');
+const dotenv = require('dotenv');
 const dotenvExpand = require('dotenv-expand');
-// const path = require('path');
+const path = require('path');
 
 // Load environment variables from .env file, where API keys and passwords are configured.
-// const env = dotenv.config({ path: path.resolve(__dirname, '.env') });
-const { env } = process;
+let env;
+if (process.env.NODE_ENV !== 'production') {
+  env = dotenv.config({ path: path.resolve(__dirname, '.env') });
+} else {
+  env = process.env;
+}
 dotenvExpand(env);
 if (env.error) {
   throw env.error;

@@ -184,8 +184,12 @@ const MongoStore = require('connect-mongo')(session);
  * @see {@link https://www.npmjs.com/package/connect-mongo NPM:connect-mongo}
  */
 
-const connectTo = 'atlas';
-const logLevel = 'info';
+let connectTo;
+let logLevel;
+if (process.env.NODE_ENV === 'production') {
+  connectTo = 'atlas';
+  logLevel = process.env.LOG_LEVEL || 'info';
+}
 
 let uri;
 let srv;

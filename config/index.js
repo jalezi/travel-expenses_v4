@@ -1,7 +1,7 @@
 const appRoot = require('app-root-path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
-const { argv } = require('yargs');
+// const { argv } = require('yargs');
 
 /**
  * @memberof module:config
@@ -184,8 +184,8 @@ const { argv } = require('yargs');
  * @see {@link https://www.npmjs.com/package/connect-mongo NPM:connect-mongo}
  */
 
-const connectTo = argv.dbServer ? argv.dbServer.toLowerCase() : undefined;
-const logLevel = argv.logLevel ? argv.logLevel.toLowerCase() : 'debug';
+const connectTo = 'atlas';
+const logLevel = 'info';
 
 let uri;
 let srv;
@@ -289,7 +289,7 @@ module.exports = {
 
   // winston logger level
   logs: {
-    level: logLevel || process.env.LOG_LEVEL || 'silly',
+    level: process.env.LOG_LEVEL || logLevel || 'silly',
     trace: process.env.LOG_TRACE === 'true' || false
   },
 

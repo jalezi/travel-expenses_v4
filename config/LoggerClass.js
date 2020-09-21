@@ -225,7 +225,8 @@ switch (process.env.NODE_ENV) {
       options: {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-      },
+      }
+
     });
     console.log('HERE');
     break;

@@ -2,12 +2,13 @@
 // test change gitflow again
 
 const express = require('express');
-const dotenv = require('dotenv');
+// const dotenv = require('dotenv');
 const dotenvExpand = require('dotenv-expand');
-const path = require('path');
+// const path = require('path');
 
 // Load environment variables from .env file, where API keys and passwords are configured.
-const env = dotenv.config({ path: path.resolve(__dirname, '.env') });
+// const env = dotenv.config({ path: path.resolve(__dirname, '.env') });
+const { env } = process;
 dotenvExpand(env);
 if (env.error) {
   throw env.error;
@@ -71,21 +72,25 @@ async function startServer() {
   await getRates();
   logger.silly('Function getRates intialized!');
 
-  await dbAutoBackUp();
-  logger.silly('Function dbAutoBackUp initialized');
+  if (process.env.NODE_ENV !== 'production') {
+    await dbAutoBackUp();
+    logger.silly('Function dbAutoBackUp initialized');
+  }
 
   // Error Handler.
   errorHandler(app);
   logger.info('Error handler loaded');
 
+  const { port } = config;
+
   if (!module.parent) {
-    app.listen(config.port, err => {
+    app.listen(port, err => {
       if (err) {
         logger.error(err.message);
         process.exit(1);
         return;
       }
-      logger.info(`Server listening on port: ${config.port}`);
+      logger.info(`Server listening on port: ${port}`);
 
       // Setup the event emitter to assume that app is running.
       // It's for tests.

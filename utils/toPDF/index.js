@@ -30,32 +30,49 @@ exports.createInfo = (title, author, subject, keywords) => {
 
 exports.footer = (currentPage, pageCount) => {
   logger.debug('footer');
-  const canvas = [{
-    type: 'line', x1: 30, y1: 15, x2: 559.28, y2: 15, lineWidth: 1, lineCap: 'square'
-  }];
+  const canvas = [
+    {
+      type: 'line',
+      x1: 30,
+      y1: 15,
+      x2: 559.28,
+      y2: 15,
+      lineWidth: 1,
+      lineCap: 'square'
+    }
+  ];
   const text = `${currentPage.toString()} of ${pageCount}`;
   const textCongig = { alignment: 'center', fontSize: 10, margin: [0, 10] };
   logger.debug('footer END');
-  return [
-    { canvas },
-    { text, ...textCongig }
-  ];
+  return [{ canvas }, { text, ...textCongig }];
 };
-
 
 exports.header = (currentPage, pageCount, pageSize) => {
   logger.debug('header');
   const fontSize = 10;
   const cText1 = 'Created with TExpApp';
-  const cText1Config = { alignment: (currentPage % 2) ? 'left' : 'right', fontSize };
+  const cText1Config = {
+    alignment: currentPage % 2 ? 'left' : 'right',
+    fontSize
+  };
   const column1 = { text: cText1, ...cText1Config };
   const cText2 = moment().format('YYYY-MM-DD');
-  const cText2Config = { alignment: (currentPage % 2) ? 'right' : 'left', fontSize };
+  const cText2Config = {
+    alignment: currentPage % 2 ? 'right' : 'left',
+    fontSize
+  };
   const column2 = { text: cText2, ...cText2Config };
   const columns = [{ ...column1 }, { ...column2 }];
-  const canvas = [{
-    type: 'rect', x: 170, y: 32, w: pageSize.width - 170, h: 100, fillColor: 'red'
-  }];
+  const canvas = [
+    {
+      type: 'rect',
+      x: 170,
+      y: 32,
+      w: pageSize.width - 170,
+      h: 100,
+      fillColor: 'red'
+    }
+  ];
   logger.debug('header END');
   return [{ columns }, { canvas }];
 };
@@ -63,9 +80,7 @@ exports.header = (currentPage, pageCount, pageSize) => {
 const titleStack = titleText => {
   logger.debug('titleStack');
   const stack = {
-    stack: [
-      { text: titleText }
-    ],
+    stack: [{ text: titleText }],
     style: 'title'
   };
   logger.debug('titleStack END');
@@ -113,7 +128,6 @@ const travelInfoStack = info => {
             ['From:', dateFrom],
             ['To:', dateTo]
           ]
-
         }
       }
     ],
@@ -131,17 +145,18 @@ const travelInfoStack = info => {
 
 const totalStack = info => {
   logger.debug('totalStack');
-  const stack = { text: `Total: ${info.currency} ${info.sum}`, margin: [0, 0, 0, 20], color: '#696969' };
+  const stack = {
+    text: `Total: ${info.currency} ${info.sum}`,
+    margin: [0, 0, 0, 20],
+    color: '#696969'
+  };
   logger.debug('totalStack END');
   return stack;
 };
 
-
 const contentStacks = info => {
   logger.debug('contentStack');
-  const {
-    title, user, ...rest
-  } = info;
+  const { title, user, ...rest } = info;
   const stack1 = titleStack(title);
   const stack2 = personInfoStack(user);
   const stack3 = travelInfoStack(rest);

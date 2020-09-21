@@ -1,4 +1,3 @@
-
 const PdfPrinter = require('pdfmake');
 const moment = require('moment');
 const fs = require('fs');
@@ -41,7 +40,9 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
     columns.forEach(column => {
       const dataRowObject = {};
       dataRowObject.text = row[column].toString();
-      const cond = ['amount', tableHeader[tableHeader.length - 1]].includes(column);
+      const cond = ['amount', tableHeader[tableHeader.length - 1]].includes(
+        column
+      );
       logger.debug(cond.toString());
       dataRowObject.alignment = dataRowAlignment(cond, column);
       logger.debug(dataRowObject.alignment);
@@ -111,7 +112,7 @@ function createTravelsTotalTableData(travels, indexes) {
 }
 
 // Returns TOTAL pdfmake stream
-module.exports = (travels, user, dateRange, sum, indexes) => {
+module.exports = (travels, user, dateRange, sum, indexes, callback) => {
   logger.debug('Creating pdf Total');
   logger.debug(`Travel indexes: ${indexes}`);
 
@@ -179,10 +180,16 @@ module.exports = (travels, user, dateRange, sum, indexes) => {
   };
 
   const pdfDoc = printer.createPdfKitDocument(docDefinition);
+  const chunks = [];
+  let result;
 
-  const pdfDocPath = `./pdf/TOTAL_${user._id}_${df}_${dt}.pdf`;
-  pdfDoc.pipe(fs.createWriteStream(pdfDocPath));
+  pdfDoc.on('data', chunk => {
+    chunks.push(chunk);
+  });
+  pdfDoc.on('end', () => {
+    result = Buffer.concat(chunks);
+    callback(result);
+    logger.debug('Finish pdfDoc');
+  });
   pdfDoc.end();
-  logger.debug('Returning pdfDoc');
-  return pdfDoc;
 };

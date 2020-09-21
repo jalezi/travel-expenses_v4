@@ -21,41 +21,17 @@ const travelController = require('../../controllers/travel');
  */
 module.exports = app => {
   logger.debug('Travels routes initializing');
-  app.get(
-    '/travels',
-    isAuthenticated,
-    travelController.getTravels
-  );
-  app.get(
-    '/travels/new',
-    isAuthenticated,
-    travelController.getNewTravel
-  );
-  app.post(
-    '/travels/new',
-    isAuthenticated,
-    travelController.postNewTravel
-  );
+  app.get('/travels', isAuthenticated, travelController.getTravels);
+  app.get('/travels/new', isAuthenticated, travelController.getNewTravel);
+  app.post('/travels/new', isAuthenticated, travelController.postNewTravel);
   app.get(
     '/travels/total_pdf',
     isAuthenticated,
     travelController.getTravelsTotalPDF
   );
-  app.get(
-    '/travels/:id',
-    isAuthenticated,
-    travelController.getTravel
-  );
-  app.delete(
-    '/travels/:id',
-    isAuthenticated,
-    travelController.deleteTravel
-  );
-  app.patch(
-    '/travels/:id',
-    isAuthenticated,
-    travelController.updateTravel
-  );
+  app.get('/travels/:id', isAuthenticated, travelController.getTravel);
+  app.delete('/travels/:id', isAuthenticated, travelController.deleteTravel);
+  app.patch('/travels/:id', isAuthenticated, travelController.updateTravel);
   app.get(
     '/travels/:id/pdf',
     isAuthenticated,

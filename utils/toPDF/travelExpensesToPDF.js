@@ -41,7 +41,11 @@ function buildTableBody(data, columns, tableHeader, total = 0) {
     columns.forEach(column => {
       const dataRowObject = {};
       dataRowObject.text = row[column].toString();
-      const cond = ['amount', 'rate', tableHeader[tableHeader.length - 1]].includes(column);
+      const cond = [
+        'amount',
+        'rate',
+        tableHeader[tableHeader.length - 1]
+      ].includes(column);
       logger.debug(cond.toString());
       dataRowObject.alignment = dataRowAlignment(cond, column);
       logger.debug(dataRowObject.alignment);
@@ -108,7 +112,7 @@ function createTravelExpensesTableData(travel) {
 }
 
 // Returns travel pdfmake stream
-module.exports = (travel, user, idx) => {
+module.exports = (travel, user, idx, callback) => {
   logger.debug('Creating pdf Travel');
   if (!user.profile.name) {
     user.profile.name = 'Unknown';
@@ -178,10 +182,16 @@ module.exports = (travel, user, idx) => {
   };
 
   const pdfDoc = printer.createPdfKitDocument(docDefinition);
+  const chunks = [];
+  let result;
 
-  const pdfDocPath = `./pdf/TReport_${user._id}_${travel._id}-${idx}.pdf`;
-  pdfDoc.pipe(fs.createWriteStream(pdfDocPath));
+  pdfDoc.on('data', chunk => {
+    chunks.push(chunk);
+  });
+  pdfDoc.on('end', () => {
+    result = Buffer.concat(chunks);
+    callback(result);
+    logger.debug('Finish pdfDoc');
+  });
   pdfDoc.end();
-  logger.debug('Returning pdfDoc');
-  return pdfDoc;
 };

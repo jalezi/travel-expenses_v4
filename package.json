@@ -130,10 +130,10 @@
     "generate:docs2": "jsdoc -c jsdoc.json -P package.json",
     "lint": "eslint \"**/*.js\"",
     "postinstall": "npm rebuild node-sass",
-    "start": "node app.js",
+    "start": "node app.js --logLevel info",
     "start:nodemon": "nodemon --ignore dbBackup/* --icu-data-dir=node_modules\\full-icu app.js --logLevel silly",
     "start:playground": "node playground\\loopObject\\loopObject.js",
     "test": "set NODE_ENV=test && nyc -r clover --clean mocha --recursive --inline-diffs --timeout=10000 --exit"
   },
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

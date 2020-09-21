@@ -78,7 +78,6 @@ async function startServer() {
   errorHandler(app);
   logger.info('Error handler loaded');
 
-
   if (!module.parent) {
     app.listen(config.port, err => {
       if (err) {

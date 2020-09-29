@@ -220,7 +220,7 @@ switch (process.env.NODE_ENV) {
     break;
   case (envNode.match(/^production/) || {}).input:
     consoleTransport = new transports.MongoDB({
-      level: 'debug',
+      level: 'warn',
       db:
         'mongodb+srv://t-exp-app1:BK6iL2VdUzbSROS1@cluster0-sx0tb.mongodb.net/t_exp_app?retryWrites=true&w=majority',
       options: {
